@@ -1,0 +1,10 @@
+FROM golang:1.13.1
+LABEL maintainer="morteza.alizadeh@gmail.com"
+
+ARG VERSION
+
+ADD . /src
+WORKDIR /src
+
+RUN make build
+
