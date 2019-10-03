@@ -3,7 +3,7 @@ package contract
 
 import "fmt"
 
-// UnknownError indicates that the edge cluster with the given information already exists
+// UnknownError indicates that an unknown error has happened<Paste>
 type UnknownError struct {
 	Message string
 	Err     error
