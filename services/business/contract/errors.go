@@ -85,7 +85,52 @@ func NewEdgeClusterAlreadyExistsErrorWithError(err error) error {
 	}
 }
 
-// EdgeClusterNotFoundError indicates that the edge cluster with the given edgeClusterID does not exist
+// TenantNotFoundError indicates that the tenant with the given edge tenant ID does not exist
+type TenantNotFoundError struct {
+	TenantID string
+	Err      error
+}
+
+// Error returns message for the TenantNotFoundError error type
+// Returns the error nessage
+func (e TenantNotFoundError) Error() string {
+	if e.Err == nil {
+		return fmt.Sprintf("Tenant not found. TenantID: %s.", e.TenantID)
+	}
+
+	return fmt.Sprintf("Tenant not found. TenantID: %s. Error: %s", e.TenantID, e.Err.Error())
+}
+
+// Unwrap returns the err if provided through NewTenantNotFoundErrorWithError function, otherwise returns nil
+func (e TenantNotFoundError) Unwrap() error {
+	return e.Err
+}
+
+// IsTenantNotFoundError indicates whether the error is of type TenantNotFoundError
+func IsTenantNotFoundError(err error) bool {
+	_, ok := err.(TenantNotFoundError)
+
+	return ok
+}
+
+// NewTenantNotFoundError creates a new TenantNotFoundError error
+// tenantID: Mandatory. The tenant ID that did not match any existing tenant
+func NewTenantNotFoundError(tenantID string) error {
+	return TenantNotFoundError{
+		TenantID: tenantID,
+	}
+}
+
+// NewTenantNotFoundErrorWithError creates a new TenantNotFoundError error
+// tenantID: Mandatory. The tenant ID that did not match any existing tenant
+func NewTenantNotFoundErrorWithError(tenantID string, err error) error {
+	return TenantNotFoundError{
+		TenantID: tenantID,
+		Err:      err,
+	}
+}
+
+// EdgeClusterNotFoundError indicates that the edge cluster with the given edge cluster ID does not exist
 type EdgeClusterNotFoundError struct {
 	EdgeClusterID string
 	Err           error
@@ -114,7 +159,7 @@ func IsEdgeClusterNotFoundError(err error) bool {
 }
 
 // NewEdgeClusterNotFoundError creates a new EdgeClusterNotFoundError error
-// edgeClusterID: Mandatory. The edgeClusterID that did not match any existing edge cluster
+// edgeClusterID: Mandatory. The edge clusterID that did not match any existing edge cluster
 func NewEdgeClusterNotFoundError(edgeClusterID string) error {
 	return EdgeClusterNotFoundError{
 		EdgeClusterID: edgeClusterID,
@@ -122,7 +167,7 @@ func NewEdgeClusterNotFoundError(edgeClusterID string) error {
 }
 
 // NewEdgeClusterNotFoundErrorWithError creates a new EdgeClusterNotFoundError error
-// edgeClusterID: Mandatory. The edgeClusterID that did not match any existing edge cluster
+// edgeClusterID: Mandatory. The edge clusterID that did not match any existing edge cluster
 func NewEdgeClusterNotFoundErrorWithError(edgeClusterID string, err error) error {
 	return EdgeClusterNotFoundError{
 		EdgeClusterID: edgeClusterID,

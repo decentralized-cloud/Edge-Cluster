@@ -58,14 +58,8 @@ func (service *edgeClusterService) CreateEdgeCluster(
 	})
 
 	if err != nil {
-		if repositoryContract.IsEdgeClusterAlreadyExistsError(err) {
-			return &contract.CreateEdgeClusterResponse{
-				Err: contract.NewEdgeClusterAlreadyExistsErrorWithError(err),
-			}, nil
-		}
-
 		return &contract.CreateEdgeClusterResponse{
-			Err: contract.NewUnknownErrorWithError("", err),
+			Err: mapRepositoryError(err, request.TenantID, ""),
 		}, nil
 	}
 
@@ -105,14 +99,8 @@ func (service *edgeClusterService) ReadEdgeCluster(
 	})
 
 	if err != nil {
-		if repositoryContract.IsEdgeClusterNotFoundError(err) {
-			return &contract.ReadEdgeClusterResponse{
-				Err: contract.NewEdgeClusterNotFoundErrorWithError(request.EdgeClusterID, err),
-			}, nil
-		}
-
 		return &contract.ReadEdgeClusterResponse{
-			Err: contract.NewUnknownErrorWithError("", err),
+			Err: mapRepositoryError(err, request.TenantID, request.EdgeClusterID),
 		}, nil
 	}
 
@@ -153,14 +141,8 @@ func (service *edgeClusterService) UpdateEdgeCluster(
 	})
 
 	if err != nil {
-		if repositoryContract.IsEdgeClusterNotFoundError(err) {
-			return &contract.UpdateEdgeClusterResponse{
-				Err: contract.NewEdgeClusterNotFoundErrorWithError(request.EdgeClusterID, err),
-			}, nil
-		}
-
 		return &contract.UpdateEdgeClusterResponse{
-			Err: contract.NewUnknownErrorWithError("", err),
+			Err: mapRepositoryError(err, request.TenantID, request.EdgeClusterID),
 		}, nil
 	}
 
@@ -198,16 +180,26 @@ func (service *edgeClusterService) DeleteEdgeCluster(
 	})
 
 	if err != nil {
-		if repositoryContract.IsEdgeClusterNotFoundError(err) {
-			return &contract.DeleteEdgeClusterResponse{
-				Err: contract.NewEdgeClusterNotFoundErrorWithError(request.EdgeClusterID, err),
-			}, nil
-		}
-
 		return &contract.DeleteEdgeClusterResponse{
-			Err: contract.NewUnknownErrorWithError("", err),
+			Err: mapRepositoryError(err, request.TenantID, request.EdgeClusterID),
 		}, nil
 	}
 
 	return &contract.DeleteEdgeClusterResponse{}, nil
+}
+
+func mapRepositoryError(err error, tenantID, edgeClusterID string) error {
+	if repositoryContract.IsEdgeClusterAlreadyExistsError(err) {
+		return contract.NewEdgeClusterAlreadyExistsErrorWithError(err)
+	}
+
+	if repositoryContract.IsTenantNotFoundError(err) {
+		return contract.NewTenantNotFoundErrorWithError(tenantID, err)
+	}
+
+	if repositoryContract.IsEdgeClusterNotFoundError(err) {
+		return contract.NewEdgeClusterNotFoundErrorWithError(edgeClusterID, err)
+	}
+
+	return contract.NewUnknownErrorWithError("", err)
 }

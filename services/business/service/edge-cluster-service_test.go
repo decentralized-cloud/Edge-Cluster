@@ -116,7 +116,7 @@ var _ = Describe("EdgeClusterService Tests", func() {
 					Ω(response.Err).Should(BeNil())
 				})
 
-				When("And edge cluster repository CreateEdgeCluster return EdgeClusterAlreadyExistError", func() {
+				When("and edge cluster repository CreateEdgeCluster return EdgeClusterAlreadyExistError", func() {
 					It("should return EdgeClusterAlreadyExistsError", func() {
 						expectedError := repositoryContract.NewEdgeClusterAlreadyExistsError()
 						mockEdgeClusterRepositoryService.
@@ -130,7 +130,7 @@ var _ = Describe("EdgeClusterService Tests", func() {
 					})
 				})
 
-				When("And edge cluster repository CreateEdgeCluster return any error rather than EdgeClusterAlreadyExistsError", func() {
+				When("and edge cluster repository CreateEdgeCluster return any other error", func() {
 					It("should return UnknownError", func() {
 						expectedError := errors.New(cuid.New())
 						mockEdgeClusterRepositoryService.
@@ -144,7 +144,7 @@ var _ = Describe("EdgeClusterService Tests", func() {
 					})
 				})
 
-				When("And edge cluster repository CreateEdgeCluster return no error", func() {
+				When("and edge cluster repository CreateEdgeCluster return no error", func() {
 					It("should return the new edgeClusterID", func() {
 						edgeClusterID := cuid.New()
 						mockEdgeClusterRepositoryService.
@@ -221,7 +221,21 @@ var _ = Describe("EdgeClusterService Tests", func() {
 				})
 			})
 
-			When("And edge cluster repository ReadEdgeCluster return EdgeClusterNotFoundError", func() {
+			When("and edge cluster repository ReadEdgeCluster cannot find the tenant", func() {
+				It("should return TenantNotFoundError", func() {
+					expectedError := repositoryContract.NewTenantNotFoundError(request.TenantID)
+					mockEdgeClusterRepositoryService.
+						EXPECT().
+						ReadEdgeCluster(gomock.Any(), gomock.Any()).
+						Return(nil, expectedError)
+
+					response, err := sut.ReadEdgeCluster(ctx, &request)
+					Ω(err).Should(BeNil())
+					assertTenantNotFoundError(request.TenantID, response.Err, expectedError)
+				})
+			})
+
+			When("and edge cluster repository ReadEdgeCluster cannot find the edge cluster", func() {
 				It("should return EdgeClusterNotFoundError", func() {
 					expectedError := repositoryContract.NewEdgeClusterNotFoundError(request.EdgeClusterID)
 					mockEdgeClusterRepositoryService.
@@ -235,7 +249,7 @@ var _ = Describe("EdgeClusterService Tests", func() {
 				})
 			})
 
-			When("And edge cluster repository ReadEdgeCluster return any error rather than EdgeClusterNotFoundError", func() {
+			When("and edge cluster repository ReadEdgeCluster return any other error", func() {
 				It("should return UnknownError", func() {
 					expectedError := errors.New(cuid.New())
 					mockEdgeClusterRepositoryService.
@@ -249,7 +263,7 @@ var _ = Describe("EdgeClusterService Tests", func() {
 				})
 			})
 
-			When("And edge cluster repository ReadEdgeCluster return no error", func() {
+			When("and edge cluster repository ReadEdgeCluster return no error", func() {
 				It("should return the edgeClusterID", func() {
 					edgeCluster := models.EdgeCluster{Name: cuid.New()}
 					mockEdgeClusterRepositoryService.
@@ -328,7 +342,21 @@ var _ = Describe("EdgeClusterService Tests", func() {
 				})
 			})
 
-			When("And edge cluster repository UpdateEdgeCluster return EdgeClusterNotFoundError", func() {
+			When("and edge cluster repository UpdateEdgeCluster cannot find provided tenant", func() {
+				It("should return TenantNotFoundError", func() {
+					expectedError := repositoryContract.NewTenantNotFoundError(request.TenantID)
+					mockEdgeClusterRepositoryService.
+						EXPECT().
+						UpdateEdgeCluster(gomock.Any(), gomock.Any()).
+						Return(nil, expectedError)
+
+					response, err := sut.UpdateEdgeCluster(ctx, &request)
+					Ω(err).Should(BeNil())
+					assertTenantNotFoundError(request.TenantID, response.Err, expectedError)
+				})
+			})
+
+			When("and edge cluster repository UpdateEdgeCluster cannot find provided edge cluster", func() {
 				It("should return EdgeClusterNotFoundError", func() {
 					expectedError := repositoryContract.NewEdgeClusterNotFoundError(request.EdgeClusterID)
 					mockEdgeClusterRepositoryService.
@@ -342,7 +370,7 @@ var _ = Describe("EdgeClusterService Tests", func() {
 				})
 			})
 
-			When("And edge cluster repository UpdateEdgeCluster return any error rather than EdgeClusterNotFoundError", func() {
+			When("and edge cluster repository UpdateEdgeCluster return any other error", func() {
 				It("should return UnknownError", func() {
 					expectedError := errors.New(cuid.New())
 					mockEdgeClusterRepositoryService.
@@ -356,7 +384,7 @@ var _ = Describe("EdgeClusterService Tests", func() {
 				})
 			})
 
-			When("And edge cluster repository UpdateEdgeCluster return no error", func() {
+			When("and edge cluster repository UpdateEdgeCluster return no error", func() {
 				It("should return no error", func() {
 					mockEdgeClusterRepositoryService.
 						EXPECT().
@@ -429,7 +457,21 @@ var _ = Describe("EdgeClusterService Tests", func() {
 				})
 			})
 
-			When("edge cluster repository DeleteEdgeCluster can not find matched edge cluster", func() {
+			When("edge cluster repository DeleteEdgeCluster cannot find provided tenant", func() {
+				It("should return TenantNotFoundError", func() {
+					expectedError := repositoryContract.NewTenantNotFoundError(request.TenantID)
+					mockEdgeClusterRepositoryService.
+						EXPECT().
+						DeleteEdgeCluster(gomock.Any(), gomock.Any()).
+						Return(nil, expectedError)
+
+					response, err := sut.DeleteEdgeCluster(ctx, &request)
+					Ω(err).Should(BeNil())
+					assertTenantNotFoundError(request.TenantID, response.Err, expectedError)
+				})
+			})
+
+			When("edge cluster repository DeleteEdgeCluster cannot find provided edge cluster", func() {
 				It("should return EdgeClusterNotFoundError", func() {
 					expectedError := repositoryContract.NewEdgeClusterNotFoundError(request.EdgeClusterID)
 					mockEdgeClusterRepositoryService.
@@ -442,7 +484,8 @@ var _ = Describe("EdgeClusterService Tests", func() {
 					assertEdgeClusterNotFoundError(request.EdgeClusterID, response.Err, expectedError)
 				})
 			})
-			When("edge cluster repository DeleteEdgeCluster is faced with any error rather than EdgeClusterNotFoundError", func() {
+
+			When("edge cluster repository DeleteEdgeCluster is faced with any other error", func() {
 				It("should return UnknownError", func() {
 					expectedError := errors.New(cuid.New())
 					mockEdgeClusterRepositoryService.
@@ -515,6 +558,16 @@ func assertUnknowError(expectedMessage string, err error, nestedErr error) {
 
 func assertEdgeClusterAlreadyExistsError(err error, nestedErr error) {
 	Ω(contract.IsEdgeClusterAlreadyExistsError(err)).Should(BeTrue())
+	Ω(errors.Unwrap(err)).Should(Equal(nestedErr))
+}
+
+func assertTenantNotFoundError(expectedTenantID string, err error, nestedErr error) {
+	Ω(contract.IsTenantNotFoundError(err)).Should(BeTrue())
+
+	var tenantNotFoundErr contract.TenantNotFoundError
+	_ = errors.As(err, &tenantNotFoundErr)
+
+	Ω(tenantNotFoundErr.TenantID).Should(Equal(expectedTenantID))
 	Ω(errors.Unwrap(err)).Should(Equal(nestedErr))
 }
 
