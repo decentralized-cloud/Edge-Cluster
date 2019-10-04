@@ -8,6 +8,13 @@ import (
 // Validate validates the CreateEdgeClusterRequest model and return error if the validation failes
 // Returns error if validation failes
 func (val *CreateEdgeClusterRequest) Validate() error {
+	if err := validation.ValidateStruct(val,
+		// TenantID cannot be empty
+		validation.Field(&val.TenantID, validation.Required),
+	); err != nil {
+		return err
+	}
+
 	// TODO: mortezaalizadeh: 16/09/2019: Should replace following code with nested validation
 	return val.EdgeCluster.Validate()
 }
@@ -25,6 +32,8 @@ func (val *CreateEdgeClusterResponse) Validate() error {
 // Returns error if validation failes
 func (val *ReadEdgeClusterRequest) Validate() error {
 	return validation.ValidateStruct(val,
+		// TenantID cannot be empty
+		validation.Field(&val.TenantID, validation.Required),
 		// EdgeClusterID cannot be empty
 		validation.Field(&val.EdgeClusterID, validation.Required),
 	)
@@ -43,6 +52,8 @@ func (val *ReadEdgeClusterResponse) Validate() error {
 // Returns error if validation failes
 func (val *UpdateEdgeClusterRequest) Validate() error {
 	return validation.ValidateStruct(val,
+		// TenantID cannot be empty
+		validation.Field(&val.TenantID, validation.Required),
 		// EdgeClusterID cannot be empty
 		validation.Field(&val.EdgeClusterID, validation.Required),
 		// Validate EdgeCluster using its own validation rules
@@ -60,6 +71,8 @@ func (val *UpdateEdgeClusterResponse) Validate() error {
 // Returns error if validation failes
 func (val *DeleteEdgeClusterRequest) Validate() error {
 	return validation.ValidateStruct(val,
+		// TenantID cannot be empty
+		validation.Field(&val.TenantID, validation.Required),
 		// EdgeClusterID cannot be empty
 		validation.Field(&val.EdgeClusterID, validation.Required),
 	)

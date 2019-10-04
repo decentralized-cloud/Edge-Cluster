@@ -64,6 +64,7 @@ var _ = Describe("EdgeClusterService Tests", func() {
 
 		BeforeEach(func() {
 			request = contract.CreateEdgeClusterRequest{
+				TenantID: cuid.New(),
 				EdgeCluster: models.EdgeCluster{
 					Name: cuid.New(),
 				}}
@@ -169,6 +170,7 @@ var _ = Describe("EdgeClusterService Tests", func() {
 
 		BeforeEach(func() {
 			request = contract.ReadEdgeClusterRequest{
+				TenantID:      cuid.New(),
 				EdgeClusterID: cuid.New(),
 			}
 		})
@@ -272,6 +274,7 @@ var _ = Describe("EdgeClusterService Tests", func() {
 
 		BeforeEach(func() {
 			request = contract.UpdateEdgeClusterRequest{
+				TenantID:      cuid.New(),
 				EdgeClusterID: cuid.New(),
 				EdgeCluster:   models.EdgeCluster{Name: cuid.New()},
 			}
@@ -375,6 +378,7 @@ var _ = Describe("EdgeClusterService Tests", func() {
 
 		BeforeEach(func() {
 			request = contract.DeleteEdgeClusterRequest{
+				TenantID:      cuid.New(),
 				EdgeClusterID: cuid.New(),
 			}
 		})
