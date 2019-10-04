@@ -53,6 +53,7 @@ func (service *edgeClusterService) CreateEdgeCluster(
 	}
 
 	response, err := service.repositoryService.CreateEdgeCluster(ctx, &repositoryContract.CreateEdgeClusterRequest{
+		TenantID:    request.TenantID,
 		EdgeCluster: request.EdgeCluster,
 	})
 
@@ -99,6 +100,7 @@ func (service *edgeClusterService) ReadEdgeCluster(
 	}
 
 	response, err := service.repositoryService.ReadEdgeCluster(ctx, &repositoryContract.ReadEdgeClusterRequest{
+		TenantID:      request.TenantID,
 		EdgeClusterID: request.EdgeClusterID,
 	})
 
@@ -145,6 +147,7 @@ func (service *edgeClusterService) UpdateEdgeCluster(
 	}
 
 	_, err := service.repositoryService.UpdateEdgeCluster(ctx, &repositoryContract.UpdateEdgeClusterRequest{
+		TenantID:      request.TenantID,
 		EdgeClusterID: request.EdgeClusterID,
 		EdgeCluster:   request.EdgeCluster,
 	})
@@ -190,6 +193,7 @@ func (service *edgeClusterService) DeleteEdgeCluster(
 	}
 
 	_, err := service.repositoryService.DeleteEdgeCluster(ctx, &repositoryContract.DeleteEdgeClusterRequest{
+		TenantID:      request.TenantID,
 		EdgeClusterID: request.EdgeClusterID,
 	})
 

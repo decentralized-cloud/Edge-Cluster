@@ -20,6 +20,7 @@ func decodeCreateEdgeClusterRequest(
 	castedRequest := request.(*edgeClusterGRPCContract.CreateEdgeClusterRequest)
 
 	return &businessContract.CreateEdgeClusterRequest{
+		TenantID: castedRequest.TenantID,
 		EdgeCluster: models.EdgeCluster{
 			Name: castedRequest.EdgeCluster.Name,
 		}}, nil
@@ -57,6 +58,7 @@ func decodeReadEdgeClusterRequest(
 	castedRequest := request.(*edgeClusterGRPCContract.ReadEdgeClusterRequest)
 
 	return &businessContract.ReadEdgeClusterRequest{
+		TenantID:      castedRequest.TenantID,
 		EdgeClusterID: castedRequest.EdgeClusterID,
 	}, nil
 }
@@ -95,6 +97,7 @@ func decodeUpdateEdgeClusterRequest(
 	castedRequest := request.(*edgeClusterGRPCContract.UpdateEdgeClusterRequest)
 
 	return &businessContract.UpdateEdgeClusterRequest{
+		TenantID:      castedRequest.TenantID,
 		EdgeClusterID: castedRequest.EdgeClusterID,
 		EdgeCluster: models.EdgeCluster{
 			Name: castedRequest.EdgeCluster.Name,
@@ -132,6 +135,7 @@ func decodeDeleteEdgeClusterRequest(
 	castedRequest := request.(*edgeClusterGRPCContract.DeleteEdgeClusterRequest)
 
 	return &businessContract.DeleteEdgeClusterRequest{
+		TenantID:      castedRequest.TenantID,
 		EdgeClusterID: castedRequest.EdgeClusterID,
 	}, nil
 }

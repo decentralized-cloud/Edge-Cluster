@@ -10,13 +10,13 @@ import (
 	"github.com/lucsky/cuid"
 )
 
-var edgeClusters map[string]models.EdgeCluster
+var tenants map[string]map[string]models.EdgeCluster
 
 type edgeClusterRepositoryService struct {
 }
 
 func init() {
-	edgeClusters = make(map[string]models.EdgeCluster)
+	tenants = make(map[string]map[string]models.EdgeCluster)
 }
 
 // NewEdgeClusterRepositoryService creates new instance of the EdgeClusterRepositoryService, setting up all dependencies and returns the instance
@@ -32,6 +32,12 @@ func NewEdgeClusterRepositoryService() (contract.EdgeClusterRepositoryServiceCon
 func (service *edgeClusterRepositoryService) CreateEdgeCluster(
 	ctx context.Context,
 	request *contract.CreateEdgeClusterRequest) (*contract.CreateEdgeClusterResponse, error) {
+
+	edgeClusters, ok := tenants[request.TenantID]
+	if !ok {
+		edgeClusters = make(map[string]models.EdgeCluster)
+		tenants[request.TenantID] = edgeClusters
+	}
 
 	edgeClusterID := cuid.New()
 	edgeClusters[edgeClusterID] = request.EdgeCluster
@@ -49,6 +55,11 @@ func (service *edgeClusterRepositoryService) ReadEdgeCluster(
 	ctx context.Context,
 	request *contract.ReadEdgeClusterRequest) (*contract.ReadEdgeClusterResponse, error) {
 
+	edgeClusters, ok := tenants[request.TenantID]
+	if !ok {
+		return nil, contract.NewTenantNotFoundError(request.TenantID)
+	}
+
 	edgeCluster, ok := edgeClusters[request.EdgeClusterID]
 	if !ok {
 		return nil, contract.NewEdgeClusterNotFoundError(request.EdgeClusterID)
@@ -65,7 +76,12 @@ func (service *edgeClusterRepositoryService) UpdateEdgeCluster(
 	ctx context.Context,
 	request *contract.UpdateEdgeClusterRequest) (*contract.UpdateEdgeClusterResponse, error) {
 
-	_, ok := edgeClusters[request.EdgeClusterID]
+	edgeClusters, ok := tenants[request.TenantID]
+	if !ok {
+		return nil, contract.NewTenantNotFoundError(request.TenantID)
+	}
+
+	_, ok = edgeClusters[request.EdgeClusterID]
 	if !ok {
 		return nil, contract.NewEdgeClusterNotFoundError(request.EdgeClusterID)
 	}
@@ -83,7 +99,12 @@ func (service *edgeClusterRepositoryService) DeleteEdgeCluster(
 	ctx context.Context,
 	request *contract.DeleteEdgeClusterRequest) (*contract.DeleteEdgeClusterResponse, error) {
 
-	_, ok := edgeClusters[request.EdgeClusterID]
+	edgeClusters, ok := tenants[request.TenantID]
+	if !ok {
+		return nil, contract.NewTenantNotFoundError(request.TenantID)
+	}
+
+	_, ok = edgeClusters[request.EdgeClusterID]
 	if !ok {
 		return nil, contract.NewEdgeClusterNotFoundError(request.EdgeClusterID)
 	}

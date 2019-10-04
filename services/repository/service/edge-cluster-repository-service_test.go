@@ -26,6 +26,7 @@ var _ = Describe("EdgeClusterRepositoryService Tests", func() {
 		sut, _ = service.NewEdgeClusterRepositoryService()
 		ctx = context.Background()
 		createRequest = contract.CreateEdgeClusterRequest{
+			TenantID: cuid.New(),
 			EdgeCluster: models.EdgeCluster{
 				Name: cuid.New(),
 			}}
@@ -63,7 +64,12 @@ var _ = Describe("EdgeClusterRepositoryService Tests", func() {
 
 		When("user reads the edge cluster", func() {
 			It("should return the edge cluster information", func() {
-				response, err := sut.ReadEdgeCluster(ctx, &contract.ReadEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+				response, err := sut.ReadEdgeCluster(
+					ctx,
+					&contract.ReadEdgeClusterRequest{
+						TenantID:      createRequest.TenantID,
+						EdgeClusterID: edgeClusterID,
+					})
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeCluster).ShouldNot(BeNil())
 				Ω(response.EdgeCluster.Name).Should(Equal(createRequest.EdgeCluster.Name))
@@ -73,6 +79,7 @@ var _ = Describe("EdgeClusterRepositoryService Tests", func() {
 		When("user updates the existing edge cluster", func() {
 			It("should update the edge cluster information", func() {
 				updateRequest := contract.UpdateEdgeClusterRequest{
+					TenantID:      createRequest.TenantID,
 					EdgeClusterID: edgeClusterID,
 					EdgeCluster: models.EdgeCluster{
 						Name: cuid.New(),
@@ -81,7 +88,12 @@ var _ = Describe("EdgeClusterRepositoryService Tests", func() {
 				_, err := sut.UpdateEdgeCluster(ctx, &updateRequest)
 				Ω(err).Should(BeNil())
 
-				response, err := sut.ReadEdgeCluster(ctx, &contract.ReadEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+				response, err := sut.ReadEdgeCluster(
+					ctx,
+					&contract.ReadEdgeClusterRequest{
+						TenantID:      createRequest.TenantID,
+						EdgeClusterID: edgeClusterID,
+					})
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeCluster).ShouldNot(BeNil())
 				Ω(response.EdgeCluster.Name).Should(Equal(updateRequest.EdgeCluster.Name))
@@ -90,10 +102,20 @@ var _ = Describe("EdgeClusterRepositoryService Tests", func() {
 
 		When("user deletes the edge cluster", func() {
 			It("should delete the edge cluster", func() {
-				_, err := sut.DeleteEdgeCluster(ctx, &contract.DeleteEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+				_, err := sut.DeleteEdgeCluster(
+					ctx,
+					&contract.DeleteEdgeClusterRequest{
+						TenantID:      createRequest.TenantID,
+						EdgeClusterID: edgeClusterID,
+					})
 				Ω(err).Should(BeNil())
 
-				response, err := sut.ReadEdgeCluster(ctx, &contract.ReadEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+				response, err := sut.ReadEdgeCluster(
+					ctx,
+					&contract.ReadEdgeClusterRequest{
+						TenantID:      createRequest.TenantID,
+						EdgeClusterID: edgeClusterID,
+					})
 				Ω(err).Should(HaveOccurred())
 				Ω(response).Should(BeNil())
 
@@ -114,11 +136,23 @@ var _ = Describe("EdgeClusterRepositoryService Tests", func() {
 
 		BeforeEach(func() {
 			edgeClusterID = cuid.New()
+			_, _ = sut.CreateEdgeCluster(ctx, &createRequest)
+			_, _ = sut.DeleteEdgeCluster(
+				ctx,
+				&contract.DeleteEdgeClusterRequest{
+					TenantID:      createRequest.TenantID,
+					EdgeClusterID: edgeClusterID,
+				})
 		})
 
 		When("user reads the edge cluster", func() {
-			It("should return NotgFoundError", func() {
-				response, err := sut.ReadEdgeCluster(ctx, &contract.ReadEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+			It("should return NotFoundError", func() {
+				response, err := sut.ReadEdgeCluster(
+					ctx,
+					&contract.ReadEdgeClusterRequest{
+						TenantID:      createRequest.TenantID,
+						EdgeClusterID: edgeClusterID,
+					})
 				Ω(err).Should(HaveOccurred())
 				Ω(response).Should(BeNil())
 
@@ -132,8 +166,9 @@ var _ = Describe("EdgeClusterRepositoryService Tests", func() {
 		})
 
 		When("user tries to update the edge cluster", func() {
-			It("should return NotgFoundError", func() {
+			It("should return NotFoundError", func() {
 				updateRequest := contract.UpdateEdgeClusterRequest{
+					TenantID:      createRequest.TenantID,
 					EdgeClusterID: edgeClusterID,
 					EdgeCluster: models.EdgeCluster{
 						Name: cuid.New(),
@@ -152,8 +187,13 @@ var _ = Describe("EdgeClusterRepositoryService Tests", func() {
 		})
 
 		When("user tries to delete the edge cluster", func() {
-			It("should return NotgFoundError", func() {
-				response, err := sut.DeleteEdgeCluster(ctx, &contract.DeleteEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+			It("should return NotFoundError", func() {
+				response, err := sut.DeleteEdgeCluster(
+					ctx,
+					&contract.DeleteEdgeClusterRequest{
+						TenantID:      createRequest.TenantID,
+						EdgeClusterID: edgeClusterID,
+					})
 				Ω(err).Should(HaveOccurred())
 				Ω(response).Should(BeNil())
 
@@ -163,6 +203,77 @@ var _ = Describe("EdgeClusterRepositoryService Tests", func() {
 				_ = errors.As(err, &notFoundErr)
 
 				Ω(notFoundErr.EdgeClusterID).Should(Equal(edgeClusterID))
+			})
+		})
+	})
+
+	Context("tenant does not exist", func() {
+
+		var (
+			tenantID string
+		)
+
+		BeforeEach(func() {
+			tenantID = cuid.New()
+		})
+
+		When("user tries to read the edge cluster", func() {
+			It("should return TenantNotFoundError", func() {
+				response, err := sut.ReadEdgeCluster(
+					ctx,
+					&contract.ReadEdgeClusterRequest{
+						TenantID:      tenantID,
+						EdgeClusterID: cuid.New(),
+					})
+				Ω(err).Should(HaveOccurred())
+				Ω(response).Should(BeNil())
+
+				Ω(contract.IsTenantNotFoundError(err)).Should(BeTrue())
+
+				var tenantNotFoundErr contract.TenantNotFoundError
+				_ = errors.As(err, &tenantNotFoundErr)
+
+				Ω(tenantNotFoundErr.TenantID).Should(Equal(tenantID))
+			})
+		})
+
+		When("user tries to update an existing edge cluster", func() {
+			It("should return TenantNotFoundError", func() {
+				response, err := sut.UpdateEdgeCluster(
+					ctx,
+					&contract.UpdateEdgeClusterRequest{
+						TenantID:      tenantID,
+						EdgeClusterID: cuid.New(),
+					})
+				Ω(err).Should(HaveOccurred())
+				Ω(response).Should(BeNil())
+
+				Ω(contract.IsTenantNotFoundError(err)).Should(BeTrue())
+
+				var tenantNotFoundErr contract.TenantNotFoundError
+				_ = errors.As(err, &tenantNotFoundErr)
+
+				Ω(tenantNotFoundErr.TenantID).Should(Equal(tenantID))
+			})
+		})
+
+		When("user tries to delete an existing edge cluster", func() {
+			It("should return TenantNotFoundError", func() {
+				response, err := sut.DeleteEdgeCluster(
+					ctx,
+					&contract.DeleteEdgeClusterRequest{
+						TenantID:      tenantID,
+						EdgeClusterID: cuid.New(),
+					})
+				Ω(err).Should(HaveOccurred())
+				Ω(response).Should(BeNil())
+
+				Ω(contract.IsTenantNotFoundError(err)).Should(BeTrue())
+
+				var tenantNotFoundErr contract.TenantNotFoundError
+				_ = errors.As(err, &tenantNotFoundErr)
+
+				Ω(tenantNotFoundErr.TenantID).Should(Equal(tenantID))
 			})
 		})
 	})
