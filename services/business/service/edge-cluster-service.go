@@ -34,24 +34,6 @@ func NewEdgeClusterService(
 func (service *edgeClusterService) CreateEdgeCluster(
 	ctx context.Context,
 	request *contract.CreateEdgeClusterRequest) (*contract.CreateEdgeClusterResponse, error) {
-	if ctx == nil {
-		return &contract.CreateEdgeClusterResponse{
-			Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
-		}, nil
-	}
-
-	if request == nil {
-		return &contract.CreateEdgeClusterResponse{
-			Err: commonErrors.NewArgumentNilError("request", "request is required"),
-		}, nil
-	}
-
-	if err := request.Validate(); err != nil {
-		return &contract.CreateEdgeClusterResponse{
-			Err: commonErrors.NewArgumentErrorWithError("request", "", err),
-		}, nil
-	}
-
 	response, err := service.repositoryService.CreateEdgeCluster(ctx, &repositoryContract.CreateEdgeClusterRequest{
 		TenantID:    request.TenantID,
 		EdgeCluster: request.EdgeCluster,
@@ -75,24 +57,6 @@ func (service *edgeClusterService) CreateEdgeCluster(
 func (service *edgeClusterService) ReadEdgeCluster(
 	ctx context.Context,
 	request *contract.ReadEdgeClusterRequest) (*contract.ReadEdgeClusterResponse, error) {
-	if ctx == nil {
-		return &contract.ReadEdgeClusterResponse{
-			Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
-		}, nil
-	}
-
-	if request == nil {
-		return &contract.ReadEdgeClusterResponse{
-			Err: commonErrors.NewArgumentNilError("request", "request is required"),
-		}, nil
-	}
-
-	if err := request.Validate(); err != nil {
-		return &contract.ReadEdgeClusterResponse{
-			Err: commonErrors.NewArgumentErrorWithError("request", "", err),
-		}, nil
-	}
-
 	response, err := service.repositoryService.ReadEdgeCluster(ctx, &repositoryContract.ReadEdgeClusterRequest{
 		TenantID:      request.TenantID,
 		EdgeClusterID: request.EdgeClusterID,
@@ -116,24 +80,6 @@ func (service *edgeClusterService) ReadEdgeCluster(
 func (service *edgeClusterService) UpdateEdgeCluster(
 	ctx context.Context,
 	request *contract.UpdateEdgeClusterRequest) (*contract.UpdateEdgeClusterResponse, error) {
-	if ctx == nil {
-		return &contract.UpdateEdgeClusterResponse{
-			Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
-		}, nil
-	}
-
-	if request == nil {
-		return &contract.UpdateEdgeClusterResponse{
-			Err: commonErrors.NewArgumentNilError("request", "request is required"),
-		}, nil
-	}
-
-	if err := request.Validate(); err != nil {
-		return &contract.UpdateEdgeClusterResponse{
-			Err: commonErrors.NewArgumentErrorWithError("request", "", err),
-		}, nil
-	}
-
 	_, err := service.repositoryService.UpdateEdgeCluster(ctx, &repositoryContract.UpdateEdgeClusterRequest{
 		TenantID:      request.TenantID,
 		EdgeClusterID: request.EdgeClusterID,
@@ -156,24 +102,6 @@ func (service *edgeClusterService) UpdateEdgeCluster(
 func (service *edgeClusterService) DeleteEdgeCluster(
 	ctx context.Context,
 	request *contract.DeleteEdgeClusterRequest) (*contract.DeleteEdgeClusterResponse, error) {
-	if ctx == nil {
-		return &contract.DeleteEdgeClusterResponse{
-			Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
-		}, nil
-	}
-
-	if request == nil {
-		return &contract.DeleteEdgeClusterResponse{
-			Err: commonErrors.NewArgumentNilError("request", "request is required"),
-		}, nil
-	}
-
-	if err := request.Validate(); err != nil {
-		return &contract.DeleteEdgeClusterResponse{
-			Err: commonErrors.NewArgumentErrorWithError("request", "", err),
-		}, nil
-	}
-
 	_, err := service.repositoryService.DeleteEdgeCluster(ctx, &repositoryContract.DeleteEdgeClusterRequest{
 		TenantID:      request.TenantID,
 		EdgeClusterID: request.EdgeClusterID,
