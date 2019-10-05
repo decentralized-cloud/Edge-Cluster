@@ -20,7 +20,7 @@ type endpointCreatorService struct {
 func NewEndpointCreatorService(
 	businessService businessContract.EdgeClusterServiceContract) (contract.EndpointCreatorContract, error) {
 	if businessService == nil {
-		return nil, commonErrors.NewArgumentError("businessService", "businessService is required")
+		return nil, commonErrors.NewArgumentNilError("businessService", "businessService is required")
 	}
 
 	return &endpointCreatorService{
@@ -32,7 +32,26 @@ func NewEndpointCreatorService(
 // Returns the Create Edge Cluster endpoint
 func (service *endpointCreatorService) CreateEdgeClusterEndpoint() endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		return service.businessService.CreateEdgeCluster(ctx, request.(*businessContract.CreateEdgeClusterRequest))
+		if ctx == nil {
+			return &businessContract.CreateEdgeClusterResponse{
+				Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
+			}, nil
+		}
+
+		if request == nil {
+			return &businessContract.CreateEdgeClusterResponse{
+				Err: commonErrors.NewArgumentNilError("request", "request is required"),
+			}, nil
+		}
+
+		castedRequest := request.(*businessContract.CreateEdgeClusterRequest)
+		if err := castedRequest.Validate(); err != nil {
+			return &businessContract.CreateEdgeClusterResponse{
+				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
+			}, nil
+		}
+
+		return service.businessService.CreateEdgeCluster(ctx, castedRequest)
 	}
 }
 
@@ -40,7 +59,26 @@ func (service *endpointCreatorService) CreateEdgeClusterEndpoint() endpoint.Endp
 // Returns the Read Edge Cluster endpoint
 func (service *endpointCreatorService) ReadEdgeClusterEndpoint() endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		return service.businessService.ReadEdgeCluster(ctx, request.(*businessContract.ReadEdgeClusterRequest))
+		if ctx == nil {
+			return &businessContract.ReadEdgeClusterResponse{
+				Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
+			}, nil
+		}
+
+		if request == nil {
+			return &businessContract.ReadEdgeClusterResponse{
+				Err: commonErrors.NewArgumentNilError("request", "request is required"),
+			}, nil
+		}
+
+		castedRequest := request.(*businessContract.ReadEdgeClusterRequest)
+		if err := castedRequest.Validate(); err != nil {
+			return &businessContract.ReadEdgeClusterResponse{
+				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
+			}, nil
+		}
+
+		return service.businessService.ReadEdgeCluster(ctx, castedRequest)
 	}
 }
 
@@ -48,7 +86,26 @@ func (service *endpointCreatorService) ReadEdgeClusterEndpoint() endpoint.Endpoi
 // Returns the Update Edge Cluster endpoint
 func (service *endpointCreatorService) UpdateEdgeClusterEndpoint() endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		return service.businessService.UpdateEdgeCluster(ctx, request.(*businessContract.UpdateEdgeClusterRequest))
+		if ctx == nil {
+			return &businessContract.UpdateEdgeClusterResponse{
+				Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
+			}, nil
+		}
+
+		if request == nil {
+			return &businessContract.UpdateEdgeClusterResponse{
+				Err: commonErrors.NewArgumentNilError("request", "request is required"),
+			}, nil
+		}
+
+		castedRequest := request.(*businessContract.UpdateEdgeClusterRequest)
+		if err := castedRequest.Validate(); err != nil {
+			return &businessContract.UpdateEdgeClusterResponse{
+				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
+			}, nil
+		}
+
+		return service.businessService.UpdateEdgeCluster(ctx, castedRequest)
 	}
 }
 
@@ -56,6 +113,25 @@ func (service *endpointCreatorService) UpdateEdgeClusterEndpoint() endpoint.Endp
 // Returns the Delete Edge Cluster endpoint
 func (service *endpointCreatorService) DeleteEdgeClusterEndpoint() endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		return service.businessService.DeleteEdgeCluster(ctx, request.(*businessContract.DeleteEdgeClusterRequest))
+		if ctx == nil {
+			return &businessContract.DeleteEdgeClusterResponse{
+				Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
+			}, nil
+		}
+
+		if request == nil {
+			return &businessContract.DeleteEdgeClusterResponse{
+				Err: commonErrors.NewArgumentNilError("request", "request is required"),
+			}, nil
+		}
+
+		castedRequest := request.(*businessContract.DeleteEdgeClusterRequest)
+		if err := castedRequest.Validate(); err != nil {
+			return &businessContract.DeleteEdgeClusterResponse{
+				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
+			}, nil
+		}
+
+		return service.businessService.DeleteEdgeCluster(ctx, castedRequest)
 	}
 }

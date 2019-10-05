@@ -71,36 +71,6 @@ var _ = Describe("EdgeClusterService Tests", func() {
 		})
 
 		Context("edge cluster service is instantiated", func() {
-			When("CreateEdgeCluster is called without context", func() {
-				It("should return ArgumentNilError", func() {
-					response, err := sut.CreateEdgeCluster(nil, &request)
-					Ω(err).Should(BeNil())
-					assertArgumentNilError("ctx", "", response.Err)
-				})
-			})
-
-			When("CreateEdgeCluster is called without request", func() {
-				It("should return ArgumentNilError", func() {
-					response, err := sut.CreateEdgeCluster(ctx, nil)
-					Ω(err).Should(BeNil())
-					assertArgumentNilError("request", "", response.Err)
-				})
-			})
-
-			When("CreateEdgeCluster is called with invalid request", func() {
-				It("should return ArgumentNilError", func() {
-					invalidRequest := contract.CreateEdgeClusterRequest{
-						EdgeCluster: models.EdgeCluster{
-							Name: "",
-						}}
-
-					response, err := sut.CreateEdgeCluster(ctx, &invalidRequest)
-					Ω(err).Should(BeNil())
-					validationErr := invalidRequest.Validate()
-					assertArgumentError("request", validationErr.Error(), response.Err, validationErr)
-				})
-			})
-
 			When("CreateEdgeCluster is called with correct input parameters", func() {
 				It("should call edge cluster repository CreateEdgeCluster method", func() {
 					mockEdgeClusterRepositoryService.
@@ -176,35 +146,6 @@ var _ = Describe("EdgeClusterService Tests", func() {
 		})
 
 		Context("edge cluster service is instantiated", func() {
-			When("ReadEdgeCluster is called without context", func() {
-				It("should return ArgumentNilError", func() {
-					response, err := sut.ReadEdgeCluster(nil, &request)
-					Ω(err).Should(BeNil())
-					assertArgumentNilError("ctx", "", response.Err)
-				})
-			})
-
-			When("ReadEdgeCluster is called without request", func() {
-				It("should return ArgumentNilError", func() {
-					response, err := sut.ReadEdgeCluster(ctx, nil)
-					Ω(err).Should(BeNil())
-					assertArgumentNilError("request", "", response.Err)
-				})
-			})
-
-			When("ReadEdgeCluster is called with invalid request", func() {
-				It("should return ArgumentNilError", func() {
-					invalidRequest := contract.ReadEdgeClusterRequest{
-						EdgeClusterID: "",
-					}
-
-					response, err := sut.ReadEdgeCluster(ctx, &invalidRequest)
-					Ω(err).Should(BeNil())
-					validationErr := invalidRequest.Validate()
-					assertArgumentError("request", validationErr.Error(), response.Err, validationErr)
-				})
-			})
-
 			When("ReadEdgeCluster is called with correct input parameters", func() {
 				It("should call edge cluster repository ReadEdgeCluster method", func() {
 					mockEdgeClusterRepositoryService.
@@ -295,36 +236,6 @@ var _ = Describe("EdgeClusterService Tests", func() {
 		})
 
 		Context("edge cluster service is instantiated", func() {
-			When("UpdateEdgeCluster is called without context", func() {
-				It("should return ArgumentNilError", func() {
-					response, err := sut.UpdateEdgeCluster(nil, &request)
-					Ω(err).Should(BeNil())
-					assertArgumentNilError("ctx", "", response.Err)
-				})
-			})
-
-			When("UpdateEdgeCluster is called without request", func() {
-				It("should return ArgumentNilError", func() {
-					response, err := sut.UpdateEdgeCluster(ctx, nil)
-					Ω(err).Should(BeNil())
-					assertArgumentNilError("request", "", response.Err)
-				})
-			})
-
-			When("UpdateEdgeCluster is called with invalid request", func() {
-				It("should return ArgumentNilError", func() {
-					invalidRequest := contract.UpdateEdgeClusterRequest{
-						EdgeClusterID: "",
-						EdgeCluster:   models.EdgeCluster{Name: ""},
-					}
-
-					response, err := sut.UpdateEdgeCluster(ctx, &invalidRequest)
-					Ω(err).Should(BeNil())
-					validationErr := invalidRequest.Validate()
-					assertArgumentError("request", validationErr.Error(), response.Err, validationErr)
-				})
-			})
-
 			When("UpdateEdgeCluster is called with correct input parameters", func() {
 				It("should call edge cluster repository UpdateEdgeCluster method", func() {
 					mockEdgeClusterRepositoryService.
@@ -412,35 +323,6 @@ var _ = Describe("EdgeClusterService Tests", func() {
 		})
 
 		Context("edge cluster service is instantiated", func() {
-			When("context is null", func() {
-				It("should return ArgumentNilError and ArgumentName matches the context argument name", func() {
-					response, err := sut.DeleteEdgeCluster(nil, &request)
-					Ω(err).Should(BeNil())
-					assertArgumentNilError("ctx", "", response.Err)
-				})
-			})
-
-			When("request is null", func() {
-				It("should return ArgumentNilError and ArgumentName matches the request argument name", func() {
-					response, err := sut.DeleteEdgeCluster(ctx, nil)
-					Ω(err).Should(BeNil())
-					assertArgumentNilError("request", "", response.Err)
-				})
-			})
-
-			When("request is invalid", func() {
-				It("should return ArgumentNilError and both ArgumentName and ErrorMessage are matched", func() {
-					invalidRequest := contract.DeleteEdgeClusterRequest{
-						EdgeClusterID: "",
-					}
-
-					response, err := sut.DeleteEdgeCluster(ctx, &invalidRequest)
-					Ω(err).Should(BeNil())
-					validationErr := invalidRequest.Validate()
-					assertArgumentError("request", validationErr.Error(), response.Err, validationErr)
-				})
-			})
-
 			When("input parameters are valid", func() {
 				It("should call edge cluster repository DeleteEdgeCluster method", func() {
 					mockEdgeClusterRepositoryService.
