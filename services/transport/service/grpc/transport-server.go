@@ -9,7 +9,7 @@ import (
 	edgeClusterGRPCContract "github.com/decentralized-cloud/edge-cluster-contract/grpc"
 	configurationServiceContract "github.com/decentralized-cloud/edge-cluster/services/configuration/contract"
 	endpointContract "github.com/decentralized-cloud/edge-cluster/services/endpoint/contract"
-	transportContract "github.com/decentralized-cloud/edge-cluster/transport/contract"
+	transportContract "github.com/decentralized-cloud/edge-cluster/services/transport/contract"
 	gokitgrpc "github.com/go-kit/kit/transport/grpc"
 	commonErrors "github.com/micro-business/go-core/system/errors"
 	"go.uber.org/zap"

@@ -12,7 +12,7 @@ import (
 	endpointContract "github.com/decentralized-cloud/edge-cluster/services/endpoint/contract"
 	endpoint "github.com/decentralized-cloud/edge-cluster/services/endpoint/service"
 	repository "github.com/decentralized-cloud/edge-cluster/services/repository/service"
-	grpctransport "github.com/decentralized-cloud/edge-cluster/transport/grpc"
+	grpctransport "github.com/decentralized-cloud/edge-cluster/services/transport/service/grpc"
 	"go.uber.org/zap"
 )
 
