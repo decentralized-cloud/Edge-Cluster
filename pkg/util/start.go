@@ -6,18 +6,16 @@ import (
 	"os"
 	"os/signal"
 
-	business "github.com/decentralized-cloud/edge-cluster/services/business/service"
-	configurationServiceContract "github.com/decentralized-cloud/edge-cluster/services/configuration/contract"
-	configuration "github.com/decentralized-cloud/edge-cluster/services/configuration/service"
-	endpointContract "github.com/decentralized-cloud/edge-cluster/services/endpoint/contract"
-	endpoint "github.com/decentralized-cloud/edge-cluster/services/endpoint/service"
-	repository "github.com/decentralized-cloud/edge-cluster/services/repository/service"
-	grpctransport "github.com/decentralized-cloud/edge-cluster/services/transport/service/grpc"
+	"github.com/decentralized-cloud/edge-cluster/services/business"
+	"github.com/decentralized-cloud/edge-cluster/services/configuration"
+	"github.com/decentralized-cloud/edge-cluster/services/endpoint"
+	"github.com/decentralized-cloud/edge-cluster/services/repository/memory"
+	"github.com/decentralized-cloud/edge-cluster/services/transport/grpc"
 	"go.uber.org/zap"
 )
 
-var configurationService configurationServiceContract.ConfigurationServiceContract
-var endpointCreatorService endpointContract.EndpointCreatorContract
+var configurationService configuration.ConfigurationContract
+var endpointCreatorService endpoint.EndpointCreatorContract
 
 // StartService setups all dependecies required to start the EdgeCluster service and
 // start the service
@@ -33,7 +31,7 @@ func StartService() {
 		logger.Fatal("Failed to setup dependecies", zap.Error(err))
 	}
 
-	grpcTransportService, err := grpctransport.NewTransportService(
+	grpcTransportService, err := grpc.NewTransportService(
 		logger,
 		configurationService,
 		endpointCreatorService)
@@ -61,18 +59,16 @@ func StartService() {
 }
 
 func setupDependencies() (err error) {
-	if configurationService, err = configuration.NewConfigurationService(); err != nil {
+	if configurationService, err = configuration.NewEnvConfigurationService(); err != nil {
 		return
 	}
 
-	repositoryService, err := repository.NewEdgeClusterRepositoryService()
-
+	repositoryService, err := memory.NewRepositoryService()
 	if err != nil {
 		return
 	}
 
-	businessServer, err := business.NewEdgeClusterService(repositoryService)
-
+	businessServer, err := business.NewBusinessService(repositoryService)
 	if err != nil {
 		return err
 	}
