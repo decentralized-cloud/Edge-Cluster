@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net"
 
-	edgeClusterGRPCContract "github.com/decentralized-cloud/edge-cluster-contract/grpc"
+	edgeClusterGRPCContract "github.com/decentralized-cloud/edge-cluster/contract/grpc/go"
 	"github.com/decentralized-cloud/edge-cluster/services/configuration"
 	"github.com/decentralized-cloud/edge-cluster/services/endpoint"
 	"github.com/decentralized-cloud/edge-cluster/services/transport"
