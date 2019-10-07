@@ -4,7 +4,7 @@ package grpc
 import (
 	"context"
 
-	edgeClusterGRPCContract "github.com/decentralized-cloud/edge-cluster-contract/grpc"
+	edgeClusterGRPCContract "github.com/decentralized-cloud/edge-cluster/contract/grpc/go"
 	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/business"
 	commonErrors "github.com/micro-business/go-core/system/errors"
