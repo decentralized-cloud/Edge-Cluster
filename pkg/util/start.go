@@ -39,11 +39,15 @@ func StartService() {
 		logger.Fatal("Failed to create gRPC transport service", zap.Error(err))
 	}
 
-	go grpcTransportService.Start()
-
 	signalChan := make(chan os.Signal, 1)
 	cleanupDone := make(chan struct{})
 	signal.Notify(signalChan, os.Interrupt)
+
+	go func() {
+		if serviceErr := grpcTransportService.Start(); serviceErr != nil {
+			logger.Fatal("Failed to start gRPC transport service", zap.Error(serviceErr))
+		}
+	}()
 
 	go func() {
 		<-signalChan
