@@ -26,7 +26,15 @@ type transportService struct {
 	deleteEdgeClusterHandler gokitgrpc.Handler
 }
 
-// NewTransportService creates new instance of the GRPCService, setting up all dependencies and returns the instance
+var Live bool
+var Ready bool
+
+func init() {
+	Live = false
+	Ready = false
+}
+
+// NewTransportService creates new instance of the transportService, setting up all dependencies and returns the instance
 // logger: Mandatory. Reference to the logger service
 // configurationService: Mandatory. Reference to the service that provides required configurations
 // endpointCreatorService: Mandatory. Reference to the service that creates go-kit compatible endpoints
@@ -59,17 +67,17 @@ func NewTransportService(
 func (service *transportService) Start() error {
 	service.setupHandlers()
 
-	host, err := service.configurationService.GetHost()
+	host, err := service.configurationService.GetGrpcHost()
 	if err != nil {
 		return err
 	}
 
-	portNumber, err := service.configurationService.GetPort()
+	port, err := service.configurationService.GetGrpcPort()
 	if err != nil {
 		return err
 	}
 
-	address := fmt.Sprintf("%s:%d", host, portNumber)
+	address := fmt.Sprintf("%s:%d", host, port)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return err
@@ -77,9 +85,17 @@ func (service *transportService) Start() error {
 
 	gRPCServer := grpc.NewServer()
 	edgeClusterGRPCContract.RegisterEdgeClusterServiceServer(gRPCServer, service)
-	service.logger.Info("gRPC server started", zap.String("address", address))
+	service.logger.Info("gRPC service started", zap.String("address", address))
 
-	return gRPCServer.Serve(listener)
+	Live = true
+	Ready = true
+
+	err = gRPCServer.Serve(listener)
+
+	Live = false
+	Ready = false
+
+	return err
 }
 
 // Stop stops the GRPC transport service
