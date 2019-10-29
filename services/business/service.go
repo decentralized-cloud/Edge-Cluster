@@ -40,7 +40,7 @@ func (service *businessService) CreateEdgeCluster(
 
 	if err != nil {
 		return &CreateEdgeClusterResponse{
-			Err: mapRepositoryError(err, request.TenantID, ""),
+			Err: mapRepositoryError(err, ""),
 		}, nil
 	}
 
@@ -57,17 +57,17 @@ func (service *businessService) ReadEdgeCluster(
 	ctx context.Context,
 	request *ReadEdgeClusterRequest) (*ReadEdgeClusterResponse, error) {
 	response, err := service.repositoryService.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{
-		TenantID:      request.TenantID,
 		EdgeClusterID: request.EdgeClusterID,
 	})
 
 	if err != nil {
 		return &ReadEdgeClusterResponse{
-			Err: mapRepositoryError(err, request.TenantID, request.EdgeClusterID),
+			Err: mapRepositoryError(err, request.EdgeClusterID),
 		}, nil
 	}
 
 	return &ReadEdgeClusterResponse{
+		TenantID:    response.TenantID,
 		EdgeCluster: response.EdgeCluster,
 	}, nil
 }
@@ -80,14 +80,13 @@ func (service *businessService) UpdateEdgeCluster(
 	ctx context.Context,
 	request *UpdateEdgeClusterRequest) (*UpdateEdgeClusterResponse, error) {
 	_, err := service.repositoryService.UpdateEdgeCluster(ctx, &repository.UpdateEdgeClusterRequest{
-		TenantID:      request.TenantID,
 		EdgeClusterID: request.EdgeClusterID,
 		EdgeCluster:   request.EdgeCluster,
 	})
 
 	if err != nil {
 		return &UpdateEdgeClusterResponse{
-			Err: mapRepositoryError(err, request.TenantID, request.EdgeClusterID),
+			Err: mapRepositoryError(err, request.EdgeClusterID),
 		}, nil
 	}
 
@@ -102,26 +101,21 @@ func (service *businessService) DeleteEdgeCluster(
 	ctx context.Context,
 	request *DeleteEdgeClusterRequest) (*DeleteEdgeClusterResponse, error) {
 	_, err := service.repositoryService.DeleteEdgeCluster(ctx, &repository.DeleteEdgeClusterRequest{
-		TenantID:      request.TenantID,
 		EdgeClusterID: request.EdgeClusterID,
 	})
 
 	if err != nil {
 		return &DeleteEdgeClusterResponse{
-			Err: mapRepositoryError(err, request.TenantID, request.EdgeClusterID),
+			Err: mapRepositoryError(err, request.EdgeClusterID),
 		}, nil
 	}
 
 	return &DeleteEdgeClusterResponse{}, nil
 }
 
-func mapRepositoryError(err error, tenantID, edgeClusterID string) error {
+func mapRepositoryError(err error, edgeClusterID string) error {
 	if repository.IsEdgeClusterAlreadyExistsError(err) {
 		return NewEdgeClusterAlreadyExistsErrorWithError(err)
-	}
-
-	if repository.IsTenantNotFoundError(err) {
-		return NewTenantNotFoundErrorWithError(tenantID, err)
 	}
 
 	if repository.IsEdgeClusterNotFoundError(err) {

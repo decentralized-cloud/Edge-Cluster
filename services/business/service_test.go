@@ -144,7 +144,6 @@ var _ = Describe("Business Service Tests", func() {
 
 		BeforeEach(func() {
 			request = business.ReadEdgeClusterRequest{
-				TenantID:      cuid.New(),
 				EdgeClusterID: cuid.New(),
 			}
 		})
@@ -163,20 +162,6 @@ var _ = Describe("Business Service Tests", func() {
 					response, err := sut.ReadEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(BeNil())
-				})
-			})
-
-			When("and edge cluster repository ReadEdgeCluster cannot find the tenant", func() {
-				It("should return TenantNotFoundError", func() {
-					expectedError := repository.NewTenantNotFoundError(request.TenantID)
-					mockRepositoryService.
-						EXPECT().
-						ReadEdgeCluster(gomock.Any(), gomock.Any()).
-						Return(nil, expectedError)
-
-					response, err := sut.ReadEdgeCluster(ctx, &request)
-					Ω(err).Should(BeNil())
-					assertTenantNotFoundError(request.TenantID, response.Err, expectedError)
 				})
 			})
 
@@ -210,16 +195,21 @@ var _ = Describe("Business Service Tests", func() {
 
 			When("and edge cluster repository ReadEdgeCluster return no error", func() {
 				It("should return the edgeClusterID", func() {
+					tenantID := cuid.New()
 					edgeCluster := models.EdgeCluster{Name: cuid.New()}
 					mockRepositoryService.
 						EXPECT().
 						ReadEdgeCluster(gomock.Any(), gomock.Any()).
-						Return(&repository.ReadEdgeClusterResponse{EdgeCluster: edgeCluster}, nil)
+						Return(&repository.ReadEdgeClusterResponse{
+							TenantID:    tenantID,
+							EdgeCluster: edgeCluster,
+						}, nil)
 
 					response, err := sut.ReadEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(BeNil())
 					Ω(response.EdgeCluster).ShouldNot(BeNil())
+					Ω(response.TenantID).Should(Equal(tenantID))
 					Ω(response.EdgeCluster.Name).Should(Equal(edgeCluster.Name))
 				})
 			})
@@ -233,7 +223,6 @@ var _ = Describe("Business Service Tests", func() {
 
 		BeforeEach(func() {
 			request = business.UpdateEdgeClusterRequest{
-				TenantID:      cuid.New(),
 				EdgeClusterID: cuid.New(),
 				EdgeCluster:   models.EdgeCluster{Name: cuid.New()},
 			}
@@ -254,20 +243,6 @@ var _ = Describe("Business Service Tests", func() {
 					response, err := sut.UpdateEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(BeNil())
-				})
-			})
-
-			When("and edge cluster repository UpdateEdgeCluster cannot find provided tenant", func() {
-				It("should return TenantNotFoundError", func() {
-					expectedError := repository.NewTenantNotFoundError(request.TenantID)
-					mockRepositoryService.
-						EXPECT().
-						UpdateEdgeCluster(gomock.Any(), gomock.Any()).
-						Return(nil, expectedError)
-
-					response, err := sut.UpdateEdgeCluster(ctx, &request)
-					Ω(err).Should(BeNil())
-					assertTenantNotFoundError(request.TenantID, response.Err, expectedError)
 				})
 			})
 
@@ -321,7 +296,6 @@ var _ = Describe("Business Service Tests", func() {
 
 		BeforeEach(func() {
 			request = business.DeleteEdgeClusterRequest{
-				TenantID:      cuid.New(),
 				EdgeClusterID: cuid.New(),
 			}
 		})
@@ -340,20 +314,6 @@ var _ = Describe("Business Service Tests", func() {
 					response, err := sut.DeleteEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(BeNil())
-				})
-			})
-
-			When("edge cluster repository DeleteEdgeCluster cannot find provided tenant", func() {
-				It("should return TenantNotFoundError", func() {
-					expectedError := repository.NewTenantNotFoundError(request.TenantID)
-					mockRepositoryService.
-						EXPECT().
-						DeleteEdgeCluster(gomock.Any(), gomock.Any()).
-						Return(nil, expectedError)
-
-					response, err := sut.DeleteEdgeCluster(ctx, &request)
-					Ω(err).Should(BeNil())
-					assertTenantNotFoundError(request.TenantID, response.Err, expectedError)
 				})
 			})
 
@@ -416,17 +376,6 @@ func assertArgumentNilError(expectedArgumentName, expectedMessage string, err er
 	}
 }
 
-func assertArgumentError(expectedArgumentName, expectedMessage string, err error, nestedErr error) {
-	Ω(commonErrors.IsArgumentError(err)).Should(BeTrue())
-
-	var argumentErr commonErrors.ArgumentError
-	_ = errors.As(err, &argumentErr)
-
-	Ω(argumentErr.ArgumentName).Should(Equal(expectedArgumentName))
-	Ω(strings.Contains(argumentErr.Error(), expectedMessage)).Should(BeTrue())
-	Ω(errors.Unwrap(err)).Should(Equal(nestedErr))
-}
-
 func assertUnknowError(expectedMessage string, err error, nestedErr error) {
 	Ω(business.IsUnknownError(err)).Should(BeTrue())
 
@@ -439,16 +388,6 @@ func assertUnknowError(expectedMessage string, err error, nestedErr error) {
 
 func assertEdgeClusterAlreadyExistsError(err error, nestedErr error) {
 	Ω(business.IsEdgeClusterAlreadyExistsError(err)).Should(BeTrue())
-	Ω(errors.Unwrap(err)).Should(Equal(nestedErr))
-}
-
-func assertTenantNotFoundError(expectedTenantID string, err error, nestedErr error) {
-	Ω(business.IsTenantNotFoundError(err)).Should(BeTrue())
-
-	var tenantNotFoundErr business.TenantNotFoundError
-	_ = errors.As(err, &tenantNotFoundErr)
-
-	Ω(tenantNotFoundErr.TenantID).Should(Equal(expectedTenantID))
 	Ω(errors.Unwrap(err)).Should(Equal(nestedErr))
 }
 

@@ -16,18 +16,17 @@ type CreateEdgeClusterResponse struct {
 
 // ReadEdgeClusterRequest contains the request to read an existing edge cluster
 type ReadEdgeClusterRequest struct {
-	TenantID      string
 	EdgeClusterID string
 }
 
 // ReadEdgeClusterResponse contains the result of reading an existing edge cluster
 type ReadEdgeClusterResponse struct {
+	TenantID    string
 	EdgeCluster models.EdgeCluster
 }
 
 // UpdateEdgeClusterRequest contains the request to update an existing edge cluster
 type UpdateEdgeClusterRequest struct {
-	TenantID      string
 	EdgeClusterID string
 	EdgeCluster   models.EdgeCluster
 }
@@ -38,7 +37,6 @@ type UpdateEdgeClusterResponse struct {
 
 // DeleteEdgeClusterRequest contains the request to delete an existing edge cluster
 type DeleteEdgeClusterRequest struct {
-	TenantID      string
 	EdgeClusterID string
 }
 
