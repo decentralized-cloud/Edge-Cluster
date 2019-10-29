@@ -196,7 +196,6 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 			BeforeEach(func() {
 				endpoint = sut.ReadEdgeClusterEndpoint()
 				request = business.ReadEdgeClusterRequest{
-					TenantID:      cuid.New(),
 					EdgeClusterID: cuid.New(),
 				}
 
@@ -233,7 +232,6 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				When("endpoint is called with invalid request", func() {
 					It("should return ArgumentNilError", func() {
 						invalidRequest := business.ReadEdgeClusterRequest{
-							TenantID:      "",
 							EdgeClusterID: "",
 						}
 						returnedResponse, err := endpoint(ctx, &invalidRequest)
@@ -312,7 +310,6 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 			BeforeEach(func() {
 				endpoint = sut.UpdateEdgeClusterEndpoint()
 				request = business.UpdateEdgeClusterRequest{
-					TenantID:      cuid.New(),
 					EdgeClusterID: cuid.New(),
 					EdgeCluster: models.EdgeCluster{
 						Name: cuid.New(),
@@ -347,7 +344,6 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				When("endpoint is called with invalid request", func() {
 					It("should return ArgumentNilError", func() {
 						invalidRequest := business.UpdateEdgeClusterRequest{
-							TenantID:      "",
 							EdgeClusterID: "",
 							EdgeCluster: models.EdgeCluster{
 								Name: "",
@@ -428,7 +424,6 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 			BeforeEach(func() {
 				endpoint = sut.DeleteEdgeClusterEndpoint()
 				request = business.DeleteEdgeClusterRequest{
-					TenantID:      cuid.New(),
 					EdgeClusterID: cuid.New(),
 				}
 
@@ -461,7 +456,6 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				When("endpoint is called with invalid request", func() {
 					It("should return ArgumentNilError", func() {
 						invalidRequest := business.DeleteEdgeClusterRequest{
-							TenantID:      "",
 							EdgeClusterID: "",
 						}
 						returnedResponse, err := endpoint(ctx, &invalidRequest)

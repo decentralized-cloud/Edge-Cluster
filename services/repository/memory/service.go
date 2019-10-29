@@ -10,19 +10,21 @@ import (
 	"github.com/lucsky/cuid"
 )
 
-var tenants map[string]map[string]models.EdgeCluster
-
-type repositoryService struct {
+type edgeClusterWithTenant struct {
+	tenantID    string
+	edgeCluster models.EdgeCluster
 }
 
-func init() {
-	tenants = make(map[string]map[string]models.EdgeCluster)
+type repositoryService struct {
+	edgeClusterWithTenants map[string]*edgeClusterWithTenant
 }
 
 // NewRepositoryService creates new instance of the RepositoryService, setting up all dependencies and returns the instance
 // Returns the new service or error if something goes wrong
 func NewRepositoryService() (repository.RepositoryContract, error) {
-	return &repositoryService{}, nil
+	return &repositoryService{
+		edgeClusterWithTenants: make(map[string]*edgeClusterWithTenant),
+	}, nil
 }
 
 // CreateEdgeCluster creates a new edge cluster.
@@ -32,15 +34,11 @@ func NewRepositoryService() (repository.RepositoryContract, error) {
 func (service *repositoryService) CreateEdgeCluster(
 	ctx context.Context,
 	request *repository.CreateEdgeClusterRequest) (*repository.CreateEdgeClusterResponse, error) {
-
-	edgeClusters, ok := tenants[request.TenantID]
-	if !ok {
-		edgeClusters = make(map[string]models.EdgeCluster)
-		tenants[request.TenantID] = edgeClusters
-	}
-
 	edgeClusterID := cuid.New()
-	edgeClusters[edgeClusterID] = request.EdgeCluster
+	service.edgeClusterWithTenants[edgeClusterID] = &edgeClusterWithTenant{
+		tenantID:    request.TenantID,
+		edgeCluster: request.EdgeCluster,
+	}
 
 	return &repository.CreateEdgeClusterResponse{
 		EdgeClusterID: edgeClusterID,
@@ -54,18 +52,15 @@ func (service *repositoryService) CreateEdgeCluster(
 func (service *repositoryService) ReadEdgeCluster(
 	ctx context.Context,
 	request *repository.ReadEdgeClusterRequest) (*repository.ReadEdgeClusterResponse, error) {
-
-	edgeClusters, ok := tenants[request.TenantID]
-	if !ok {
-		return nil, repository.NewTenantNotFoundError(request.TenantID)
-	}
-
-	edgeCluster, ok := edgeClusters[request.EdgeClusterID]
+	edgeClusterWithTenant, ok := service.edgeClusterWithTenants[request.EdgeClusterID]
 	if !ok {
 		return nil, repository.NewEdgeClusterNotFoundError(request.EdgeClusterID)
 	}
 
-	return &repository.ReadEdgeClusterResponse{EdgeCluster: edgeCluster}, nil
+	return &repository.ReadEdgeClusterResponse{
+		TenantID:    edgeClusterWithTenant.tenantID,
+		EdgeCluster: edgeClusterWithTenant.edgeCluster,
+	}, nil
 }
 
 // UpdateEdgeCluster update an existing edge cluster
@@ -75,18 +70,12 @@ func (service *repositoryService) ReadEdgeCluster(
 func (service *repositoryService) UpdateEdgeCluster(
 	ctx context.Context,
 	request *repository.UpdateEdgeClusterRequest) (*repository.UpdateEdgeClusterResponse, error) {
-
-	edgeClusters, ok := tenants[request.TenantID]
-	if !ok {
-		return nil, repository.NewTenantNotFoundError(request.TenantID)
-	}
-
-	_, ok = edgeClusters[request.EdgeClusterID]
+	edgeClusterWithTenant, ok := service.edgeClusterWithTenants[request.EdgeClusterID]
 	if !ok {
 		return nil, repository.NewEdgeClusterNotFoundError(request.EdgeClusterID)
 	}
 
-	edgeClusters[request.EdgeClusterID] = request.EdgeCluster
+	edgeClusterWithTenant.edgeCluster = request.EdgeCluster
 
 	return &repository.UpdateEdgeClusterResponse{}, nil
 }
@@ -98,18 +87,12 @@ func (service *repositoryService) UpdateEdgeCluster(
 func (service *repositoryService) DeleteEdgeCluster(
 	ctx context.Context,
 	request *repository.DeleteEdgeClusterRequest) (*repository.DeleteEdgeClusterResponse, error) {
-
-	edgeClusters, ok := tenants[request.TenantID]
-	if !ok {
-		return nil, repository.NewTenantNotFoundError(request.TenantID)
-	}
-
-	_, ok = edgeClusters[request.EdgeClusterID]
+	_, ok := service.edgeClusterWithTenants[request.EdgeClusterID]
 	if !ok {
 		return nil, repository.NewEdgeClusterNotFoundError(request.EdgeClusterID)
 	}
 
-	delete(edgeClusters, request.EdgeClusterID)
+	delete(service.edgeClusterWithTenants, request.EdgeClusterID)
 
 	return &repository.DeleteEdgeClusterResponse{}, nil
 }

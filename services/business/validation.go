@@ -20,8 +20,6 @@ func (val CreateEdgeClusterRequest) Validate() error {
 // Returns error if validation failes
 func (val ReadEdgeClusterRequest) Validate() error {
 	return validation.ValidateStruct(&val,
-		// TenantID cannot be empty
-		validation.Field(&val.TenantID, validation.Required),
 		// EdgeClusterID cannot be empty
 		validation.Field(&val.EdgeClusterID, validation.Required),
 	)
@@ -31,8 +29,6 @@ func (val ReadEdgeClusterRequest) Validate() error {
 // Returns error if validation failes
 func (val UpdateEdgeClusterRequest) Validate() error {
 	return validation.ValidateStruct(&val,
-		// TenantID cannot be empty
-		validation.Field(&val.TenantID, validation.Required),
 		// EdgeClusterID cannot be empty
 		validation.Field(&val.EdgeClusterID, validation.Required),
 		// Validate EdgeCluster using its own validation rules
@@ -44,8 +40,6 @@ func (val UpdateEdgeClusterRequest) Validate() error {
 // Returns error if validation failes
 func (val DeleteEdgeClusterRequest) Validate() error {
 	return validation.ValidateStruct(&val,
-		// TenantID cannot be empty
-		validation.Field(&val.TenantID, validation.Required),
 		// EdgeClusterID cannot be empty
 		validation.Field(&val.EdgeClusterID, validation.Required),
 	)

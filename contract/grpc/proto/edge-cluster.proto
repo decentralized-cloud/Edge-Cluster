@@ -54,11 +54,8 @@ message CreateEdgeClusterResponse {
 /** Request to read an existing edge cluster
  */
 message ReadEdgeClusterRequest {
-  // The unique tenant identifier
-  string tenantID = 1;
-
   // The unique edge cluster identifier
-  string edgeClusterID = 2;
+  string edgeClusterID = 1;
 }
 
 /**
@@ -71,22 +68,22 @@ message ReadEdgeClusterResponse {
   // Contains error message if the operation was unsuccessful
   string errorMessage = 2;
 
+  // The unique tenant identifier
+  string tenantID = 3;
+
   // The edge cluster object
-  EdgeCluster edgeCluster = 3;
+  EdgeCluster edgeCluster = 4;
 }
 
 /**
  * Request to update an existing edge cluster
  */
 message UpdateEdgeClusterRequest {
-  // The unique tenant identifier
-  string tenantID = 1;
-
   // The unique edge cluster identifier
-  string edgeClusterID = 2;
+  string edgeClusterID = 1;
 
   // The edge cluster object contains the updated edge cluster details to update
-  EdgeCluster edgeCluster = 3;
+  EdgeCluster edgeCluster = 2;
 }
 
 /**
@@ -104,11 +101,8 @@ message UpdateEdgeClusterResponse {
  * Request to delete an existing edge cluster
  */
 message DeleteEdgeClusterRequest {
-  // The unique tenant identifier
-  string tenantID = 1;
-
   // The unique edge cluster identifier
-  string edgeClusterID = 2;
+  string edgeClusterID = 1;
 }
 
 /**
