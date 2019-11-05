@@ -21,4 +21,8 @@ type EndpointCreatorContract interface {
 	// DeleteEdgeClusterEndpoint creates Delete Edge Cluster endpoint
 	// Returns the Delete Edge Cluster endpoint
 	DeleteEdgeClusterEndpoint() endpoint.Endpoint
+
+	// SearchEndpoint creates Search Edge Cluster endpoint
+	// Returns the Search Edge Cluster endpoint
+	SearchEndpoint() endpoint.Endpoint
 }

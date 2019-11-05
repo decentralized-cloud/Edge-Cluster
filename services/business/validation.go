@@ -9,8 +9,6 @@ import (
 // Returns error if validation failes
 func (val CreateEdgeClusterRequest) Validate() error {
 	return validation.ValidateStruct(&val,
-		// TenantID cannot be empty
-		validation.Field(&val.TenantID, validation.Required),
 		// Validate EdgeCluster using its own validation rules
 		validation.Field(&val.EdgeCluster),
 	)
@@ -43,4 +41,10 @@ func (val DeleteEdgeClusterRequest) Validate() error {
 		// EdgeClusterID cannot be empty
 		validation.Field(&val.EdgeClusterID, validation.Required),
 	)
+}
+
+// Validate validates the SearchRequest model and return error if the validation failes
+// Returns error if validation failes
+func (val SearchRequest) Validate() error {
+	return nil
 }

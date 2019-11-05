@@ -3,15 +3,17 @@ package business_test
 import (
 	"context"
 	"errors"
+	"math/rand"
 	"strings"
 	"testing"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/business"
-	"github.com/decentralized-cloud/edge-cluster/services/repository"
+	repository "github.com/decentralized-cloud/edge-cluster/services/repository"
 	repsoitoryMock "github.com/decentralized-cloud/edge-cluster/services/repository/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/lucsky/cuid"
+	"github.com/micro-business/go-core/common"
 	commonErrors "github.com/micro-business/go-core/system/errors"
 
 	. "github.com/onsi/ginkgo"
@@ -43,8 +45,8 @@ var _ = Describe("Business Service Tests", func() {
 		mockCtrl.Finish()
 	})
 
-	Context("user tries to instantiate EdgeClusterService", func() {
-		When("edge cluster repository service is not provided and NewEdgeClusterService is called", func() {
+	Context("user tries to instantiate BusinessService", func() {
+		When("edge cluster repository service is not provided and NewBusinessService is called", func() {
 			It("should return ArgumentNilError", func() {
 				service, err := business.NewBusinessService(nil)
 				Ω(service).Should(BeNil())
@@ -52,8 +54,8 @@ var _ = Describe("Business Service Tests", func() {
 			})
 		})
 
-		When("all dependencies are resolved and NewEdgeClusterService is called", func() {
-			It("should instantiate the new EdgeClusterService", func() {
+		When("all dependencies are resolved and NewBusinessService is called", func() {
+			It("should instantiate the new BusinessService", func() {
 				service, err := business.NewBusinessService(mockRepositoryService)
 				Ω(err).Should(BeNil())
 				Ω(service).ShouldNot(BeNil())
@@ -68,14 +70,14 @@ var _ = Describe("Business Service Tests", func() {
 
 		BeforeEach(func() {
 			request = business.CreateEdgeClusterRequest{
-				TenantID: cuid.New(),
 				EdgeCluster: models.EdgeCluster{
-					Name: cuid.New(),
+					TenantID: cuid.New(),
+					Name:     cuid.New(),
 				}}
 		})
 
 		Context("edge cluster service is instantiated", func() {
-			When("CreateEdgeCluster is called with correct input parameters", func() {
+			When("CreateEdgeCluster is called", func() {
 				It("should call edge cluster repository CreateEdgeCluster method", func() {
 					mockRepositoryService.
 						EXPECT().
@@ -83,14 +85,19 @@ var _ = Describe("Business Service Tests", func() {
 						Do(func(_ context.Context, mappedRequest *repository.CreateEdgeClusterRequest) {
 							Ω(mappedRequest.EdgeCluster).Should(Equal(request.EdgeCluster))
 						}).
-						Return(&repository.CreateEdgeClusterResponse{EdgeClusterID: cuid.New()}, nil)
+						Return(&repository.CreateEdgeClusterResponse{
+							EdgeClusterID: cuid.New(),
+							EdgeCluster: models.EdgeCluster{
+								TenantID: cuid.New(),
+								Name:     cuid.New(),
+							}}, nil)
 
 					response, err := sut.CreateEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(BeNil())
 				})
 
-				When("and edge cluster repository CreateEdgeCluster return EdgeClusterAlreadyExistError", func() {
+				When("And edge cluster repository CreateEdgeCluster return EdgeClusterAlreadyExistError", func() {
 					It("should return EdgeClusterAlreadyExistsError", func() {
 						expectedError := repository.NewEdgeClusterAlreadyExistsError()
 						mockRepositoryService.
@@ -104,7 +111,7 @@ var _ = Describe("Business Service Tests", func() {
 					})
 				})
 
-				When("and edge cluster repository CreateEdgeCluster return any other error", func() {
+				When("And edge cluster repository CreateEdgeCluster return any other error", func() {
 					It("should return UnknownError", func() {
 						expectedError := errors.New(cuid.New())
 						mockRepositoryService.
@@ -118,19 +125,26 @@ var _ = Describe("Business Service Tests", func() {
 					})
 				})
 
-				When("and edge cluster repository CreateEdgeCluster return no error", func() {
-					It("should return the new edgeClusterID", func() {
-						edgeClusterID := cuid.New()
+				When("And edge cluster repository CreateEdgeCluster return no error", func() {
+					It("should return expected details", func() {
+						expectedResponse := repository.CreateEdgeClusterResponse{
+							EdgeClusterID: cuid.New(),
+							EdgeCluster: models.EdgeCluster{
+								TenantID: cuid.New(),
+								Name:     cuid.New(),
+							}}
+
 						mockRepositoryService.
 							EXPECT().
 							CreateEdgeCluster(gomock.Any(), gomock.Any()).
-							Return(&repository.CreateEdgeClusterResponse{EdgeClusterID: edgeClusterID}, nil)
+							Return(&expectedResponse, nil)
 
 						response, err := sut.CreateEdgeCluster(ctx, &request)
 						Ω(err).Should(BeNil())
 						Ω(response.Err).Should(BeNil())
 						Ω(response.EdgeClusterID).ShouldNot(BeNil())
-						Ω(response.EdgeClusterID).Should(Equal(edgeClusterID))
+						Ω(response.EdgeClusterID).Should(Equal(expectedResponse.EdgeClusterID))
+						assertEdgeCluster(response.EdgeCluster, expectedResponse.EdgeCluster)
 					})
 				})
 			})
@@ -149,7 +163,7 @@ var _ = Describe("Business Service Tests", func() {
 		})
 
 		Context("edge cluster service is instantiated", func() {
-			When("ReadEdgeCluster is called with correct input parameters", func() {
+			When("ReadEdgeCluster is called", func() {
 				It("should call edge cluster repository ReadEdgeCluster method", func() {
 					mockRepositoryService.
 						EXPECT().
@@ -165,7 +179,7 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("and edge cluster repository ReadEdgeCluster cannot find the edge cluster", func() {
+			When("And edge cluster repository ReadEdgeCluster cannot find provided edge cluster", func() {
 				It("should return EdgeClusterNotFoundError", func() {
 					expectedError := repository.NewEdgeClusterNotFoundError(request.EdgeClusterID)
 					mockRepositoryService.
@@ -179,7 +193,7 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("and edge cluster repository ReadEdgeCluster return any other error", func() {
+			When("And edge cluster repository ReadEdgeCluster return any other error", func() {
 				It("should return UnknownError", func() {
 					expectedError := errors.New(cuid.New())
 					mockRepositoryService.
@@ -193,24 +207,18 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("and edge cluster repository ReadEdgeCluster return no error", func() {
+			When("And edge cluster repository ReadEdgeCluster return no error", func() {
 				It("should return the edgeClusterID", func() {
-					tenantID := cuid.New()
 					edgeCluster := models.EdgeCluster{Name: cuid.New()}
 					mockRepositoryService.
 						EXPECT().
 						ReadEdgeCluster(gomock.Any(), gomock.Any()).
-						Return(&repository.ReadEdgeClusterResponse{
-							TenantID:    tenantID,
-							EdgeCluster: edgeCluster,
-						}, nil)
+						Return(&repository.ReadEdgeClusterResponse{EdgeCluster: edgeCluster}, nil)
 
 					response, err := sut.ReadEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(BeNil())
-					Ω(response.EdgeCluster).ShouldNot(BeNil())
-					Ω(response.TenantID).Should(Equal(tenantID))
-					Ω(response.EdgeCluster.Name).Should(Equal(edgeCluster.Name))
+					assertEdgeCluster(response.EdgeCluster, edgeCluster)
 				})
 			})
 		})
@@ -229,7 +237,7 @@ var _ = Describe("Business Service Tests", func() {
 		})
 
 		Context("edge cluster service is instantiated", func() {
-			When("UpdateEdgeCluster is called with correct input parameters", func() {
+			When("UpdateEdgeCluster is called", func() {
 				It("should call edge cluster repository UpdateEdgeCluster method", func() {
 					mockRepositoryService.
 						EXPECT().
@@ -246,7 +254,7 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("and edge cluster repository UpdateEdgeCluster cannot find provided edge cluster", func() {
+			When("And edge cluster repository UpdateEdgeCluster cannot find provided edge cluster", func() {
 				It("should return EdgeClusterNotFoundError", func() {
 					expectedError := repository.NewEdgeClusterNotFoundError(request.EdgeClusterID)
 					mockRepositoryService.
@@ -260,7 +268,7 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("and edge cluster repository UpdateEdgeCluster return any other error", func() {
+			When("And edge cluster repository UpdateEdgeCluster return any other error", func() {
 				It("should return UnknownError", func() {
 					expectedError := errors.New(cuid.New())
 					mockRepositoryService.
@@ -274,22 +282,27 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("and edge cluster repository UpdateEdgeCluster return no error", func() {
-				It("should return no error", func() {
+			When("And edge cluster repository UpdateEdgeCluster return no error", func() {
+				It("should return expected details", func() {
+					expectedResponse := repository.UpdateEdgeClusterResponse{
+						EdgeCluster: models.EdgeCluster{
+							Name: cuid.New(),
+						}}
 					mockRepositoryService.
 						EXPECT().
 						UpdateEdgeCluster(gomock.Any(), gomock.Any()).
-						Return(&repository.UpdateEdgeClusterResponse{}, nil)
+						Return(&expectedResponse, nil)
 
 					response, err := sut.UpdateEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(BeNil())
+					assertEdgeCluster(response.EdgeCluster, expectedResponse.EdgeCluster)
 				})
 			})
 		})
 	})
 
-	Describe("DeleteEdgeCluster is called.", func() {
+	Describe("DeleteEdgeCluster is called", func() {
 		var (
 			request business.DeleteEdgeClusterRequest
 		)
@@ -301,7 +314,7 @@ var _ = Describe("Business Service Tests", func() {
 		})
 
 		Context("edge cluster service is instantiated", func() {
-			When("input parameters are valid", func() {
+			When("DeleteEdgeCluster is called", func() {
 				It("should call edge cluster repository DeleteEdgeCluster method", func() {
 					mockRepositoryService.
 						EXPECT().
@@ -359,6 +372,110 @@ var _ = Describe("Business Service Tests", func() {
 			})
 		})
 	})
+
+	Describe("Search is called", func() {
+		var (
+			request        business.SearchRequest
+			edgeClusterIDs []string
+		)
+
+		BeforeEach(func() {
+			rand.Seed(42)
+			edgeClusterIDs = []string{}
+			for idx := 0; idx < rand.Intn(20)+1; idx++ {
+				edgeClusterIDs = append(edgeClusterIDs, cuid.New())
+			}
+
+			request = business.SearchRequest{
+				Pagination: common.Pagination{
+					After:  cuid.New(),
+					First:  rand.Intn(1000),
+					Before: cuid.New(),
+					Last:   rand.Intn(1000),
+				},
+				SortingOptions: []common.SortingOptionPair{
+					common.SortingOptionPair{
+						Name:      cuid.New(),
+						Direction: common.Ascending,
+					},
+					common.SortingOptionPair{
+						Name:      cuid.New(),
+						Direction: common.Descending,
+					},
+				},
+				EdgeClusterIDs: edgeClusterIDs,
+			}
+		})
+
+		Context("edge cluster service is instantiated", func() {
+			When("Search is called", func() {
+				It("should call edge cluster repository Search method", func() {
+					mockRepositoryService.
+						EXPECT().
+						Search(ctx, gomock.Any()).
+						Do(func(_ context.Context, mappedRequest *repository.SearchRequest) {
+							Ω(mappedRequest.Pagination).Should(Equal(request.Pagination))
+							Ω(mappedRequest.SortingOptions).Should(Equal(request.SortingOptions))
+							Ω(mappedRequest.EdgeClusterIDs).Should(Equal(request.EdgeClusterIDs))
+						}).
+						Return(&repository.SearchResponse{}, nil)
+
+					response, err := sut.Search(ctx, &request)
+					Ω(err).Should(BeNil())
+					Ω(response.Err).Should(BeNil())
+				})
+			})
+
+			When("edge cluster repository Search is faced with any other error", func() {
+				It("should return UnknownError", func() {
+					expectedError := errors.New(cuid.New())
+					mockRepositoryService.
+						EXPECT().
+						Search(gomock.Any(), gomock.Any()).
+						Return(nil, expectedError)
+
+					response, err := sut.Search(ctx, &request)
+					Ω(err).Should(BeNil())
+					assertUnknowError(expectedError.Error(), response.Err, expectedError)
+				})
+			})
+
+			When("edge cluster repository Search completes successfully", func() {
+				It("should return the list of matched edgeClusterIDs", func() {
+					edgeClusters := []models.EdgeClusterWithCursor{}
+
+					for idx := 0; idx < rand.Intn(20)+1; idx++ {
+						edgeClusters = append(edgeClusters, models.EdgeClusterWithCursor{
+							EdgeClusterID: cuid.New(),
+							EdgeCluster: models.EdgeCluster{
+								TenantID: cuid.New(),
+								Name:     cuid.New(),
+							},
+							Cursor: cuid.New(),
+						})
+					}
+
+					expectedResponse := repository.SearchResponse{
+						HasPreviousPage: (rand.Intn(10) % 2) == 0,
+						HasNextPage:     (rand.Intn(10) % 2) == 0,
+						EdgeClusters:    edgeClusters,
+					}
+
+					mockRepositoryService.
+						EXPECT().
+						Search(gomock.Any(), gomock.Any()).
+						Return(&expectedResponse, nil)
+
+					response, err := sut.Search(ctx, &request)
+					Ω(err).Should(BeNil())
+					Ω(response.Err).Should(BeNil())
+					Ω(response.HasPreviousPage).Should(Equal(expectedResponse.HasPreviousPage))
+					Ω(response.HasNextPage).Should(Equal(expectedResponse.HasNextPage))
+					Ω(response.EdgeClusters).Should(Equal(expectedResponse.EdgeClusters))
+				})
+			})
+		})
+	})
 })
 
 func assertArgumentNilError(expectedArgumentName, expectedMessage string, err error) {
@@ -399,4 +516,10 @@ func assertEdgeClusterNotFoundError(expectedEdgeClusterID string, err error, nes
 
 	Ω(edgeClusterNotFoundErr.EdgeClusterID).Should(Equal(expectedEdgeClusterID))
 	Ω(errors.Unwrap(err)).Should(Equal(nestedErr))
+}
+
+func assertEdgeCluster(edgeCluster, expectedEdgeCluster models.EdgeCluster) {
+	Ω(edgeCluster).ShouldNot(BeNil())
+	Ω(edgeCluster.TenantID).Should(Equal(expectedEdgeCluster.TenantID))
+	Ω(edgeCluster.Name).Should(Equal(expectedEdgeCluster.Name))
 }

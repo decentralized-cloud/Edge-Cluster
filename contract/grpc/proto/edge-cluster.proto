@@ -22,19 +22,19 @@ enum Error {
  * The edge cluster object
  */
 message EdgeCluster {
+  // The unique tenant identifier that owns the edge cluster
+  string tenantID = 1;
+
   // The edge cluster name
-  string name = 1;
+  string name = 2;
 }
 
 /**
  * Request to create a new edge cluster
  */
 message CreateEdgeClusterRequest {
-  // The unique tenant identifier
-  string tenantID = 1;
-
   // The edge cluster object
-  EdgeCluster edgeCluster = 2;
+  EdgeCluster edgeCluster = 1;
 }
 
 /**
@@ -49,6 +49,9 @@ message CreateEdgeClusterResponse {
 
   // The unique edge cluster identifier
   string edgeClusterID = 3;
+
+  // The created edge cluster object
+  EdgeCluster edgeCluster = 4;
 }
 
 /** Request to read an existing edge cluster
@@ -68,11 +71,8 @@ message ReadEdgeClusterResponse {
   // Contains error message if the operation was unsuccessful
   string errorMessage = 2;
 
-  // The unique tenant identifier
-  string tenantID = 3;
-
   // The edge cluster object
-  EdgeCluster edgeCluster = 4;
+  EdgeCluster edgeCluster = 3;
 }
 
 /**
@@ -95,6 +95,9 @@ message UpdateEdgeClusterResponse {
 
   // Contains error message if the operation was unsuccessful
   string errorMessage = 2;
+
+  // The updated edge cluster object
+  EdgeCluster edgeCluster = 3;
 }
 
 /**
@@ -114,6 +117,92 @@ message DeleteEdgeClusterResponse {
 
   // Contains error message if the operation was unsuccessful
   string errorMessage = 2;
+}
+
+/**
+ * The pagination information compatible with graphql-relay connection definition, for more information visit:
+ * https://facebook.github.io/relay/graphql/connections.htm
+ */
+ message Pagination {
+  string after = 1;
+
+  int32 first = 2;
+
+  string before = 3;
+
+  int32 last = 4;
+}
+
+/**
+ * The different sorting direction
+ */
+enum SortingDirection {
+  // Indicates result data must be sorted from low to high sequence
+  ASCENDING = 0;
+
+  // Indicates result data must be sorted from high to low sequence
+  DESCENDING = 1;
+}
+
+/**
+ * Defines the pair of values that are used to determine how the result data should be sorted.
+ */
+message SortingOptionPair {
+  // The name of the field on
+   string name = 1;
+
+   // THe sorting direction
+   SortingDirection direction = 2;
+}
+
+/**
+ * Request to search for edge clusters
+ */
+message SearchRequest {
+  // The pagination information
+  Pagination pagination = 1;
+
+  // The collection of sorting option determines how the returned data must be sorted
+  repeated SortingOptionPair sortingOptions = 2;
+
+  // The unique edge cluster identifiers
+  repeated string edgeClusterIDs = 3;
+}
+
+/*
+ * The pair of edge cluster and a cursor that defines the position of the edge cluster in the repository
+ * that can later referred to using pagination information.
+ */
+message EdgeClusterWithCursor {
+  // The edge cluster object
+  EdgeCluster edgecluster = 1;
+
+  // The unique edge cluster identifier
+  string edgeClusterID = 2;
+
+  // The cursor defines the position of the edge cluster in the repository that can be later
+  // referred to using pagination information
+  string cursor = 3;
+}
+
+/**
+ * Response contains the result of searching for edge clusters
+ */
+message SearchResponse {
+  // Indicate whether the operation has any error
+  Error error = 1;
+
+  // Contains error message if the operation was unsuccessful
+  string errorMessage = 2;
+
+  // Indicates whether more edges exist prior to the set defined by the clients arguments
+  bool hasPreviousPage = 3;
+
+  // Indicates whether more edges exist following the set defined by the clients arguments
+  bool hasNextPage = 4;
+
+  // The list contains the edge clusters that matched the search criteria
+  repeated EdgeClusterWithCursor edgeClusters = 5;
 }
 
 /**
@@ -139,5 +228,10 @@ service EdgeClusterService {
   // request: The request to delete an esiting edge cluster
   // Returns the result of deleting an exiting edge cluster
   rpc DeleteEdgeCluster(DeleteEdgeClusterRequest) returns (DeleteEdgeClusterResponse);
+
+  // Search returns the list of edge clusters that matched the criteria
+  // request: The request contains the search criteria
+  // Returns the list of edge clusters that matched the criteria
+  rpc Search(SearchRequest) returns (SearchResponse);
 }
 

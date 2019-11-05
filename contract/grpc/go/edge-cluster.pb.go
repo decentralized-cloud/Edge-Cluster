@@ -66,10 +66,41 @@ func (Error) EnumDescriptor() ([]byte, []int) {
 }
 
 //*
+// The different sorting direction
+type SortingDirection int32
+
+const (
+	// Indicates result data must be sorted from low to high sequence
+	SortingDirection_ASCENDING SortingDirection = 0
+	// Indicates result data must be sorted from high to low sequence
+	SortingDirection_DESCENDING SortingDirection = 1
+)
+
+var SortingDirection_name = map[int32]string{
+	0: "ASCENDING",
+	1: "DESCENDING",
+}
+
+var SortingDirection_value = map[string]int32{
+	"ASCENDING":  0,
+	"DESCENDING": 1,
+}
+
+func (x SortingDirection) String() string {
+	return proto.EnumName(SortingDirection_name, int32(x))
+}
+
+func (SortingDirection) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_be558aad5309a67f, []int{1}
+}
+
+//*
 // The edge cluster object
 type EdgeCluster struct {
+	// The unique tenant identifier that owns the edge cluster
+	TenantID string `protobuf:"bytes,1,opt,name=tenantID,proto3" json:"tenantID,omitempty"`
 	// The edge cluster name
-	Name                 string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -100,6 +131,13 @@ func (m *EdgeCluster) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EdgeCluster proto.InternalMessageInfo
 
+func (m *EdgeCluster) GetTenantID() string {
+	if m != nil {
+		return m.TenantID
+	}
+	return ""
+}
+
 func (m *EdgeCluster) GetName() string {
 	if m != nil {
 		return m.Name
@@ -110,10 +148,8 @@ func (m *EdgeCluster) GetName() string {
 //*
 // Request to create a new edge cluster
 type CreateEdgeClusterRequest struct {
-	// The unique tenant identifier
-	TenantID string `protobuf:"bytes,1,opt,name=tenantID,proto3" json:"tenantID,omitempty"`
 	// The edge cluster object
-	EdgeCluster          *EdgeCluster `protobuf:"bytes,2,opt,name=edgeCluster,proto3" json:"edgeCluster,omitempty"`
+	EdgeCluster          *EdgeCluster `protobuf:"bytes,1,opt,name=edgeCluster,proto3" json:"edgeCluster,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
 	XXX_unrecognized     []byte       `json:"-"`
 	XXX_sizecache        int32        `json:"-"`
@@ -144,13 +180,6 @@ func (m *CreateEdgeClusterRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_CreateEdgeClusterRequest proto.InternalMessageInfo
 
-func (m *CreateEdgeClusterRequest) GetTenantID() string {
-	if m != nil {
-		return m.TenantID
-	}
-	return ""
-}
-
 func (m *CreateEdgeClusterRequest) GetEdgeCluster() *EdgeCluster {
 	if m != nil {
 		return m.EdgeCluster
@@ -166,10 +195,12 @@ type CreateEdgeClusterResponse struct {
 	// Contains error message if the operation was unsuccessful
 	ErrorMessage string `protobuf:"bytes,2,opt,name=errorMessage,proto3" json:"errorMessage,omitempty"`
 	// The unique edge cluster identifier
-	EdgeClusterID        string   `protobuf:"bytes,3,opt,name=edgeClusterID,proto3" json:"edgeClusterID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	EdgeClusterID string `protobuf:"bytes,3,opt,name=edgeClusterID,proto3" json:"edgeClusterID,omitempty"`
+	// The created edge cluster object
+	EdgeCluster          *EdgeCluster `protobuf:"bytes,4,opt,name=edgeCluster,proto3" json:"edgeCluster,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
 }
 
 func (m *CreateEdgeClusterResponse) Reset()         { *m = CreateEdgeClusterResponse{} }
@@ -216,6 +247,13 @@ func (m *CreateEdgeClusterResponse) GetEdgeClusterID() string {
 		return m.EdgeClusterID
 	}
 	return ""
+}
+
+func (m *CreateEdgeClusterResponse) GetEdgeCluster() *EdgeCluster {
+	if m != nil {
+		return m.EdgeCluster
+	}
+	return nil
 }
 
 //* Request to read an existing edge cluster
@@ -266,10 +304,8 @@ type ReadEdgeClusterResponse struct {
 	Error Error `protobuf:"varint,1,opt,name=error,proto3,enum=edgecluster.Error" json:"error,omitempty"`
 	// Contains error message if the operation was unsuccessful
 	ErrorMessage string `protobuf:"bytes,2,opt,name=errorMessage,proto3" json:"errorMessage,omitempty"`
-	// The unique tenant identifier
-	TenantID string `protobuf:"bytes,3,opt,name=tenantID,proto3" json:"tenantID,omitempty"`
 	// The edge cluster object
-	EdgeCluster          *EdgeCluster `protobuf:"bytes,4,opt,name=edgeCluster,proto3" json:"edgeCluster,omitempty"`
+	EdgeCluster          *EdgeCluster `protobuf:"bytes,3,opt,name=edgeCluster,proto3" json:"edgeCluster,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
 	XXX_unrecognized     []byte       `json:"-"`
 	XXX_sizecache        int32        `json:"-"`
@@ -310,13 +346,6 @@ func (m *ReadEdgeClusterResponse) GetError() Error {
 func (m *ReadEdgeClusterResponse) GetErrorMessage() string {
 	if m != nil {
 		return m.ErrorMessage
-	}
-	return ""
-}
-
-func (m *ReadEdgeClusterResponse) GetTenantID() string {
-	if m != nil {
-		return m.TenantID
 	}
 	return ""
 }
@@ -385,10 +414,12 @@ type UpdateEdgeClusterResponse struct {
 	// Indicate whether the operation has any error
 	Error Error `protobuf:"varint,1,opt,name=error,proto3,enum=edgecluster.Error" json:"error,omitempty"`
 	// Contains error message if the operation was unsuccessful
-	ErrorMessage         string   `protobuf:"bytes,2,opt,name=errorMessage,proto3" json:"errorMessage,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	ErrorMessage string `protobuf:"bytes,2,opt,name=errorMessage,proto3" json:"errorMessage,omitempty"`
+	// The updated edge cluster object
+	EdgeCluster          *EdgeCluster `protobuf:"bytes,3,opt,name=edgeCluster,proto3" json:"edgeCluster,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
 }
 
 func (m *UpdateEdgeClusterResponse) Reset()         { *m = UpdateEdgeClusterResponse{} }
@@ -428,6 +459,13 @@ func (m *UpdateEdgeClusterResponse) GetErrorMessage() string {
 		return m.ErrorMessage
 	}
 	return ""
+}
+
+func (m *UpdateEdgeClusterResponse) GetEdgeCluster() *EdgeCluster {
+	if m != nil {
+		return m.EdgeCluster
+	}
+	return nil
 }
 
 //*
@@ -523,8 +561,326 @@ func (m *DeleteEdgeClusterResponse) GetErrorMessage() string {
 	return ""
 }
 
+//*
+// The pagination information compatible with graphql-relay connection definition, for more information visit:
+// https://facebook.github.io/relay/graphql/connections.htm
+type Pagination struct {
+	After                string   `protobuf:"bytes,1,opt,name=after,proto3" json:"after,omitempty"`
+	First                int32    `protobuf:"varint,2,opt,name=first,proto3" json:"first,omitempty"`
+	Before               string   `protobuf:"bytes,3,opt,name=before,proto3" json:"before,omitempty"`
+	Last                 int32    `protobuf:"varint,4,opt,name=last,proto3" json:"last,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Pagination) Reset()         { *m = Pagination{} }
+func (m *Pagination) String() string { return proto.CompactTextString(m) }
+func (*Pagination) ProtoMessage()    {}
+func (*Pagination) Descriptor() ([]byte, []int) {
+	return fileDescriptor_be558aad5309a67f, []int{9}
+}
+
+func (m *Pagination) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Pagination.Unmarshal(m, b)
+}
+func (m *Pagination) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Pagination.Marshal(b, m, deterministic)
+}
+func (m *Pagination) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Pagination.Merge(m, src)
+}
+func (m *Pagination) XXX_Size() int {
+	return xxx_messageInfo_Pagination.Size(m)
+}
+func (m *Pagination) XXX_DiscardUnknown() {
+	xxx_messageInfo_Pagination.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Pagination proto.InternalMessageInfo
+
+func (m *Pagination) GetAfter() string {
+	if m != nil {
+		return m.After
+	}
+	return ""
+}
+
+func (m *Pagination) GetFirst() int32 {
+	if m != nil {
+		return m.First
+	}
+	return 0
+}
+
+func (m *Pagination) GetBefore() string {
+	if m != nil {
+		return m.Before
+	}
+	return ""
+}
+
+func (m *Pagination) GetLast() int32 {
+	if m != nil {
+		return m.Last
+	}
+	return 0
+}
+
+//*
+// Defines the pair of values that are used to determine how the result data should be sorted.
+type SortingOptionPair struct {
+	// The name of the field on
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// THe sorting direction
+	Direction            SortingDirection `protobuf:"varint,2,opt,name=direction,proto3,enum=edgecluster.SortingDirection" json:"direction,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
+}
+
+func (m *SortingOptionPair) Reset()         { *m = SortingOptionPair{} }
+func (m *SortingOptionPair) String() string { return proto.CompactTextString(m) }
+func (*SortingOptionPair) ProtoMessage()    {}
+func (*SortingOptionPair) Descriptor() ([]byte, []int) {
+	return fileDescriptor_be558aad5309a67f, []int{10}
+}
+
+func (m *SortingOptionPair) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SortingOptionPair.Unmarshal(m, b)
+}
+func (m *SortingOptionPair) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SortingOptionPair.Marshal(b, m, deterministic)
+}
+func (m *SortingOptionPair) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SortingOptionPair.Merge(m, src)
+}
+func (m *SortingOptionPair) XXX_Size() int {
+	return xxx_messageInfo_SortingOptionPair.Size(m)
+}
+func (m *SortingOptionPair) XXX_DiscardUnknown() {
+	xxx_messageInfo_SortingOptionPair.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SortingOptionPair proto.InternalMessageInfo
+
+func (m *SortingOptionPair) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *SortingOptionPair) GetDirection() SortingDirection {
+	if m != nil {
+		return m.Direction
+	}
+	return SortingDirection_ASCENDING
+}
+
+//*
+// Request to search for edge clusters
+type SearchRequest struct {
+	// The pagination information
+	Pagination *Pagination `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	// The collection of sorting option determines how the returned data must be sorted
+	SortingOptions []*SortingOptionPair `protobuf:"bytes,2,rep,name=sortingOptions,proto3" json:"sortingOptions,omitempty"`
+	// The unique edge cluster identifiers
+	EdgeClusterIDs       []string `protobuf:"bytes,3,rep,name=edgeClusterIDs,proto3" json:"edgeClusterIDs,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SearchRequest) Reset()         { *m = SearchRequest{} }
+func (m *SearchRequest) String() string { return proto.CompactTextString(m) }
+func (*SearchRequest) ProtoMessage()    {}
+func (*SearchRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_be558aad5309a67f, []int{11}
+}
+
+func (m *SearchRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SearchRequest.Unmarshal(m, b)
+}
+func (m *SearchRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SearchRequest.Marshal(b, m, deterministic)
+}
+func (m *SearchRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SearchRequest.Merge(m, src)
+}
+func (m *SearchRequest) XXX_Size() int {
+	return xxx_messageInfo_SearchRequest.Size(m)
+}
+func (m *SearchRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_SearchRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SearchRequest proto.InternalMessageInfo
+
+func (m *SearchRequest) GetPagination() *Pagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+func (m *SearchRequest) GetSortingOptions() []*SortingOptionPair {
+	if m != nil {
+		return m.SortingOptions
+	}
+	return nil
+}
+
+func (m *SearchRequest) GetEdgeClusterIDs() []string {
+	if m != nil {
+		return m.EdgeClusterIDs
+	}
+	return nil
+}
+
+//
+// The pair of edge cluster and a cursor that defines the position of the edge cluster in the repository
+// that can later referred to using pagination information.
+type EdgeClusterWithCursor struct {
+	// The edge cluster object
+	Edgecluster *EdgeCluster `protobuf:"bytes,1,opt,name=edgecluster,proto3" json:"edgecluster,omitempty"`
+	// The unique edge cluster identifier
+	EdgeClusterID string `protobuf:"bytes,2,opt,name=edgeClusterID,proto3" json:"edgeClusterID,omitempty"`
+	// The cursor defines the position of the edge cluster in the repository that can be later
+	// referred to using pagination information
+	Cursor               string   `protobuf:"bytes,3,opt,name=cursor,proto3" json:"cursor,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *EdgeClusterWithCursor) Reset()         { *m = EdgeClusterWithCursor{} }
+func (m *EdgeClusterWithCursor) String() string { return proto.CompactTextString(m) }
+func (*EdgeClusterWithCursor) ProtoMessage()    {}
+func (*EdgeClusterWithCursor) Descriptor() ([]byte, []int) {
+	return fileDescriptor_be558aad5309a67f, []int{12}
+}
+
+func (m *EdgeClusterWithCursor) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EdgeClusterWithCursor.Unmarshal(m, b)
+}
+func (m *EdgeClusterWithCursor) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EdgeClusterWithCursor.Marshal(b, m, deterministic)
+}
+func (m *EdgeClusterWithCursor) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EdgeClusterWithCursor.Merge(m, src)
+}
+func (m *EdgeClusterWithCursor) XXX_Size() int {
+	return xxx_messageInfo_EdgeClusterWithCursor.Size(m)
+}
+func (m *EdgeClusterWithCursor) XXX_DiscardUnknown() {
+	xxx_messageInfo_EdgeClusterWithCursor.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EdgeClusterWithCursor proto.InternalMessageInfo
+
+func (m *EdgeClusterWithCursor) GetEdgecluster() *EdgeCluster {
+	if m != nil {
+		return m.Edgecluster
+	}
+	return nil
+}
+
+func (m *EdgeClusterWithCursor) GetEdgeClusterID() string {
+	if m != nil {
+		return m.EdgeClusterID
+	}
+	return ""
+}
+
+func (m *EdgeClusterWithCursor) GetCursor() string {
+	if m != nil {
+		return m.Cursor
+	}
+	return ""
+}
+
+//*
+// Response contains the result of searching for edge clusters
+type SearchResponse struct {
+	// Indicate whether the operation has any error
+	Error Error `protobuf:"varint,1,opt,name=error,proto3,enum=edgecluster.Error" json:"error,omitempty"`
+	// Contains error message if the operation was unsuccessful
+	ErrorMessage string `protobuf:"bytes,2,opt,name=errorMessage,proto3" json:"errorMessage,omitempty"`
+	// Indicates whether more edges exist prior to the set defined by the clients arguments
+	HasPreviousPage bool `protobuf:"varint,3,opt,name=hasPreviousPage,proto3" json:"hasPreviousPage,omitempty"`
+	// Indicates whether more edges exist following the set defined by the clients arguments
+	HasNextPage bool `protobuf:"varint,4,opt,name=hasNextPage,proto3" json:"hasNextPage,omitempty"`
+	// The list contains the edge clusters that matched the search criteria
+	EdgeClusters         []*EdgeClusterWithCursor `protobuf:"bytes,5,rep,name=edgeClusters,proto3" json:"edgeClusters,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
+	XXX_unrecognized     []byte                   `json:"-"`
+	XXX_sizecache        int32                    `json:"-"`
+}
+
+func (m *SearchResponse) Reset()         { *m = SearchResponse{} }
+func (m *SearchResponse) String() string { return proto.CompactTextString(m) }
+func (*SearchResponse) ProtoMessage()    {}
+func (*SearchResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_be558aad5309a67f, []int{13}
+}
+
+func (m *SearchResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SearchResponse.Unmarshal(m, b)
+}
+func (m *SearchResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SearchResponse.Marshal(b, m, deterministic)
+}
+func (m *SearchResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SearchResponse.Merge(m, src)
+}
+func (m *SearchResponse) XXX_Size() int {
+	return xxx_messageInfo_SearchResponse.Size(m)
+}
+func (m *SearchResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_SearchResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SearchResponse proto.InternalMessageInfo
+
+func (m *SearchResponse) GetError() Error {
+	if m != nil {
+		return m.Error
+	}
+	return Error_NO_ERROR
+}
+
+func (m *SearchResponse) GetErrorMessage() string {
+	if m != nil {
+		return m.ErrorMessage
+	}
+	return ""
+}
+
+func (m *SearchResponse) GetHasPreviousPage() bool {
+	if m != nil {
+		return m.HasPreviousPage
+	}
+	return false
+}
+
+func (m *SearchResponse) GetHasNextPage() bool {
+	if m != nil {
+		return m.HasNextPage
+	}
+	return false
+}
+
+func (m *SearchResponse) GetEdgeClusters() []*EdgeClusterWithCursor {
+	if m != nil {
+		return m.EdgeClusters
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterEnum("edgecluster.Error", Error_name, Error_value)
+	proto.RegisterEnum("edgecluster.SortingDirection", SortingDirection_name, SortingDirection_value)
 	proto.RegisterType((*EdgeCluster)(nil), "edgecluster.EdgeCluster")
 	proto.RegisterType((*CreateEdgeClusterRequest)(nil), "edgecluster.CreateEdgeClusterRequest")
 	proto.RegisterType((*CreateEdgeClusterResponse)(nil), "edgecluster.CreateEdgeClusterResponse")
@@ -534,41 +890,66 @@ func init() {
 	proto.RegisterType((*UpdateEdgeClusterResponse)(nil), "edgecluster.UpdateEdgeClusterResponse")
 	proto.RegisterType((*DeleteEdgeClusterRequest)(nil), "edgecluster.DeleteEdgeClusterRequest")
 	proto.RegisterType((*DeleteEdgeClusterResponse)(nil), "edgecluster.DeleteEdgeClusterResponse")
+	proto.RegisterType((*Pagination)(nil), "edgecluster.Pagination")
+	proto.RegisterType((*SortingOptionPair)(nil), "edgecluster.SortingOptionPair")
+	proto.RegisterType((*SearchRequest)(nil), "edgecluster.SearchRequest")
+	proto.RegisterType((*EdgeClusterWithCursor)(nil), "edgecluster.EdgeClusterWithCursor")
+	proto.RegisterType((*SearchResponse)(nil), "edgecluster.SearchResponse")
 }
 
 func init() { proto.RegisterFile("edge-cluster.proto", fileDescriptor_be558aad5309a67f) }
 
 var fileDescriptor_be558aad5309a67f = []byte{
-	// 456 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x54, 0xdd, 0x6e, 0x94, 0x50,
-	0x10, 0x96, 0xb2, 0xd5, 0x76, 0xa8, 0x96, 0x9d, 0x8b, 0x4a, 0xf1, 0xc2, 0x8a, 0xd5, 0x6c, 0x4c,
-	0xdc, 0x8b, 0xf5, 0xce, 0x0b, 0xe3, 0xba, 0x1c, 0xcd, 0xc6, 0x0a, 0xf1, 0x00, 0x51, 0x13, 0x13,
-	0x02, 0x65, 0xb2, 0x69, 0x52, 0x01, 0x0f, 0xd4, 0x2b, 0xdf, 0xc1, 0x37, 0xf0, 0x55, 0x7c, 0x35,
-	0xb3, 0xa7, 0xc4, 0xf0, 0x5b, 0xff, 0xb2, 0x77, 0x9c, 0xe1, 0x9b, 0xf9, 0xce, 0x37, 0xf3, 0xcd,
-	0x01, 0xa4, 0x64, 0x45, 0x8f, 0x4f, 0xcf, 0x2f, 0x8a, 0x92, 0xc4, 0x34, 0x17, 0x59, 0x99, 0xa1,
-	0xb6, 0x8e, 0x55, 0x21, 0xeb, 0x1e, 0x68, 0x2c, 0x59, 0xd1, 0xe2, 0xf2, 0x88, 0x08, 0xa3, 0x34,
-	0xfa, 0x44, 0x86, 0x72, 0xa4, 0x4c, 0x76, 0xb9, 0xfc, 0xb6, 0x04, 0x18, 0x0b, 0x41, 0x51, 0x49,
-	0x35, 0x20, 0xa7, 0xcf, 0x17, 0x54, 0x94, 0x68, 0xc2, 0x4e, 0x49, 0x69, 0x94, 0x96, 0x4b, 0xbb,
-	0xca, 0xf9, 0x75, 0xc6, 0xa7, 0x20, 0x99, 0xaa, 0x0c, 0x63, 0xeb, 0x48, 0x99, 0x68, 0x33, 0x63,
-	0x5a, 0x63, 0x9f, 0xd6, 0x2b, 0xd6, 0xc1, 0xd6, 0x37, 0x05, 0x0e, 0x7b, 0x48, 0x8b, 0x3c, 0x4b,
-	0x0b, 0xc2, 0x09, 0x6c, 0x93, 0x10, 0x99, 0x90, 0x94, 0xb7, 0x66, 0xd8, 0xac, 0xb9, 0xfe, 0xc3,
-	0x2f, 0x01, 0x68, 0xc1, 0x9e, 0xfc, 0x78, 0x43, 0x45, 0x11, 0xad, 0x48, 0x5e, 0x62, 0x97, 0x37,
-	0x62, 0x78, 0x0c, 0x37, 0x6b, 0xd4, 0x4b, 0xdb, 0x50, 0x25, 0xa8, 0x19, 0xb4, 0x9e, 0xc1, 0x01,
-	0xa7, 0x28, 0xe9, 0xe9, 0x41, 0x27, 0x5f, 0xe9, 0xcb, 0xff, 0xa1, 0xc0, 0xed, 0x4e, 0x81, 0x8d,
-	0xe8, 0xa9, 0xcf, 0x44, 0xbd, 0x7a, 0x26, 0xa3, 0xbf, 0x99, 0xc9, 0x57, 0x30, 0x82, 0x3c, 0xe9,
-	0xf7, 0xc1, 0x1f, 0xf5, 0xe0, 0xbf, 0x1c, 0x71, 0x06, 0x87, 0x3d, 0xec, 0x9b, 0x68, 0xa0, 0xf5,
-	0x1c, 0x0c, 0x9b, 0xce, 0xe9, 0xdf, 0x85, 0xae, 0x2f, 0xdb, 0x53, 0x61, 0x13, 0x97, 0x7d, 0x94,
-	0xc3, 0xb6, 0xcc, 0xc1, 0x3d, 0xd8, 0x71, 0xdc, 0x90, 0x71, 0xee, 0x72, 0xfd, 0x1a, 0x6a, 0x70,
-	0x23, 0x70, 0x5e, 0x3b, 0xee, 0x3b, 0x47, 0x57, 0xf0, 0x2e, 0xdc, 0x61, 0xf6, 0x2b, 0x16, 0x2e,
-	0x4e, 0x02, 0xcf, 0x67, 0x3c, 0x9c, 0x9f, 0x70, 0x36, 0xb7, 0x3f, 0x84, 0xec, 0xfd, 0xd2, 0xf3,
-	0x3d, 0x7d, 0x0b, 0x4d, 0x38, 0x68, 0x00, 0x1c, 0xd7, 0x0f, 0x5f, 0xba, 0x81, 0x63, 0xeb, 0x2a,
-	0xee, 0x83, 0xf6, 0x62, 0x6e, 0x87, 0x9c, 0xbd, 0x0d, 0x98, 0xe7, 0xeb, 0xa3, 0xd9, 0x77, 0x15,
-	0xb0, 0xa6, 0xcb, 0x23, 0xf1, 0xe5, 0xec, 0x94, 0x30, 0x86, 0x71, 0x67, 0x63, 0xf1, 0x41, 0x43,
-	0xdc, 0xd0, 0x33, 0x62, 0x3e, 0xfc, 0x1d, 0xac, 0x6a, 0xdd, 0x47, 0xd8, 0x6f, 0xed, 0x10, 0xde,
-	0x6f, 0xa4, 0xf6, 0xaf, 0xa8, 0x79, 0x7c, 0x35, 0xa8, 0xaa, 0x1e, 0xc3, 0xb8, 0x63, 0xb1, 0x96,
-	0x82, 0xa1, 0x05, 0x68, 0x29, 0x18, 0x76, 0x6a, 0x0c, 0xe3, 0x8e, 0x33, 0x5a, 0x1c, 0x43, 0xde,
-	0x6b, 0x71, 0x0c, 0x1a, 0x2c, 0xbe, 0x2e, 0xdf, 0xf9, 0x27, 0x3f, 0x03, 0x00, 0x00, 0xff, 0xff,
-	0x24, 0x2a, 0x1d, 0xaa, 0xfd, 0x05, 0x00, 0x00,
+	// 776 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x56, 0xed, 0x6e, 0xda, 0x48,
+	0x14, 0x8d, 0xf9, 0xda, 0x70, 0x49, 0x08, 0x5c, 0xed, 0x12, 0x87, 0x68, 0x77, 0x91, 0x37, 0x1b,
+	0xa1, 0x48, 0x1b, 0x69, 0xd9, 0x1f, 0x2b, 0xb5, 0x6a, 0x55, 0x8a, 0x9d, 0x08, 0x35, 0x35, 0x74,
+	0x0c, 0x4d, 0x2b, 0x55, 0x42, 0x06, 0x26, 0x60, 0x29, 0xc5, 0x74, 0xc6, 0x44, 0xfd, 0xd1, 0x97,
+	0xe8, 0x33, 0x54, 0x7d, 0x87, 0xbe, 0x43, 0x9f, 0xa2, 0xaf, 0xd0, 0x27, 0xa8, 0x3c, 0x36, 0x60,
+	0x1b, 0xd3, 0x96, 0x4a, 0x91, 0xfa, 0xcf, 0xf7, 0xce, 0x99, 0x73, 0xe6, 0xdc, 0x99, 0xb9, 0x63,
+	0x40, 0x3a, 0x1c, 0xd1, 0x7f, 0x06, 0xd7, 0x33, 0xee, 0x50, 0x76, 0x3a, 0x65, 0xb6, 0x63, 0x63,
+	0xce, 0xcd, 0xf9, 0x29, 0xe5, 0x1e, 0xe4, 0xb4, 0xe1, 0x88, 0x36, 0xbc, 0x10, 0xcb, 0xb0, 0xed,
+	0xd0, 0x89, 0x39, 0x71, 0x9a, 0xaa, 0x2c, 0x55, 0xa4, 0x6a, 0x96, 0x2c, 0x62, 0x44, 0x48, 0x4d,
+	0xcc, 0x97, 0x54, 0x4e, 0x88, 0xbc, 0xf8, 0x56, 0x9e, 0x82, 0xdc, 0x60, 0xd4, 0x74, 0x68, 0x80,
+	0x84, 0xd0, 0x57, 0x33, 0xca, 0x1d, 0xbc, 0x03, 0x42, 0xc9, 0xcf, 0x0a, 0xba, 0x5c, 0x4d, 0x3e,
+	0x0d, 0xa8, 0x9f, 0x06, 0x67, 0x05, 0xc1, 0xca, 0x47, 0x09, 0x0e, 0x62, 0x88, 0xf9, 0xd4, 0x9e,
+	0x70, 0x8a, 0x55, 0x48, 0x53, 0xc6, 0x6c, 0x8f, 0x33, 0x5f, 0xc3, 0x30, 0xa7, 0x3b, 0x42, 0x3c,
+	0x00, 0x2a, 0xb0, 0x23, 0x3e, 0x1e, 0x53, 0xce, 0xcd, 0xd1, 0x7c, 0xed, 0xa1, 0x1c, 0x1e, 0xc1,
+	0x6e, 0x40, 0xba, 0xa9, 0xca, 0x49, 0x01, 0x0a, 0x27, 0xa3, 0x6e, 0x52, 0x9b, 0xb8, 0xb9, 0x0f,
+	0x25, 0x42, 0xcd, 0x61, 0x4c, 0x8d, 0x56, 0xb4, 0xa5, 0x18, 0x6d, 0xe5, 0x9d, 0x04, 0xfb, 0x2b,
+	0x04, 0xb7, 0x52, 0x8b, 0x88, 0xcb, 0xe4, 0x26, 0x2e, 0xdf, 0x80, 0xdc, 0x9d, 0x0e, 0xe3, 0xcf,
+	0xc2, 0x77, 0xf9, 0x8c, 0xaa, 0x27, 0x36, 0x51, 0x7f, 0x2f, 0xc1, 0x41, 0x8c, 0xfc, 0x4f, 0x57,
+	0xa5, 0x07, 0x20, 0xab, 0xf4, 0x9a, 0xfe, 0x78, 0x95, 0x14, 0x0b, 0x0e, 0x62, 0x18, 0x6e, 0xc3,
+	0xa8, 0x32, 0x04, 0x68, 0x9b, 0x23, 0x6b, 0x62, 0x3a, 0x96, 0x3d, 0xc1, 0x5f, 0x21, 0x6d, 0x5e,
+	0xcd, 0xaf, 0x72, 0x96, 0x78, 0x81, 0x9b, 0xbd, 0xb2, 0x18, 0x77, 0x04, 0x41, 0x9a, 0x78, 0x01,
+	0x96, 0x20, 0xd3, 0xa7, 0x57, 0x36, 0xa3, 0xfe, 0x6d, 0xf2, 0x23, 0xb7, 0x89, 0x5c, 0x9b, 0xdc,
+	0x11, 0xf7, 0x27, 0x4d, 0xc4, 0xb7, 0x32, 0x84, 0xa2, 0x61, 0x33, 0xc7, 0x9a, 0x8c, 0x5a, 0x53,
+	0x57, 0xa8, 0x6d, 0x5a, 0x6c, 0xd1, 0x6d, 0xa4, 0x65, 0xb7, 0xc1, 0xbb, 0x90, 0x1d, 0x5a, 0x8c,
+	0x0e, 0x5c, 0x90, 0x90, 0xcb, 0xd7, 0x7e, 0x0f, 0x19, 0xf4, 0x69, 0xd4, 0x39, 0x88, 0x2c, 0xf1,
+	0xca, 0x07, 0x09, 0x76, 0x0d, 0x6a, 0xb2, 0xc1, 0x78, 0x5e, 0xee, 0xff, 0x01, 0xa6, 0x0b, 0x77,
+	0x7e, 0x7f, 0xda, 0x0f, 0xf1, 0x2d, 0xcd, 0x93, 0x00, 0x14, 0xcf, 0x20, 0xcf, 0x83, 0x0b, 0xe6,
+	0x72, 0xa2, 0x92, 0xac, 0xe6, 0x6a, 0x7f, 0xc4, 0x2d, 0x66, 0xe9, 0x89, 0x44, 0x66, 0xe1, 0x31,
+	0xe4, 0x43, 0x5b, 0xcb, 0xe5, 0x64, 0x25, 0x59, 0xcd, 0x92, 0x48, 0x56, 0x79, 0x2b, 0xc1, 0x6f,
+	0x81, 0xcd, 0xbe, 0xb4, 0x9c, 0x71, 0x63, 0xc6, 0xb8, 0xcd, 0xe6, 0x27, 0x71, 0xb0, 0x49, 0x8f,
+	0xf5, 0x07, 0x56, 0x4f, 0x5b, 0x22, 0xee, 0x4e, 0x96, 0x20, 0x33, 0x10, 0x5a, 0xf3, 0x8d, 0xf4,
+	0x22, 0xe5, 0xb3, 0x04, 0xf9, 0x79, 0x39, 0x6f, 0xe5, 0x92, 0x55, 0x61, 0x6f, 0x6c, 0xf2, 0x36,
+	0xa3, 0x37, 0x96, 0x3d, 0xe3, 0x6d, 0x17, 0xe6, 0xae, 0x60, 0x9b, 0x44, 0xd3, 0x58, 0x81, 0xdc,
+	0xd8, 0xe4, 0x3a, 0x7d, 0xed, 0x08, 0x54, 0x4a, 0xa0, 0x82, 0x29, 0x3c, 0x83, 0x9d, 0x80, 0x2b,
+	0x2e, 0xa7, 0xc5, 0x76, 0x29, 0xeb, 0xea, 0xb4, 0x2c, 0x30, 0x09, 0xcd, 0x3b, 0x99, 0x42, 0x5a,
+	0xf8, 0xc0, 0x1d, 0xd8, 0xd6, 0x5b, 0x3d, 0x8d, 0x90, 0x16, 0x29, 0x6c, 0x61, 0x0e, 0x7e, 0xe9,
+	0xea, 0x8f, 0xf4, 0xd6, 0xa5, 0x5e, 0x90, 0xf0, 0x4f, 0x38, 0xd4, 0xd4, 0x73, 0xad, 0xd7, 0xb8,
+	0xe8, 0x1a, 0x1d, 0x8d, 0xf4, 0xea, 0x17, 0x44, 0xab, 0xab, 0xcf, 0x7b, 0xda, 0xb3, 0xa6, 0xd1,
+	0x31, 0x0a, 0x09, 0x2c, 0x43, 0x29, 0x04, 0xd0, 0x5b, 0x9d, 0xde, 0x59, 0xab, 0xab, 0xab, 0x85,
+	0x24, 0xee, 0x41, 0xee, 0x61, 0x5d, 0xed, 0x11, 0xed, 0x49, 0x57, 0x33, 0x3a, 0x85, 0xd4, 0xc9,
+	0xbf, 0x50, 0x88, 0x1e, 0x6a, 0xdc, 0x85, 0x6c, 0xdd, 0x68, 0x68, 0xba, 0xda, 0xd4, 0xcf, 0x0b,
+	0x5b, 0x98, 0x07, 0x50, 0xb5, 0x45, 0x2c, 0xd5, 0x3e, 0x25, 0x01, 0x03, 0x66, 0x0c, 0xca, 0x6e,
+	0xac, 0x01, 0xc5, 0x3e, 0x14, 0x57, 0x5e, 0x54, 0xfc, 0x3b, 0x54, 0x82, 0x75, 0x4f, 0x79, 0xf9,
+	0xf8, 0x5b, 0x30, 0xff, 0x04, 0xbc, 0x80, 0xbd, 0xc8, 0x3b, 0x85, 0x7f, 0x85, 0xa6, 0xc6, 0x3f,
+	0x83, 0xe5, 0xa3, 0xaf, 0x83, 0x7c, 0xf6, 0x3e, 0x14, 0x57, 0x3a, 0x7c, 0xc4, 0xc1, 0xba, 0x07,
+	0x28, 0xe2, 0x60, 0xfd, 0x43, 0xd1, 0x87, 0xe2, 0x4a, 0x73, 0x8d, 0x68, 0xac, 0x6b, 0xdf, 0x11,
+	0x8d, 0xf5, 0x3d, 0xba, 0x0e, 0x19, 0xef, 0xe6, 0x60, 0x39, 0xdc, 0x30, 0x82, 0xdd, 0xa9, 0x7c,
+	0x18, 0x3b, 0xe6, 0x51, 0xf4, 0x33, 0xe2, 0x57, 0xee, 0xbf, 0x2f, 0x01, 0x00, 0x00, 0xff, 0xff,
+	0x62, 0x70, 0xfa, 0xee, 0xe0, 0x09, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -599,6 +980,10 @@ type EdgeClusterServiceClient interface {
 	// request: The request to delete an esiting edge cluster
 	// Returns the result of deleting an exiting edge cluster
 	DeleteEdgeCluster(ctx context.Context, in *DeleteEdgeClusterRequest, opts ...grpc.CallOption) (*DeleteEdgeClusterResponse, error)
+	// Search returns the list of edge clusters that matched the criteria
+	// request: The request contains the search criteria
+	// Returns the list of edge clusters that matched the criteria
+	Search(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponse, error)
 }
 
 type edgeClusterServiceClient struct {
@@ -645,6 +1030,15 @@ func (c *edgeClusterServiceClient) DeleteEdgeCluster(ctx context.Context, in *De
 	return out, nil
 }
 
+func (c *edgeClusterServiceClient) Search(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponse, error) {
+	out := new(SearchResponse)
+	err := c.cc.Invoke(ctx, "/edgecluster.EdgeClusterService/Search", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EdgeClusterServiceServer is the server API for EdgeClusterService service.
 type EdgeClusterServiceServer interface {
 	// CreateEdgeCluster creates a new edge cluster
@@ -663,6 +1057,10 @@ type EdgeClusterServiceServer interface {
 	// request: The request to delete an esiting edge cluster
 	// Returns the result of deleting an exiting edge cluster
 	DeleteEdgeCluster(context.Context, *DeleteEdgeClusterRequest) (*DeleteEdgeClusterResponse, error)
+	// Search returns the list of edge clusters that matched the criteria
+	// request: The request contains the search criteria
+	// Returns the list of edge clusters that matched the criteria
+	Search(context.Context, *SearchRequest) (*SearchResponse, error)
 }
 
 // UnimplementedEdgeClusterServiceServer can be embedded to have forward compatible implementations.
@@ -680,6 +1078,9 @@ func (*UnimplementedEdgeClusterServiceServer) UpdateEdgeCluster(ctx context.Cont
 }
 func (*UnimplementedEdgeClusterServiceServer) DeleteEdgeCluster(ctx context.Context, req *DeleteEdgeClusterRequest) (*DeleteEdgeClusterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteEdgeCluster not implemented")
+}
+func (*UnimplementedEdgeClusterServiceServer) Search(ctx context.Context, req *SearchRequest) (*SearchResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Search not implemented")
 }
 
 func RegisterEdgeClusterServiceServer(s *grpc.Server, srv EdgeClusterServiceServer) {
@@ -758,6 +1159,24 @@ func _EdgeClusterService_DeleteEdgeCluster_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EdgeClusterService_Search_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EdgeClusterServiceServer).Search(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/edgecluster.EdgeClusterService/Search",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EdgeClusterServiceServer).Search(ctx, req.(*SearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _EdgeClusterService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "edgecluster.EdgeClusterService",
 	HandlerType: (*EdgeClusterServiceServer)(nil),
@@ -777,6 +1196,10 @@ var _EdgeClusterService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteEdgeCluster",
 			Handler:    _EdgeClusterService_DeleteEdgeCluster_Handler,
+		},
+		{
+			MethodName: "Search",
+			Handler:    _EdgeClusterService_Search_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
