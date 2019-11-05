@@ -24,6 +24,7 @@ type transportService struct {
 	readEdgeClusterHandler   gokitgrpc.Handler
 	updateEdgeClusterHandler gokitgrpc.Handler
 	deleteEdgeClusterHandler gokitgrpc.Handler
+	searchHandler            gokitgrpc.Handler
 }
 
 var Live bool
@@ -129,6 +130,12 @@ func (service *transportService) setupHandlers() {
 		decodeDeleteEdgeClusterRequest,
 		encodeDeleteEdgeClusterResponse,
 	)
+
+	service.searchHandler = gokitgrpc.NewServer(
+		service.endpointCreatorService.SearchEndpoint(),
+		decodeSearchRequest,
+		encodeSearchResponse,
+	)
 }
 
 // CreateEdgeCluster creates a new edgeCluster
@@ -192,4 +199,19 @@ func (service *transportService) DeleteEdgeCluster(
 
 	return response.(*edgeClusterGRPCContract.DeleteEdgeClusterResponse), nil
 
+}
+
+// Search returns the list  of edge clusters that matched the provided criteria
+// context: Mandatory. The reference to the context
+// request: Mandatory. The request contains the filter criteria to look for existing edge clusters
+// Returns the list of edge clusters that matched the provided criteria
+func (service *transportService) Search(
+	ctx context.Context,
+	request *edgeClusterGRPCContract.SearchRequest) (*edgeClusterGRPCContract.SearchResponse, error) {
+	_, response, err := service.searchHandler.ServeGRPC(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.(*edgeClusterGRPCContract.SearchResponse), nil
 }

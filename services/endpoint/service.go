@@ -134,3 +134,30 @@ func (service *endpointCreatorService) DeleteEdgeClusterEndpoint() endpoint.Endp
 		return service.businessService.DeleteEdgeCluster(ctx, castedRequest)
 	}
 }
+
+// SearchEndpoint creates Search Edge Cluster endpoint
+// Returns the Search Edge Cluster endpoint
+func (service *endpointCreatorService) SearchEndpoint() endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		if ctx == nil {
+			return &business.SearchResponse{
+				Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
+			}, nil
+		}
+
+		if request == nil {
+			return &business.SearchResponse{
+				Err: commonErrors.NewArgumentNilError("request", "request is required"),
+			}, nil
+		}
+
+		castedRequest := request.(*business.SearchRequest)
+		if err := castedRequest.Validate(); err != nil {
+			return &business.SearchResponse{
+				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
+			}, nil
+		}
+
+		return service.businessService.Search(ctx, castedRequest)
+	}
+}

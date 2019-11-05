@@ -1,15 +1,17 @@
-// Package repository implements different repository services required by the edge cluster service
 package memory_test
 
 import (
 	"context"
 	"errors"
+	"math/rand"
 	"testing"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/repository"
 	"github.com/decentralized-cloud/edge-cluster/services/repository/memory"
 	"github.com/lucsky/cuid"
+	"github.com/micro-business/go-core/common"
+	"github.com/thoas/go-funk"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -31,9 +33,9 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 		sut, _ = memory.NewRepositoryService()
 		ctx = context.Background()
 		createRequest = repository.CreateEdgeClusterRequest{
-			TenantID: cuid.New(),
 			EdgeCluster: models.EdgeCluster{
-				Name: cuid.New(),
+				TenantID: cuid.New(),
+				Name:     cuid.New(),
 			}}
 	})
 
@@ -53,6 +55,7 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				response, err := sut.CreateEdgeCluster(ctx, &createRequest)
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusterID).ShouldNot(BeNil())
+				assertEdgeCluster(response.EdgeCluster, createRequest.EdgeCluster)
 			})
 		})
 	})
@@ -71,9 +74,7 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 			It("should return the edge cluster information", func() {
 				response, err := sut.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{EdgeClusterID: edgeClusterID})
 				Ω(err).Should(BeNil())
-				Ω(response.EdgeCluster).ShouldNot(BeNil())
-				Ω(response.TenantID).Should(Equal(createRequest.TenantID))
-				Ω(response.EdgeCluster.Name).Should(Equal(createRequest.EdgeCluster.Name))
+				assertEdgeCluster(response.EdgeCluster, createRequest.EdgeCluster)
 			})
 		})
 
@@ -82,17 +83,17 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				updateRequest := repository.UpdateEdgeClusterRequest{
 					EdgeClusterID: edgeClusterID,
 					EdgeCluster: models.EdgeCluster{
-						Name: cuid.New(),
+						TenantID: cuid.New(),
+						Name:     cuid.New(),
 					}}
 
-				_, err := sut.UpdateEdgeCluster(ctx, &updateRequest)
+				updateResponse, err := sut.UpdateEdgeCluster(ctx, &updateRequest)
 				Ω(err).Should(BeNil())
+				assertEdgeCluster(updateResponse.EdgeCluster, updateRequest.EdgeCluster)
 
-				response, err := sut.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+				readResponse, err := sut.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{EdgeClusterID: edgeClusterID})
 				Ω(err).Should(BeNil())
-				Ω(response.EdgeCluster).ShouldNot(BeNil())
-				Ω(response.TenantID).Should(Equal(createRequest.TenantID))
-				Ω(response.EdgeCluster.Name).Should(Equal(updateRequest.EdgeCluster.Name))
+				assertEdgeCluster(readResponse.EdgeCluster, updateRequest.EdgeCluster)
 			})
 		})
 
@@ -144,7 +145,8 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				updateRequest := repository.UpdateEdgeClusterRequest{
 					EdgeClusterID: edgeClusterID,
 					EdgeCluster: models.EdgeCluster{
-						Name: cuid.New(),
+						TenantID: cuid.New(),
+						Name:     cuid.New(),
 					}}
 				response, err := sut.UpdateEdgeCluster(ctx, &updateRequest)
 				Ω(err).Should(HaveOccurred())
@@ -174,4 +176,178 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 			})
 		})
 	})
+
+	Context("edge clusters exist", func() {
+		var (
+			edgeClusterIDs []string
+			edgeClusters   []models.EdgeCluster
+		)
+
+		BeforeEach(func() {
+			rand.Seed(42)
+			edgeClusters = []models.EdgeCluster{}
+			for idx := 0; idx < rand.Intn(20)+10; idx++ {
+				edgeClusters = append(
+					edgeClusters,
+					models.EdgeCluster{
+						TenantID: cuid.New(),
+						Name:     cuid.New(),
+					})
+			}
+
+			edgeClusterIDs = funk.Map(edgeClusters, func(edgeCluster models.EdgeCluster) string {
+				response, _ := sut.CreateEdgeCluster(ctx, &repository.CreateEdgeClusterRequest{
+					EdgeCluster: models.EdgeCluster{
+						TenantID: edgeCluster.TenantID,
+						Name:     edgeCluster.Name,
+					},
+				})
+
+				return response.EdgeClusterID
+			}).([]string)
+		})
+
+		When("user search for edge clusters without any edge cluster ID provided", func() {
+			It("should return all edge clusters", func() {
+				response, err := sut.Search(ctx, &repository.SearchRequest{})
+				Ω(err).Should(BeNil())
+				Ω(response.EdgeClusters).Should(HaveLen(len(edgeClusterIDs)))
+
+				filteredEdgeClusters := funk.Filter(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) bool {
+					return !funk.Contains(edgeClusterIDs, edgeClusterWithCursor.EdgeClusterID)
+				}).([]models.EdgeClusterWithCursor)
+
+				Ω(filteredEdgeClusters).Should(HaveLen(0))
+			})
+
+			It("should sort the result ascending when no sorting direction is provided", func() {
+				response, _ := sut.Search(ctx, &repository.SearchRequest{})
+				convertedEdgeClusters := funk.Map(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) models.EdgeCluster {
+					return edgeClusterWithCursor.EdgeCluster
+				}).([]models.EdgeCluster)
+
+				for idx := range convertedEdgeClusters[:len(convertedEdgeClusters)-1] {
+					Ω(convertedEdgeClusters[idx].Name < convertedEdgeClusters[idx+1].Name).Should(BeTrue())
+				}
+			})
+
+			It("should sort the result ascending when sorting direction is ascending", func() {
+				response, _ := sut.Search(ctx, &repository.SearchRequest{
+					SortingOptions: []common.SortingOptionPair{
+						common.SortingOptionPair{
+							Name:      "name",
+							Direction: common.Ascending,
+						}}})
+				convertedEdgeClusters := funk.Map(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) models.EdgeCluster {
+					return edgeClusterWithCursor.EdgeCluster
+				}).([]models.EdgeCluster)
+
+				for idx := range convertedEdgeClusters[:len(convertedEdgeClusters)-1] {
+					Ω(convertedEdgeClusters[idx].Name < convertedEdgeClusters[idx+1].Name).Should(BeTrue())
+				}
+			})
+
+			It("should sort the result descending when sorting direction is descending", func() {
+				response, _ := sut.Search(ctx, &repository.SearchRequest{
+					SortingOptions: []common.SortingOptionPair{
+						common.SortingOptionPair{
+							Name:      "name",
+							Direction: common.Descending,
+						}}})
+				convertedEdgeClusters := funk.Map(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) models.EdgeCluster {
+					return edgeClusterWithCursor.EdgeCluster
+				}).([]models.EdgeCluster)
+
+				for idx := range convertedEdgeClusters[:len(convertedEdgeClusters)-1] {
+					Ω(convertedEdgeClusters[idx].Name > convertedEdgeClusters[idx+1].Name).Should(BeTrue())
+				}
+			})
+		})
+
+		When("user search for edge clusters with edge cluster IDs provided", func() {
+			var (
+				numberOfEdgeClusterIDs  int
+				shuffeledEdgeClusterIDs []string
+			)
+
+			BeforeEach(func() {
+				shuffeledEdgeClusterIDs = funk.ShuffleString(edgeClusterIDs)
+				numberOfEdgeClusterIDs = rand.Intn(10)
+			})
+
+			It("should return filtered edge cluster list", func() {
+				response, err := sut.Search(ctx, &repository.SearchRequest{
+					EdgeClusterIDs: shuffeledEdgeClusterIDs[:numberOfEdgeClusterIDs],
+				})
+				Ω(err).Should(BeNil())
+				Ω(response.EdgeClusters).Should(HaveLen(numberOfEdgeClusterIDs))
+
+				filteredEdgeClusters := funk.Filter(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) bool {
+					return !funk.Contains(edgeClusterIDs, edgeClusterWithCursor.EdgeClusterID)
+				}).([]models.EdgeClusterWithCursor)
+
+				Ω(filteredEdgeClusters).Should(HaveLen(0))
+			})
+
+			It("should sort the result ascending when no sorting direction is provided", func() {
+				response, _ := sut.Search(ctx, &repository.SearchRequest{
+					EdgeClusterIDs: shuffeledEdgeClusterIDs[:numberOfEdgeClusterIDs],
+				})
+
+				convertedEdgeClusters := funk.Map(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) models.EdgeCluster {
+					return edgeClusterWithCursor.EdgeCluster
+				}).([]models.EdgeCluster)
+
+				for idx := range convertedEdgeClusters[:len(convertedEdgeClusters)-1] {
+					Ω(convertedEdgeClusters[idx].Name < convertedEdgeClusters[idx+1].Name).Should(BeTrue())
+				}
+			})
+
+			It("should sort the result ascending when sorting direction is ascending", func() {
+				response, _ := sut.Search(ctx, &repository.SearchRequest{
+					SortingOptions: []common.SortingOptionPair{
+						common.SortingOptionPair{
+							Name:      "name",
+							Direction: common.Ascending,
+						},
+					},
+					EdgeClusterIDs: shuffeledEdgeClusterIDs[:numberOfEdgeClusterIDs],
+				})
+
+				convertedEdgeClusters := funk.Map(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) models.EdgeCluster {
+					return edgeClusterWithCursor.EdgeCluster
+				}).([]models.EdgeCluster)
+
+				for idx := range convertedEdgeClusters[:len(convertedEdgeClusters)-1] {
+					Ω(convertedEdgeClusters[idx].Name < convertedEdgeClusters[idx+1].Name).Should(BeTrue())
+				}
+			})
+
+			It("should sort the result descending when sorting direction is descending", func() {
+				response, _ := sut.Search(ctx, &repository.SearchRequest{
+					SortingOptions: []common.SortingOptionPair{
+						common.SortingOptionPair{
+							Name:      "name",
+							Direction: common.Descending,
+						},
+					},
+					EdgeClusterIDs: shuffeledEdgeClusterIDs[:numberOfEdgeClusterIDs],
+				})
+
+				convertedEdgeClusters := funk.Map(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) models.EdgeCluster {
+					return edgeClusterWithCursor.EdgeCluster
+				}).([]models.EdgeCluster)
+
+				for idx := range convertedEdgeClusters[:len(convertedEdgeClusters)-1] {
+					Ω(convertedEdgeClusters[idx].Name > convertedEdgeClusters[idx+1].Name).Should(BeTrue())
+				}
+			})
+		})
+	})
 })
+
+func assertEdgeCluster(edgeCluster, expectedEdgeCluster models.EdgeCluster) {
+	Ω(edgeCluster).ShouldNot(BeNil())
+	Ω(edgeCluster.TenantID).Should(Equal(expectedEdgeCluster.TenantID))
+	Ω(edgeCluster.Name).Should(Equal(expectedEdgeCluster.Name))
+}
