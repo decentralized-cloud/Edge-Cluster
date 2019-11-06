@@ -141,8 +141,8 @@ func (service *repositoryService) Search(
 		return response.EdgeClusters[i].EdgeCluster.Name > response.EdgeClusters[j].EdgeCluster.Name
 	})
 
-	for idx, edgeCluster := range response.EdgeClusters {
-		edgeCluster.Cursor = strconv.Itoa(idx)
+	for idx := range response.EdgeClusters {
+		response.EdgeClusters[idx].Cursor = strconv.Itoa(idx)
 	}
 
 	return response, nil
