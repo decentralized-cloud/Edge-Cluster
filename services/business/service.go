@@ -34,7 +34,6 @@ func (service *businessService) CreateEdgeCluster(
 	ctx context.Context,
 	request *CreateEdgeClusterRequest) (*CreateEdgeClusterResponse, error) {
 	response, err := service.repositoryService.CreateEdgeCluster(ctx, &repository.CreateEdgeClusterRequest{
-		TenantID:    request.TenantID,
 		EdgeCluster: request.EdgeCluster,
 	})
 
@@ -46,6 +45,7 @@ func (service *businessService) CreateEdgeCluster(
 
 	return &CreateEdgeClusterResponse{
 		EdgeClusterID: response.EdgeClusterID,
+		EdgeCluster:   response.EdgeCluster,
 	}, nil
 }
 
@@ -67,7 +67,6 @@ func (service *businessService) ReadEdgeCluster(
 	}
 
 	return &ReadEdgeClusterResponse{
-		TenantID:    response.TenantID,
 		EdgeCluster: response.EdgeCluster,
 	}, nil
 }
@@ -79,7 +78,7 @@ func (service *businessService) ReadEdgeCluster(
 func (service *businessService) UpdateEdgeCluster(
 	ctx context.Context,
 	request *UpdateEdgeClusterRequest) (*UpdateEdgeClusterResponse, error) {
-	_, err := service.repositoryService.UpdateEdgeCluster(ctx, &repository.UpdateEdgeClusterRequest{
+	response, err := service.repositoryService.UpdateEdgeCluster(ctx, &repository.UpdateEdgeClusterRequest{
 		EdgeClusterID: request.EdgeClusterID,
 		EdgeCluster:   request.EdgeCluster,
 	})
@@ -90,7 +89,9 @@ func (service *businessService) UpdateEdgeCluster(
 		}, nil
 	}
 
-	return &UpdateEdgeClusterResponse{}, nil
+	return &UpdateEdgeClusterResponse{
+		EdgeCluster: response.EdgeCluster,
+	}, nil
 }
 
 // DeleteEdgeCluster delete an existing edge cluster
@@ -111,6 +112,33 @@ func (service *businessService) DeleteEdgeCluster(
 	}
 
 	return &DeleteEdgeClusterResponse{}, nil
+}
+
+// Search returns the list of edge clusters that matched the criteria
+// ctx: Mandatory The reference to the context
+// request: Mandatory. The request contains the search criteria
+// Returns the list of edge clusters that matched the criteria
+func (service *businessService) Search(
+	ctx context.Context,
+	request *SearchRequest) (*SearchResponse, error) {
+	result, err := service.repositoryService.Search(ctx, &repository.SearchRequest{
+		Pagination:     request.Pagination,
+		SortingOptions: request.SortingOptions,
+		EdgeClusterIDs: request.EdgeClusterIDs,
+		TenantIDs:      request.TenantIDs,
+	})
+
+	if err != nil {
+		return &SearchResponse{
+			Err: mapRepositoryError(err, ""),
+		}, nil
+	}
+
+	return &SearchResponse{
+		HasPreviousPage: result.HasPreviousPage,
+		HasNextPage:     result.HasNextPage,
+		EdgeClusters:    result.EdgeClusters,
+	}, nil
 }
 
 func mapRepositoryError(err error, edgeClusterID string) error {

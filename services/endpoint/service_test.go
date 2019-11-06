@@ -3,17 +3,18 @@ package endpoint_test
 import (
 	"context"
 	"errors"
+	"math/rand"
 	"strings"
 	"testing"
-
-	gokitendpoint "github.com/go-kit/kit/endpoint"
-	"github.com/lucsky/cuid"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/business"
 	businessMock "github.com/decentralized-cloud/edge-cluster/services/business/mock"
 	"github.com/decentralized-cloud/edge-cluster/services/endpoint"
+	gokitendpoint "github.com/go-kit/kit/endpoint"
 	"github.com/golang/mock/gomock"
+	"github.com/lucsky/cuid"
+	"github.com/micro-business/go-core/common"
 	commonErrors "github.com/micro-business/go-core/system/errors"
 
 	. "github.com/onsi/ginkgo"
@@ -79,9 +80,9 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 			BeforeEach(func() {
 				endpoint = sut.CreateEdgeClusterEndpoint()
 				request = business.CreateEdgeClusterRequest{
-					TenantID: cuid.New(),
 					EdgeCluster: models.EdgeCluster{
-						Name: cuid.New(),
+						TenantID: cuid.New(),
+						Name:     cuid.New(),
 					},
 				}
 
@@ -116,7 +117,6 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				When("endpoint is called with invalid request", func() {
 					It("should return ArgumentNilError", func() {
 						invalidRequest := business.CreateEdgeClusterRequest{
-							TenantID: "",
 							EdgeCluster: models.EdgeCluster{
 								Name: "",
 							}}
@@ -201,7 +201,8 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 
 				response = business.ReadEdgeClusterResponse{
 					EdgeCluster: models.EdgeCluster{
-						Name: cuid.New(),
+						TenantID: cuid.New(),
+						Name:     cuid.New(),
 					},
 				}
 			})
@@ -312,7 +313,8 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				request = business.UpdateEdgeClusterRequest{
 					EdgeClusterID: cuid.New(),
 					EdgeCluster: models.EdgeCluster{
-						Name: cuid.New(),
+						TenantID: cuid.New(),
+						Name:     cuid.New(),
 					}}
 
 				response = business.UpdateEdgeClusterResponse{}
@@ -506,6 +508,146 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						mockBusinessService.
 							EXPECT().
 							DeleteEdgeCluster(gomock.Any(), gomock.Any()).
+							Return(&response, nil)
+
+						returnedResponse, err := endpoint(ctx, &request)
+
+						Ω(err).Should(BeNil())
+						Ω(returnedResponse).Should(Equal(&response))
+					})
+				})
+			})
+		})
+	})
+
+	Context("EndpointCreatorService is instantiated", func() {
+		When("SearchEndpoint is called", func() {
+			It("should return valid function", func() {
+				endpoint := sut.SearchEndpoint()
+				Ω(endpoint).ShouldNot(BeNil())
+			})
+
+			var (
+				endpoint       gokitendpoint.Endpoint
+				edgeClusterIDs []string
+				tenantIDs      []string
+				request        business.SearchRequest
+				response       business.SearchResponse
+			)
+
+			BeforeEach(func() {
+				endpoint = sut.SearchEndpoint()
+				rand.Seed(42)
+				edgeClusterIDs = []string{}
+				for idx := 0; idx < rand.Intn(20)+1; idx++ {
+					edgeClusterIDs = append(edgeClusterIDs, cuid.New())
+				}
+
+				tenantIDs = []string{}
+				for idx := 0; idx < rand.Intn(20)+1; idx++ {
+					tenantIDs = append(tenantIDs, cuid.New())
+				}
+
+				request = business.SearchRequest{
+					Pagination: common.Pagination{
+						After:  cuid.New(),
+						First:  rand.Intn(1000),
+						Before: cuid.New(),
+						Last:   rand.Intn(1000),
+					},
+					SortingOptions: []common.SortingOptionPair{
+						common.SortingOptionPair{
+							Name:      cuid.New(),
+							Direction: common.Ascending,
+						},
+						common.SortingOptionPair{
+							Name:      cuid.New(),
+							Direction: common.Descending,
+						},
+					},
+					EdgeClusterIDs: edgeClusterIDs,
+					TenantIDs:      tenantIDs,
+				}
+
+				edgeClusters := []models.EdgeClusterWithCursor{}
+
+				for idx := 0; idx < rand.Intn(20)+1; idx++ {
+					edgeClusters = append(edgeClusters, models.EdgeClusterWithCursor{
+						EdgeClusterID: cuid.New(),
+						EdgeCluster: models.EdgeCluster{
+							Name: cuid.New(),
+						},
+						Cursor: cuid.New(),
+					})
+				}
+
+				response = business.SearchResponse{EdgeClusters: edgeClusters}
+			})
+
+			Context("SearchEndpoint function is returned", func() {
+				When("endpoint is called with nil context", func() {
+					It("should return ArgumentNilError", func() {
+						returnedResponse, err := endpoint(nil, &request)
+
+						Ω(err).Should(BeNil())
+						Ω(returnedResponse).ShouldNot(BeNil())
+						castedResponse := returnedResponse.(*business.SearchResponse)
+						assertArgumentNilError("ctx", "", castedResponse.Err)
+					})
+				})
+
+				When("endpoint is called with nil request", func() {
+					It("should return ArgumentNilError", func() {
+						returnedResponse, err := endpoint(ctx, nil)
+
+						Ω(err).Should(BeNil())
+						Ω(returnedResponse).ShouldNot(BeNil())
+						castedResponse := returnedResponse.(*business.SearchResponse)
+						assertArgumentNilError("request", "", castedResponse.Err)
+					})
+				})
+
+				When("endpoint is called with valid request", func() {
+					It("should call business service Search method", func() {
+						mockBusinessService.
+							EXPECT().
+							Search(ctx, gomock.Any()).
+							Do(func(_ context.Context, mappedRequest *business.SearchRequest) {
+								Ω(mappedRequest.Pagination).Should(Equal(request.Pagination))
+								Ω(mappedRequest.SortingOptions).Should(Equal(request.SortingOptions))
+								Ω(mappedRequest.EdgeClusterIDs).Should(Equal(request.EdgeClusterIDs))
+								Ω(mappedRequest.TenantIDs).Should(Equal(request.TenantIDs))
+							}).
+							Return(&response, nil)
+
+						returnedResponse, err := endpoint(ctx, &request)
+
+						Ω(err).Should(BeNil())
+						Ω(response).ShouldNot(BeNil())
+						castedResponse := returnedResponse.(*business.SearchResponse)
+						Ω(castedResponse.Err).Should(BeNil())
+					})
+				})
+
+				When("business service Search returns error", func() {
+					It("should return the same error", func() {
+						expectedErr := errors.New(cuid.New())
+						mockBusinessService.
+							EXPECT().
+							Search(gomock.Any(), gomock.Any()).
+							Return(nil, expectedErr)
+
+						_, err := endpoint(ctx, &request)
+
+						Ω(err).Should(Equal(expectedErr))
+					})
+				})
+
+				When("business service Search returns response", func() {
+					It("should return the same response", func() {
+						mockBusinessService.
+							EXPECT().
+							Search(gomock.Any(), gomock.Any()).
 							Return(&response, nil)
 
 						returnedResponse, err := endpoint(ctx, &request)
