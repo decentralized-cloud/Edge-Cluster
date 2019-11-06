@@ -167,6 +167,9 @@ message SearchRequest {
 
   // The unique edge cluster identifiers
   repeated string edgeClusterIDs = 3;
+
+  // The unique tenant identifiers
+  repeated string tenantIDs = 4;
 }
 
 /*

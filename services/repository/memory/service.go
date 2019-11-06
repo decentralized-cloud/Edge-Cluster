@@ -4,6 +4,7 @@ package memory
 import (
 	"context"
 	"sort"
+	"strconv"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/repository"
@@ -109,13 +110,18 @@ func (service *repositoryService) Search(
 		return models.EdgeClusterWithCursor{
 			EdgeClusterID: edgeClusterID,
 			EdgeCluster:   edgeCluster,
-			Cursor:        "Not implemented",
 		}
 	})
 
 	if len(request.EdgeClusterIDs) > 0 {
 		edgeClustersWithCursor = funk.Filter(edgeClustersWithCursor, func(edgeClusterWithCursor models.EdgeClusterWithCursor) bool {
 			return funk.Contains(request.EdgeClusterIDs, edgeClusterWithCursor.EdgeClusterID)
+		})
+	}
+
+	if len(request.TenantIDs) > 0 {
+		edgeClustersWithCursor = funk.Filter(edgeClustersWithCursor, func(edgeClusterWithCursor models.EdgeClusterWithCursor) bool {
+			return funk.Contains(request.TenantIDs, edgeClusterWithCursor.EdgeCluster.TenantID)
 		})
 	}
 
@@ -134,6 +140,10 @@ func (service *repositoryService) Search(
 
 		return response.EdgeClusters[i].EdgeCluster.Name > response.EdgeClusters[j].EdgeCluster.Name
 	})
+
+	for idx, edgeCluster := range response.EdgeClusters {
+		edgeCluster.Cursor = strconv.Itoa(idx)
+	}
 
 	return response, nil
 }
