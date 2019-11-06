@@ -180,17 +180,22 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 	Context("edge clusters exist", func() {
 		var (
 			edgeClusterIDs []string
+			tenantIDs      []string
 			edgeClusters   []models.EdgeCluster
 		)
 
 		BeforeEach(func() {
 			rand.Seed(42)
 			edgeClusters = []models.EdgeCluster{}
+			tenantIDs = []string{}
 			for idx := 0; idx < rand.Intn(20)+10; idx++ {
+				tenantID := cuid.New()
+				tenantIDs = append(tenantIDs, tenantID)
+
 				edgeClusters = append(
 					edgeClusters,
 					models.EdgeCluster{
-						TenantID: cuid.New(),
+						TenantID: tenantID,
 						Name:     cuid.New(),
 					})
 			}
@@ -207,19 +212,7 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 			}).([]string)
 		})
 
-		When("user search for edge clusters without any edge cluster ID provided", func() {
-			It("should return all edge clusters", func() {
-				response, err := sut.Search(ctx, &repository.SearchRequest{})
-				Ω(err).Should(BeNil())
-				Ω(response.EdgeClusters).Should(HaveLen(len(edgeClusterIDs)))
-
-				filteredEdgeClusters := funk.Filter(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) bool {
-					return !funk.Contains(edgeClusterIDs, edgeClusterWithCursor.EdgeClusterID)
-				}).([]models.EdgeClusterWithCursor)
-
-				Ω(filteredEdgeClusters).Should(HaveLen(0))
-			})
-
+		When("user search for edge clusters with/without sorting options", func() {
 			It("should sort the result ascending when no sorting direction is provided", func() {
 				response, _ := sut.Search(ctx, &repository.SearchRequest{})
 				convertedEdgeClusters := funk.Map(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) models.EdgeCluster {
@@ -264,6 +257,20 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 			})
 		})
 
+		When("user search for edge clusters without any edge cluster ID or tenant ID provided", func() {
+			It("should return all edge clusters", func() {
+				response, err := sut.Search(ctx, &repository.SearchRequest{})
+				Ω(err).Should(BeNil())
+				Ω(response.EdgeClusters).Should(HaveLen(len(edgeClusterIDs)))
+
+				filteredEdgeClusters := funk.Filter(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) bool {
+					return !funk.Contains(edgeClusterIDs, edgeClusterWithCursor.EdgeClusterID)
+				}).([]models.EdgeClusterWithCursor)
+
+				Ω(filteredEdgeClusters).Should(HaveLen(0))
+			})
+		})
+
 		When("user search for edge clusters with edge cluster IDs provided", func() {
 			var (
 				numberOfEdgeClusterIDs  int
@@ -288,59 +295,31 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 
 				Ω(filteredEdgeClusters).Should(HaveLen(0))
 			})
+		})
 
-			It("should sort the result ascending when no sorting direction is provided", func() {
-				response, _ := sut.Search(ctx, &repository.SearchRequest{
-					EdgeClusterIDs: shuffeledEdgeClusterIDs[:numberOfEdgeClusterIDs],
-				})
+		When("user search for edge clusters with tenant IDs provided", func() {
+			var (
+				numberOfTenantIDs  int
+				shuffeledTenantIDs []string
+			)
 
-				convertedEdgeClusters := funk.Map(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) models.EdgeCluster {
-					return edgeClusterWithCursor.EdgeCluster
-				}).([]models.EdgeCluster)
-
-				for idx := range convertedEdgeClusters[:len(convertedEdgeClusters)-1] {
-					Ω(convertedEdgeClusters[idx].Name < convertedEdgeClusters[idx+1].Name).Should(BeTrue())
-				}
+			BeforeEach(func() {
+				shuffeledTenantIDs = funk.ShuffleString(tenantIDs)
+				numberOfTenantIDs = rand.Intn(10)
 			})
 
-			It("should sort the result ascending when sorting direction is ascending", func() {
-				response, _ := sut.Search(ctx, &repository.SearchRequest{
-					SortingOptions: []common.SortingOptionPair{
-						common.SortingOptionPair{
-							Name:      "name",
-							Direction: common.Ascending,
-						},
-					},
-					EdgeClusterIDs: shuffeledEdgeClusterIDs[:numberOfEdgeClusterIDs],
+			It("should return filtered edge cluster list", func() {
+				response, err := sut.Search(ctx, &repository.SearchRequest{
+					TenantIDs: shuffeledTenantIDs[:numberOfTenantIDs],
 				})
+				Ω(err).Should(BeNil())
+				Ω(response.EdgeClusters).Should(HaveLen(numberOfTenantIDs))
 
-				convertedEdgeClusters := funk.Map(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) models.EdgeCluster {
-					return edgeClusterWithCursor.EdgeCluster
-				}).([]models.EdgeCluster)
+				filteredEdgeClusters := funk.Filter(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) bool {
+					return !funk.Contains(tenantIDs, edgeClusterWithCursor.EdgeCluster.TenantID)
+				}).([]models.EdgeClusterWithCursor)
 
-				for idx := range convertedEdgeClusters[:len(convertedEdgeClusters)-1] {
-					Ω(convertedEdgeClusters[idx].Name < convertedEdgeClusters[idx+1].Name).Should(BeTrue())
-				}
-			})
-
-			It("should sort the result descending when sorting direction is descending", func() {
-				response, _ := sut.Search(ctx, &repository.SearchRequest{
-					SortingOptions: []common.SortingOptionPair{
-						common.SortingOptionPair{
-							Name:      "name",
-							Direction: common.Descending,
-						},
-					},
-					EdgeClusterIDs: shuffeledEdgeClusterIDs[:numberOfEdgeClusterIDs],
-				})
-
-				convertedEdgeClusters := funk.Map(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) models.EdgeCluster {
-					return edgeClusterWithCursor.EdgeCluster
-				}).([]models.EdgeCluster)
-
-				for idx := range convertedEdgeClusters[:len(convertedEdgeClusters)-1] {
-					Ω(convertedEdgeClusters[idx].Name > convertedEdgeClusters[idx+1].Name).Should(BeTrue())
-				}
+				Ω(filteredEdgeClusters).Should(HaveLen(0))
 			})
 		})
 	})

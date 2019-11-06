@@ -204,6 +204,7 @@ func decodeSearchRequest(
 			Last:   int(castedRequest.Pagination.Last),
 		},
 		EdgeClusterIDs: castedRequest.EdgeClusterIDs,
+		TenantIDs:      castedRequest.TenantIDs,
 		SortingOptions: sortingOptions,
 	}, nil
 }

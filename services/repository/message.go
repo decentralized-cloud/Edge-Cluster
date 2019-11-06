@@ -52,6 +52,7 @@ type SearchRequest struct {
 	Pagination     common.Pagination
 	SortingOptions []common.SortingOptionPair
 	EdgeClusterIDs []string
+	TenantIDs      []string
 }
 
 // SearchResponse contains the list of the tenants that matched the result

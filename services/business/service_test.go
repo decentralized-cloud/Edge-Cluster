@@ -377,6 +377,7 @@ var _ = Describe("Business Service Tests", func() {
 		var (
 			request        business.SearchRequest
 			edgeClusterIDs []string
+			tenantIDs      []string
 		)
 
 		BeforeEach(func() {
@@ -384,6 +385,11 @@ var _ = Describe("Business Service Tests", func() {
 			edgeClusterIDs = []string{}
 			for idx := 0; idx < rand.Intn(20)+1; idx++ {
 				edgeClusterIDs = append(edgeClusterIDs, cuid.New())
+			}
+
+			tenantIDs = []string{}
+			for idx := 0; idx < rand.Intn(20)+1; idx++ {
+				tenantIDs = append(tenantIDs, cuid.New())
 			}
 
 			request = business.SearchRequest{
@@ -404,6 +410,7 @@ var _ = Describe("Business Service Tests", func() {
 					},
 				},
 				EdgeClusterIDs: edgeClusterIDs,
+				TenantIDs:      tenantIDs,
 			}
 		})
 
@@ -417,6 +424,7 @@ var _ = Describe("Business Service Tests", func() {
 							Ω(mappedRequest.Pagination).Should(Equal(request.Pagination))
 							Ω(mappedRequest.SortingOptions).Should(Equal(request.SortingOptions))
 							Ω(mappedRequest.EdgeClusterIDs).Should(Equal(request.EdgeClusterIDs))
+							Ω(mappedRequest.TenantIDs).Should(Equal(request.TenantIDs))
 						}).
 						Return(&repository.SearchResponse{}, nil)
 

@@ -125,6 +125,7 @@ func (service *businessService) Search(
 		Pagination:     request.Pagination,
 		SortingOptions: request.SortingOptions,
 		EdgeClusterIDs: request.EdgeClusterIDs,
+		TenantIDs:      request.TenantIDs,
 	})
 
 	if err != nil {

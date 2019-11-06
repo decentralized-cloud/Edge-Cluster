@@ -530,6 +530,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 			var (
 				endpoint       gokitendpoint.Endpoint
 				edgeClusterIDs []string
+				tenantIDs      []string
 				request        business.SearchRequest
 				response       business.SearchResponse
 			)
@@ -540,6 +541,11 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				edgeClusterIDs = []string{}
 				for idx := 0; idx < rand.Intn(20)+1; idx++ {
 					edgeClusterIDs = append(edgeClusterIDs, cuid.New())
+				}
+
+				tenantIDs = []string{}
+				for idx := 0; idx < rand.Intn(20)+1; idx++ {
+					tenantIDs = append(tenantIDs, cuid.New())
 				}
 
 				request = business.SearchRequest{
@@ -560,6 +566,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						},
 					},
 					EdgeClusterIDs: edgeClusterIDs,
+					TenantIDs:      tenantIDs,
 				}
 
 				edgeClusters := []models.EdgeClusterWithCursor{}
@@ -609,6 +616,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 								Ω(mappedRequest.Pagination).Should(Equal(request.Pagination))
 								Ω(mappedRequest.SortingOptions).Should(Equal(request.SortingOptions))
 								Ω(mappedRequest.EdgeClusterIDs).Should(Equal(request.EdgeClusterIDs))
+								Ω(mappedRequest.TenantIDs).Should(Equal(request.TenantIDs))
 							}).
 							Return(&response, nil)
 
