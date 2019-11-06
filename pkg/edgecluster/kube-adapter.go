@@ -9,8 +9,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-type edgeClusterKubeAdapter struct {
-	adapter KubeAdapter
+// KubeAdapter a struct for grtting metadata information from kubernetes
+type KubeAdapter struct {
+	logger    *zap.Logger
+	NameSpace string
+	PodName   string
 }
 
 func NewEdgeClusterKubeAdapter(logger *zap.Logger) (KubeMonitor, error) {
@@ -18,16 +21,9 @@ func NewEdgeClusterKubeAdapter(logger *zap.Logger) (KubeMonitor, error) {
 		return nil, commonErrors.NewArgumentNilError("logger", "logger is required")
 	}
 
-	return &edgeClusterKubeAdapter.adapter{
+	return &KubeAdapter{
 		logger: logger,
 	}, nil
-}
-
-// KubeAdapter a struct for grtting metadata information from kubernetes
-type KubeAdapter struct {
-	logger    *zap.Logger
-	NameSpace string
-	PodName   string
 }
 
 //GetPods getting available pods in Kubernetes

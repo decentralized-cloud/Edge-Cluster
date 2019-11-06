@@ -1,6 +1,8 @@
 package edgecluster
 
 import (
+	"context"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -10,16 +12,19 @@ type EdgeClusterAdapter interface {
 
 	//Create create a new edge cluster.
 	//ClientSet: kubernetes client object for create operation
-	Create(clientSet *kubernetes.Clientset) error
+	Create(ctx context.Context, clientSet *kubernetes.Clientset) error
+
 	//UpdateWithRetry update an existing cluster.
 	//ClientSet: kubernetes client object for update operation
-	UpdateWithRetry(clientSet *kubernetes.Clientset) error
+	UpdateWithRetry(ctx context.Context, clientSet *kubernetes.Clientset) error
+
 	//Replace replace an existing cluster.
 	//ClientSet: kubernetes client object for replace operation
-	Replace(clientSet *kubernetes.Clientset) error
+	//Replace(ctx context.Context, clientSet *kubernetes.Clientset) error
+
 	//Delete delete an existing cluster.
 	//ClientSet: kubernetes client object for delete operation
-	Delete(clientSet *kubernetes.Clientset) error
+	Delete(ctx context.Context, clientSet *kubernetes.Clientset) error
 }
 
 // KubeMonitor microbusiness Kubernetes interface for monitoring

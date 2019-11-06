@@ -1,6 +1,8 @@
 package edgecluster
 
 import (
+	"context"
+
 	commonErrors "github.com/micro-business/go-core/system/errors"
 	"go.uber.org/zap"
 	apiv1 "k8s.io/api/core/v1"
@@ -9,20 +11,6 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 	"k8s.io/client-go/util/retry"
 )
-
-type edgeClusterService struct {
-	service EdgeClusterServiceDetail
-}
-
-func NewEdgeClusterService(logger *zap.Logger) (EdgeClusterAdapter, error) {
-	if logger == nil {
-		return nil, commonErrors.NewArgumentNilError("logger", "logger is required")
-	}
-
-	return &edgeClusterService.service{
-		logger: logger,
-	}, nil
-}
 
 //EdgeClusterServiceDetail micro business adapter for service
 type EdgeClusterServiceDetail struct {
@@ -39,8 +27,18 @@ type EdgeClusterServiceDetail struct {
 	LabelName      string
 }
 
+func NewEdgeClusterService(logger *zap.Logger) (EdgeClusterAdapter, error) {
+	if logger == nil {
+		return nil, commonErrors.NewArgumentNilError("logger", "logger is required")
+	}
+
+	return &EdgeClusterServiceDetail{
+		logger: logger,
+	}, nil
+}
+
 //Create service
-func (edge EdgeClusterServiceDetail) Create(clientSet *kubernetes.Clientset) error {
+func (edge EdgeClusterServiceDetail) Create(ctx context.Context, clientSet *kubernetes.Clientset) error {
 	edge.logger.Info("call Create from service")
 
 	serviceDeployment := clientSet.CoreV1().Services(apiv1.NamespaceDefault)
@@ -57,7 +55,7 @@ func (edge EdgeClusterServiceDetail) Create(clientSet *kubernetes.Clientset) err
 }
 
 //Update service
-func (edge EdgeClusterServiceDetail) UpdateWithRetry(clientSet *kubernetes.Clientset) error {
+func (edge EdgeClusterServiceDetail) UpdateWithRetry(ctx context.Context, clientSet *kubernetes.Clientset) error {
 	edge.logger.Info("call Update from service")
 
 	updateClient := clientSet.AppsV1().Deployments(apiv1.NamespaceDefault)
@@ -85,7 +83,7 @@ func (edge EdgeClusterServiceDetail) UpdateWithRetry(clientSet *kubernetes.Clien
 }
 
 //Delete service
-func (edge EdgeClusterServiceDetail) Delete(clientSet *kubernetes.Clientset) error {
+func (edge EdgeClusterServiceDetail) Delete(ctx context.Context, clientSet *kubernetes.Clientset) error {
 	edge.logger.Info("call Delete from service")
 
 	deleteClient := clientSet.AppsV1().Deployments(apiv1.NamespaceDefault)
@@ -98,6 +96,7 @@ func (edge EdgeClusterServiceDetail) Delete(clientSet *kubernetes.Clientset) err
 	return err
 }
 
+//PopulateDeploymentConfigValue create a spec object for creating a service in kubernetes
 func (edge EdgeClusterServiceDetail) populateDeploymentConfigValue() *apiv1.Service {
 	service := &apiv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
