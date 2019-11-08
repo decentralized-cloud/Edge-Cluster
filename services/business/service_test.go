@@ -9,6 +9,8 @@ import (
 
 	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/business"
+	edgeClusterTypes "github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
+	edgeClusterFactoryMock "github.com/decentralized-cloud/edge-cluster/services/edgecluster/types/mock"
 	repository "github.com/decentralized-cloud/edge-cluster/services/repository"
 	repsoitoryMock "github.com/decentralized-cloud/edge-cluster/services/repository/mock"
 	"github.com/golang/mock/gomock"
@@ -27,17 +29,37 @@ func TestBusinessService(t *testing.T) {
 
 var _ = Describe("Business Service Tests", func() {
 	var (
-		mockCtrl              *gomock.Controller
-		sut                   business.BusinessContract
-		mockRepositoryService *repsoitoryMock.MockRepositoryContract
-		ctx                   context.Context
+		mockCtrl                          *gomock.Controller
+		sut                               business.BusinessContract
+		mockRepositoryService             *repsoitoryMock.MockRepositoryContract
+		mockEdgeClusterProvisionerService *edgeClusterFactoryMock.MockEdgeClusterProvisionerContract
+		mockEdgeClusterFactoryService     *edgeClusterFactoryMock.MockEdgeClusterFactoryContract
+		ctx                               context.Context
 	)
 
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 
 		mockRepositoryService = repsoitoryMock.NewMockRepositoryContract(mockCtrl)
-		sut, _ = business.NewBusinessService(mockRepositoryService)
+
+		mockEdgeClusterProvisionerService = edgeClusterFactoryMock.NewMockEdgeClusterProvisionerContract(mockCtrl)
+		mockEdgeClusterProvisionerService.
+			EXPECT().
+			NewProvision(ctx, gomock.Any()).
+			Return(&edgeClusterTypes.NewProvisionResponse{}, nil).
+			AnyTimes()
+
+		mockEdgeClusterFactoryService = edgeClusterFactoryMock.NewMockEdgeClusterFactoryContract(mockCtrl)
+		mockEdgeClusterFactoryService.
+			EXPECT().
+			Create(ctx, edgeClusterTypes.K3S).
+			Return(mockEdgeClusterProvisionerService, nil).
+			AnyTimes()
+
+		sut, _ = business.NewBusinessService(
+			mockRepositoryService,
+			mockEdgeClusterFactoryService,
+		)
 		ctx = context.Background()
 	})
 
@@ -48,15 +70,29 @@ var _ = Describe("Business Service Tests", func() {
 	Context("user tries to instantiate BusinessService", func() {
 		When("edge cluster repository service is not provided and NewBusinessService is called", func() {
 			It("should return ArgumentNilError", func() {
-				service, err := business.NewBusinessService(nil)
+				service, err := business.NewBusinessService(
+					nil,
+					mockEdgeClusterFactoryService)
 				Ω(service).Should(BeNil())
 				assertArgumentNilError("repositoryService", "", err)
 			})
 		})
 
+		When("edge cluster factory service is not provided and NewBusinessService is called", func() {
+			It("should return ArgumentNilError", func() {
+				service, err := business.NewBusinessService(
+					mockRepositoryService,
+					nil)
+				Ω(service).Should(BeNil())
+				assertArgumentNilError("edgeClusterFactoryService", "", err)
+			})
+		})
+
 		When("all dependencies are resolved and NewBusinessService is called", func() {
 			It("should instantiate the new BusinessService", func() {
-				service, err := business.NewBusinessService(mockRepositoryService)
+				service, err := business.NewBusinessService(
+					mockRepositoryService,
+					mockEdgeClusterFactoryService)
 				Ω(err).Should(BeNil())
 				Ω(service).ShouldNot(BeNil())
 			})
@@ -82,15 +118,19 @@ var _ = Describe("Business Service Tests", func() {
 					mockRepositoryService.
 						EXPECT().
 						CreateEdgeCluster(ctx, gomock.Any()).
-						Do(func(_ context.Context, mappedRequest *repository.CreateEdgeClusterRequest) {
-							Ω(mappedRequest.EdgeCluster).Should(Equal(request.EdgeCluster))
-						}).
-						Return(&repository.CreateEdgeClusterResponse{
-							EdgeClusterID: cuid.New(),
-							EdgeCluster: models.EdgeCluster{
-								TenantID: cuid.New(),
-								Name:     cuid.New(),
-							}}, nil)
+						DoAndReturn(
+							func(
+								_ context.Context,
+								mappedRequest *repository.CreateEdgeClusterRequest) (*repository.CreateEdgeClusterResponse, error) {
+								Ω(mappedRequest.EdgeCluster).Should(Equal(request.EdgeCluster))
+
+								return &repository.CreateEdgeClusterResponse{
+									EdgeClusterID: cuid.New(),
+									EdgeCluster: models.EdgeCluster{
+										TenantID: cuid.New(),
+										Name:     cuid.New(),
+									}}, nil
+							})
 
 					response, err := sut.CreateEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
@@ -168,10 +208,17 @@ var _ = Describe("Business Service Tests", func() {
 					mockRepositoryService.
 						EXPECT().
 						ReadEdgeCluster(ctx, gomock.Any()).
-						Do(func(_ context.Context, mappedRequest *repository.ReadEdgeClusterRequest) {
-							Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
-						}).
-						Return(&repository.ReadEdgeClusterResponse{EdgeCluster: models.EdgeCluster{Name: cuid.New()}}, nil)
+						DoAndReturn(
+							func(
+								_ context.Context,
+								mappedRequest *repository.ReadEdgeClusterRequest) (*repository.ReadEdgeClusterResponse, error) {
+								Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
+
+								return &repository.ReadEdgeClusterResponse{
+									EdgeCluster: models.EdgeCluster{
+										Name: cuid.New(),
+									}}, nil
+							})
 
 					response, err := sut.ReadEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
@@ -242,11 +289,15 @@ var _ = Describe("Business Service Tests", func() {
 					mockRepositoryService.
 						EXPECT().
 						UpdateEdgeCluster(ctx, gomock.Any()).
-						Do(func(_ context.Context, mappedRequest *repository.UpdateEdgeClusterRequest) {
-							Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
-							Ω(mappedRequest.EdgeCluster.Name).Should(Equal(request.EdgeCluster.Name))
-						}).
-						Return(&repository.UpdateEdgeClusterResponse{}, nil)
+						DoAndReturn(
+							func(
+								_ context.Context,
+								mappedRequest *repository.UpdateEdgeClusterRequest) (*repository.UpdateEdgeClusterResponse, error) {
+								Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
+								Ω(mappedRequest.EdgeCluster.Name).Should(Equal(request.EdgeCluster.Name))
+
+								return &repository.UpdateEdgeClusterResponse{}, nil
+							})
 
 					response, err := sut.UpdateEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
@@ -319,10 +370,13 @@ var _ = Describe("Business Service Tests", func() {
 					mockRepositoryService.
 						EXPECT().
 						DeleteEdgeCluster(ctx, gomock.Any()).
-						Do(func(_ context.Context, mappedRequest *repository.DeleteEdgeClusterRequest) {
-							Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
-						}).
-						Return(&repository.DeleteEdgeClusterResponse{}, nil)
+						DoAndReturn(
+							func(
+								_ context.Context,
+								mappedRequest *repository.DeleteEdgeClusterRequest) (*repository.DeleteEdgeClusterResponse, error) {
+								Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
+								return &repository.DeleteEdgeClusterResponse{}, nil
+							})
 
 					response, err := sut.DeleteEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
@@ -420,13 +474,17 @@ var _ = Describe("Business Service Tests", func() {
 					mockRepositoryService.
 						EXPECT().
 						Search(ctx, gomock.Any()).
-						Do(func(_ context.Context, mappedRequest *repository.SearchRequest) {
-							Ω(mappedRequest.Pagination).Should(Equal(request.Pagination))
-							Ω(mappedRequest.SortingOptions).Should(Equal(request.SortingOptions))
-							Ω(mappedRequest.EdgeClusterIDs).Should(Equal(request.EdgeClusterIDs))
-							Ω(mappedRequest.TenantIDs).Should(Equal(request.TenantIDs))
-						}).
-						Return(&repository.SearchResponse{}, nil)
+						DoAndReturn(
+							func(
+								_ context.Context,
+								mappedRequest *repository.SearchRequest) (*repository.SearchResponse, error) {
+								Ω(mappedRequest.Pagination).Should(Equal(request.Pagination))
+								Ω(mappedRequest.SortingOptions).Should(Equal(request.SortingOptions))
+								Ω(mappedRequest.EdgeClusterIDs).Should(Equal(request.EdgeClusterIDs))
+								Ω(mappedRequest.TenantIDs).Should(Equal(request.TenantIDs))
+
+								return &repository.SearchResponse{}, nil
+							})
 
 					response, err := sut.Search(ctx, &request)
 					Ω(err).Should(BeNil())
