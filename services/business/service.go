@@ -3,6 +3,7 @@ package business
 
 import (
 	"context"
+	"strings"
 
 	edgeClusterTypes "github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	"github.com/decentralized-cloud/edge-cluster/services/repository"
@@ -51,12 +52,13 @@ func (service *businessService) CreateEdgeCluster(
 	_, err = edgeClusterProvisioner.NewProvision(
 		ctx,
 		&edgeClusterTypes.NewProvisionRequest{
-			Name:               request.EdgeCluster.Name,
-			NameSpace:          "",
-			ContainerIpAddress: "192.168.1.240",
+			Name:               strings.ToLower(request.EdgeCluster.Name),
+			NameSpace:          "test1",
+			ContainerIpAddress: "10.0.0.230",
 			ServicePort:        6443,
 			TargetPort:         6443,
 		})
+
 	if err != nil {
 		return nil, NewUnknownErrorWithError("Failed to provision egde cluster", err)
 	}

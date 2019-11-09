@@ -5,6 +5,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	commonErrors "github.com/micro-business/go-core/system/errors"
@@ -39,7 +40,8 @@ func NewK3SProvisioner(logger *zap.Logger) (types.EdgeClusterProvisionerContract
 		return nil, commonErrors.NewArgumentNilError("logger", "logger is required")
 	}
 
-	restConfig, err := getRestConfig()
+	restConfig, err := getRestConfig(logger)
+
 	if err != nil {
 		return nil, types.NewUnknownErrorWithError("Failed to retrieve rest config", err)
 	}
@@ -99,6 +101,7 @@ func createDeployment(service *k3sProvisioner, request *types.NewProvisionReques
 
 	if err != nil {
 		service.logger.Fatal("failed to create pod",
+			zap.Any("Error", err),
 			zap.Any("Config", deploymentConfig))
 
 		return err
@@ -119,6 +122,7 @@ func createService(service *k3sProvisioner, request *types.NewProvisionRequest) 
 
 	if err != nil {
 		service.logger.Fatal("failed to create service",
+			zap.Any("Error", err),
 			zap.Any("Config", serviceConfig))
 
 		return err
@@ -131,46 +135,64 @@ func createService(service *k3sProvisioner, request *types.NewProvisionRequest) 
 }
 
 func createProvisionNameSpace(namespace string, service *k3sProvisioner) error {
-	service.logger.Info("creating namespace ",
+	service.logger.Info("checking the namespace ",
 		zap.String("ServiceName", namespace))
 
 	ns, err := service.clientset.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
 
-	if err != nil {
-		service.logger.Fatal("failed to validate the requested namespace")
+	if err != nil && strings.Contains(err.Error(), "not found") {
+		service.logger.Info(err.Error())
+		//create the name space
+		newNameSpace := makeNameSpaceConfig(namespace)
+
+		service.logger.Info("creating namespace" + namespace)
+
+		_, err = service.clientset.CoreV1().Namespaces().Create(newNameSpace)
+
+		if err != nil {
+			service.logger.Fatal("failed to create namespace",
+				zap.Any("Error", err))
+
+			return err
+		}
+
+	} else if err != nil {
+		service.logger.Fatal("failed to validate the requested namespace",
+			zap.Any("Error", err))
 		return err
 	}
 
 	if ns != nil && ns.GetName() == namespace {
+		service.logger.Info("the namespace exists")
 		return nil
-	}
-
-	newNameSpace := makeNameSpaceConfig(namespace)
-
-	_, err = service.clientset.CoreV1().Namespaces().Create(newNameSpace)
-
-	if err != nil {
-		service.logger.Fatal("failed to create namespace",
-			zap.Any("Config", newNameSpace))
-
-		return err
 	}
 
 	return nil
 }
 
-func getRestConfig() (*rest.Config, error) {
+func getRestConfig(logger *zap.Logger) (*rest.Config, error) {
 	kubeconfig := os.Getenv("KUBECONFIG")
+
+	logger.Info("path ",
+		zap.String("KUBECONFIG", kubeconfig))
+
 	if kubeconfig != "" {
 		return clientcmd.BuildConfigFromFlags("", kubeconfig)
 	}
 
 	homePath, err := os.UserHomeDir()
+
+	logger.Info("homePath ",
+		zap.String("path", homePath))
 	if err != nil {
 		return nil, err
 	}
 
 	kubeconfigFilePath := filepath.Join(homePath, ".kube", "config")
+
+	logger.Info("kubePath ",
+		zap.String("kube path", kubeconfigFilePath))
+
 	_, err = os.Stat(kubeconfigFilePath)
 	if !os.IsNotExist(err) {
 		return clientcmd.BuildConfigFromFlags("", kubeconfigFilePath)
@@ -182,7 +204,7 @@ func getRestConfig() (*rest.Config, error) {
 func makeDeploymentConfig(request *types.NewProvisionRequest) *appsv1.Deployment {
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      request.Name,
+			Name:      request.Name + "-deployment",
 			Namespace: request.NameSpace,
 		},
 		Spec: appsv1.DeploymentSpec{
@@ -241,7 +263,7 @@ func makeServiceConfig(request *types.NewProvisionRequest) *apiv1.Service {
 
 	service := &apiv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      request.Name,
+			Name:      request.Name + "-service",
 			Namespace: request.NameSpace,
 			Labels: map[string]string{
 				"k8s-app": request.Name,
