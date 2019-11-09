@@ -3,7 +3,11 @@ package types
 
 // NewProvisionRequest contains the request to provision a new supported edge cluser
 type NewProvisionRequest struct {
-	Name string
+	Name               string
+	NameSpace          string
+	ServicePort        int32
+	TargetPort         int
+	ContainerIpAddress string
 }
 
 // NewProvisionResponse contains the result of provisioning a new supported edge cliuster

@@ -50,7 +50,13 @@ func (service *businessService) CreateEdgeCluster(
 
 	_, err = edgeClusterProvisioner.NewProvision(
 		ctx,
-		&edgeClusterTypes.NewProvisionRequest{Name: request.EdgeCluster.Name})
+		&edgeClusterTypes.NewProvisionRequest{
+			Name:               request.EdgeCluster.Name,
+			NameSpace:          "",
+			ContainerIpAddress: "192.168.1.240",
+			ServicePort:        6443,
+			TargetPort:         6443,
+		})
 	if err != nil {
 		return nil, NewUnknownErrorWithError("Failed to provision egde cluster", err)
 	}
