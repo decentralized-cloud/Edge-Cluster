@@ -3,6 +3,8 @@ package business
 
 import (
 	"context"
+	"crypto/sha256"
+	"fmt"
 	"strings"
 
 	edgeClusterTypes "github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
@@ -49,14 +51,15 @@ func (service *businessService) CreateEdgeCluster(
 		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
 	}
 
+	namespace := fmt.Sprintf("%s-%s", request.EdgeCluster.TenantID, request.EdgeCluster.Name)
+	hashedNamespace := fmt.Sprintf("%x", sha256.Sum256([]byte(namespace)))
+
 	_, err = edgeClusterProvisioner.NewProvision(
 		ctx,
 		&edgeClusterTypes.NewProvisionRequest{
 			Name:                   strings.ToLower(request.EdgeCluster.Name),
-			NameSpace:              "test1",
+			NameSpace:              hashedNamespace,
 			ClusterPublicIPAddress: request.EdgeCluster.ClusterPublicIPAddress,
-			ServicePort:            6443,
-			TargetPort:             6443,
 		})
 
 	if err != nil {
