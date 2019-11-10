@@ -3,6 +3,7 @@ package models
 
 import (
 	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 )
 
 // Validate validates the EdgeCluster and return error if the validation failes
@@ -13,5 +14,7 @@ func (val EdgeCluster) Validate() error {
 		validation.Field(&val.TenantID, validation.Required),
 		// Name cannot be empty
 		validation.Field(&val.Name, validation.Required),
+		// ClusterIP cannot be empty and must follow IP v4 format
+		validation.Field(&val.ClusterPublicIPAddress, validation.Required, is.IPv4),
 	)
 }

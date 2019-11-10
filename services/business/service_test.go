@@ -107,8 +107,9 @@ var _ = Describe("Business Service Tests", func() {
 		BeforeEach(func() {
 			request = business.CreateEdgeClusterRequest{
 				EdgeCluster: models.EdgeCluster{
-					TenantID: cuid.New(),
-					Name:     cuid.New(),
+					TenantID:               cuid.New(),
+					Name:                   cuid.New(),
+					ClusterPublicIPAddress: cuid.New(),
 				}}
 		})
 
@@ -127,8 +128,9 @@ var _ = Describe("Business Service Tests", func() {
 								return &repository.CreateEdgeClusterResponse{
 									EdgeClusterID: cuid.New(),
 									EdgeCluster: models.EdgeCluster{
-										TenantID: cuid.New(),
-										Name:     cuid.New(),
+										TenantID:               cuid.New(),
+										Name:                   cuid.New(),
+										ClusterPublicIPAddress: cuid.New(),
 									}}, nil
 							})
 
@@ -170,8 +172,9 @@ var _ = Describe("Business Service Tests", func() {
 						expectedResponse := repository.CreateEdgeClusterResponse{
 							EdgeClusterID: cuid.New(),
 							EdgeCluster: models.EdgeCluster{
-								TenantID: cuid.New(),
-								Name:     cuid.New(),
+								TenantID:               cuid.New(),
+								Name:                   cuid.New(),
+								ClusterPublicIPAddress: cuid.New(),
 							}}
 
 						mockRepositoryService.
@@ -216,7 +219,9 @@ var _ = Describe("Business Service Tests", func() {
 
 								return &repository.ReadEdgeClusterResponse{
 									EdgeCluster: models.EdgeCluster{
-										Name: cuid.New(),
+										Name:                   cuid.New(),
+										TenantID:               cuid.New(),
+										ClusterPublicIPAddress: cuid.New(),
 									}}, nil
 							})
 
@@ -279,7 +284,11 @@ var _ = Describe("Business Service Tests", func() {
 		BeforeEach(func() {
 			request = business.UpdateEdgeClusterRequest{
 				EdgeClusterID: cuid.New(),
-				EdgeCluster:   models.EdgeCluster{Name: cuid.New()},
+				EdgeCluster: models.EdgeCluster{
+					Name:                   cuid.New(),
+					TenantID:               cuid.New(),
+					ClusterPublicIPAddress: cuid.New(),
+				},
 			}
 		})
 
@@ -295,6 +304,8 @@ var _ = Describe("Business Service Tests", func() {
 								mappedRequest *repository.UpdateEdgeClusterRequest) (*repository.UpdateEdgeClusterResponse, error) {
 								Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
 								Ω(mappedRequest.EdgeCluster.Name).Should(Equal(request.EdgeCluster.Name))
+								Ω(mappedRequest.EdgeCluster.TenantID).Should(Equal(request.EdgeCluster.TenantID))
+								Ω(mappedRequest.EdgeCluster.ClusterPublicIPAddress).Should(Equal(request.EdgeCluster.ClusterPublicIPAddress))
 
 								return &repository.UpdateEdgeClusterResponse{}, nil
 							})
@@ -337,7 +348,9 @@ var _ = Describe("Business Service Tests", func() {
 				It("should return expected details", func() {
 					expectedResponse := repository.UpdateEdgeClusterResponse{
 						EdgeCluster: models.EdgeCluster{
-							Name: cuid.New(),
+							Name:                   cuid.New(),
+							TenantID:               cuid.New(),
+							ClusterPublicIPAddress: cuid.New(),
 						}}
 					mockRepositoryService.
 						EXPECT().
@@ -514,8 +527,9 @@ var _ = Describe("Business Service Tests", func() {
 						edgeClusters = append(edgeClusters, models.EdgeClusterWithCursor{
 							EdgeClusterID: cuid.New(),
 							EdgeCluster: models.EdgeCluster{
-								TenantID: cuid.New(),
-								Name:     cuid.New(),
+								TenantID:               cuid.New(),
+								Name:                   cuid.New(),
+								ClusterPublicIPAddress: cuid.New(),
 							},
 							Cursor: cuid.New(),
 						})
@@ -588,4 +602,5 @@ func assertEdgeCluster(edgeCluster, expectedEdgeCluster models.EdgeCluster) {
 	Ω(edgeCluster).ShouldNot(BeNil())
 	Ω(edgeCluster.TenantID).Should(Equal(expectedEdgeCluster.TenantID))
 	Ω(edgeCluster.Name).Should(Equal(expectedEdgeCluster.Name))
+	Ω(edgeCluster.ClusterPublicIPAddress).Should(Equal(expectedEdgeCluster.ClusterPublicIPAddress))
 }

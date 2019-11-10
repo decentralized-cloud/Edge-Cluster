@@ -23,8 +23,9 @@ func decodeCreateEdgeClusterRequest(
 
 	return &business.CreateEdgeClusterRequest{
 		EdgeCluster: models.EdgeCluster{
-			TenantID: castedRequest.EdgeCluster.TenantID,
-			Name:     castedRequest.EdgeCluster.Name,
+			TenantID:               castedRequest.EdgeCluster.TenantID,
+			Name:                   castedRequest.EdgeCluster.Name,
+			ClusterPublicIPAddress: castedRequest.EdgeCluster.ClusterPublicIPAddress,
 		}}, nil
 }
 
@@ -42,8 +43,9 @@ func encodeCreateEdgeClusterResponse(
 			Error:         edgeClusterGRPCContract.Error_NO_ERROR,
 			EdgeClusterID: castedResponse.EdgeClusterID,
 			EdgeCluster: &edgeClusterGRPCContract.EdgeCluster{
-				TenantID: castedResponse.EdgeCluster.TenantID,
-				Name:     castedResponse.EdgeCluster.Name,
+				TenantID:               castedResponse.EdgeCluster.TenantID,
+				Name:                   castedResponse.EdgeCluster.Name,
+				ClusterPublicIPAddress: castedResponse.EdgeCluster.ClusterPublicIPAddress,
 			},
 		}, nil
 	}
@@ -81,8 +83,9 @@ func encodeReadEdgeClusterResponse(
 		return &edgeClusterGRPCContract.ReadEdgeClusterResponse{
 			Error: edgeClusterGRPCContract.Error_NO_ERROR,
 			EdgeCluster: &edgeClusterGRPCContract.EdgeCluster{
-				TenantID: castedResponse.EdgeCluster.TenantID,
-				Name:     castedResponse.EdgeCluster.Name,
+				TenantID:               castedResponse.EdgeCluster.TenantID,
+				Name:                   castedResponse.EdgeCluster.Name,
+				ClusterPublicIPAddress: castedResponse.EdgeCluster.ClusterPublicIPAddress,
 			},
 		}, nil
 	}
@@ -105,8 +108,9 @@ func decodeUpdateEdgeClusterRequest(
 	return &business.UpdateEdgeClusterRequest{
 		EdgeClusterID: castedRequest.EdgeClusterID,
 		EdgeCluster: models.EdgeCluster{
-			TenantID: castedRequest.EdgeCluster.TenantID,
-			Name:     castedRequest.EdgeCluster.Name,
+			TenantID:               castedRequest.EdgeCluster.TenantID,
+			Name:                   castedRequest.EdgeCluster.Name,
+			ClusterPublicIPAddress: castedRequest.EdgeCluster.ClusterPublicIPAddress,
 		}}, nil
 }
 
@@ -123,8 +127,9 @@ func encodeUpdateEdgeClusterResponse(
 		return &edgeClusterGRPCContract.UpdateEdgeClusterResponse{
 			Error: edgeClusterGRPCContract.Error_NO_ERROR,
 			EdgeCluster: &edgeClusterGRPCContract.EdgeCluster{
-				TenantID: castedResponse.EdgeCluster.TenantID,
-				Name:     castedResponse.EdgeCluster.Name,
+				TenantID:               castedResponse.EdgeCluster.TenantID,
+				Name:                   castedResponse.EdgeCluster.Name,
+				ClusterPublicIPAddress: castedResponse.EdgeCluster.ClusterPublicIPAddress,
 			},
 		}, nil
 	}
@@ -226,8 +231,9 @@ func encodeSearchResponse(
 				return &edgeClusterGRPCContract.EdgeClusterWithCursor{
 					EdgeClusterID: edgeCluster.EdgeClusterID,
 					Edgecluster: &edgeClusterGRPCContract.EdgeCluster{
-						TenantID: edgeCluster.EdgeCluster.TenantID,
-						Name:     edgeCluster.EdgeCluster.Name,
+						TenantID:               edgeCluster.EdgeCluster.TenantID,
+						Name:                   edgeCluster.EdgeCluster.Name,
+						ClusterPublicIPAddress: edgeCluster.EdgeCluster.ClusterPublicIPAddress,
 					},
 					Cursor: edgeCluster.Cursor,
 				}

@@ -21,6 +21,10 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+const (
+	clusterPublicIPAddress = "10.0.0.230"
+)
+
 func TestEndpointCreatorService(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Endpoint Creator Service Tests")
@@ -81,8 +85,9 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				endpoint = sut.CreateEdgeClusterEndpoint()
 				request = business.CreateEdgeClusterRequest{
 					EdgeCluster: models.EdgeCluster{
-						TenantID: cuid.New(),
-						Name:     cuid.New(),
+						TenantID:               cuid.New(),
+						Name:                   cuid.New(),
+						ClusterPublicIPAddress: clusterPublicIPAddress,
 					},
 				}
 
@@ -205,8 +210,9 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 
 				response = business.ReadEdgeClusterResponse{
 					EdgeCluster: models.EdgeCluster{
-						TenantID: cuid.New(),
-						Name:     cuid.New(),
+						TenantID:               cuid.New(),
+						Name:                   cuid.New(),
+						ClusterPublicIPAddress: clusterPublicIPAddress,
 					},
 				}
 			})
@@ -321,8 +327,9 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				request = business.UpdateEdgeClusterRequest{
 					EdgeClusterID: cuid.New(),
 					EdgeCluster: models.EdgeCluster{
-						TenantID: cuid.New(),
-						Name:     cuid.New(),
+						TenantID:               cuid.New(),
+						Name:                   cuid.New(),
+						ClusterPublicIPAddress: clusterPublicIPAddress,
 					}}
 
 				response = business.UpdateEdgeClusterResponse{}
@@ -591,7 +598,9 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 					edgeClusters = append(edgeClusters, models.EdgeClusterWithCursor{
 						EdgeClusterID: cuid.New(),
 						EdgeCluster: models.EdgeCluster{
-							Name: cuid.New(),
+							Name:                   cuid.New(),
+							TenantID:               cuid.New(),
+							ClusterPublicIPAddress: clusterPublicIPAddress,
 						},
 						Cursor: cuid.New(),
 					})

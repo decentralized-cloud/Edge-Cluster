@@ -189,7 +189,7 @@ func makeDeploymentConfig(request *types.NewProvisionRequest) (deployment *appsv
 							Args: []string{
 								"server",
 								"--disable-agent",
-								"--advertise-address=" + request.ContainerIpAddress,
+								"--advertise-address=" + request.ClusterPublicIPAddress,
 							},
 							Ports: []apiv1.ContainerPort{
 								{

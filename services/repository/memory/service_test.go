@@ -34,8 +34,9 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 		ctx = context.Background()
 		createRequest = repository.CreateEdgeClusterRequest{
 			EdgeCluster: models.EdgeCluster{
-				TenantID: cuid.New(),
-				Name:     cuid.New(),
+				TenantID:               cuid.New(),
+				Name:                   cuid.New(),
+				ClusterPublicIPAddress: cuid.New(),
 			}}
 	})
 
@@ -83,8 +84,9 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				updateRequest := repository.UpdateEdgeClusterRequest{
 					EdgeClusterID: edgeClusterID,
 					EdgeCluster: models.EdgeCluster{
-						TenantID: cuid.New(),
-						Name:     cuid.New(),
+						TenantID:               cuid.New(),
+						Name:                   cuid.New(),
+						ClusterPublicIPAddress: cuid.New(),
 					}}
 
 				updateResponse, err := sut.UpdateEdgeCluster(ctx, &updateRequest)
@@ -145,8 +147,9 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				updateRequest := repository.UpdateEdgeClusterRequest{
 					EdgeClusterID: edgeClusterID,
 					EdgeCluster: models.EdgeCluster{
-						TenantID: cuid.New(),
-						Name:     cuid.New(),
+						TenantID:               cuid.New(),
+						Name:                   cuid.New(),
+						ClusterPublicIPAddress: cuid.New(),
 					}}
 				response, err := sut.UpdateEdgeCluster(ctx, &updateRequest)
 				Ω(err).Should(HaveOccurred())
@@ -195,16 +198,18 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				edgeClusters = append(
 					edgeClusters,
 					models.EdgeCluster{
-						TenantID: tenantID,
-						Name:     cuid.New(),
+						TenantID:               tenantID,
+						Name:                   cuid.New(),
+						ClusterPublicIPAddress: cuid.New(),
 					})
 			}
 
 			edgeClusterIDs = funk.Map(edgeClusters, func(edgeCluster models.EdgeCluster) string {
 				response, _ := sut.CreateEdgeCluster(ctx, &repository.CreateEdgeClusterRequest{
 					EdgeCluster: models.EdgeCluster{
-						TenantID: edgeCluster.TenantID,
-						Name:     edgeCluster.Name,
+						TenantID:               edgeCluster.TenantID,
+						Name:                   edgeCluster.Name,
+						ClusterPublicIPAddress: edgeCluster.ClusterPublicIPAddress,
 					},
 				})
 
@@ -329,4 +334,5 @@ func assertEdgeCluster(edgeCluster, expectedEdgeCluster models.EdgeCluster) {
 	Ω(edgeCluster).ShouldNot(BeNil())
 	Ω(edgeCluster.TenantID).Should(Equal(expectedEdgeCluster.TenantID))
 	Ω(edgeCluster.Name).Should(Equal(expectedEdgeCluster.Name))
+	Ω(edgeCluster.ClusterPublicIPAddress).Should(Equal(expectedEdgeCluster.ClusterPublicIPAddress))
 }
