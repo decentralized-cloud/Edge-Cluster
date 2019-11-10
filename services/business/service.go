@@ -3,26 +3,37 @@ package business
 
 import (
 	"context"
+	"strings"
 
+	edgeClusterTypes "github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	"github.com/decentralized-cloud/edge-cluster/services/repository"
 	commonErrors "github.com/micro-business/go-core/system/errors"
 )
 
 type businessService struct {
-	repositoryService repository.RepositoryContract
+	repositoryService         repository.RepositoryContract
+	edgeClusterFactoryService edgeClusterTypes.EdgeClusterFactoryContract
 }
 
 // NewBusinessService creates new instance of the BusinessService, setting up all dependencies and returns the instance
 // repositoryService: Mandatory. Reference to the repository service that can persist the edge cluster related data
+// edgeClusterFactoryService: Mandatory. Reference to the factory service that can that can create different type of supported
+// edge cluster provisioner
 // Returns the new service or error if something goes wrong
 func NewBusinessService(
-	repositoryService repository.RepositoryContract) (BusinessContract, error) {
+	repositoryService repository.RepositoryContract,
+	edgeClusterFactoryService edgeClusterTypes.EdgeClusterFactoryContract) (BusinessContract, error) {
 	if repositoryService == nil {
 		return nil, commonErrors.NewArgumentNilError("repositoryService", "repositoryService is required")
 	}
 
+	if edgeClusterFactoryService == nil {
+		return nil, commonErrors.NewArgumentNilError("edgeClusterFactoryService", "edgeClusterFactoryService is required")
+	}
+
 	return &businessService{
-		repositoryService: repositoryService,
+		repositoryService:         repositoryService,
+		edgeClusterFactoryService: edgeClusterFactoryService,
 	}, nil
 }
 
@@ -33,6 +44,25 @@ func NewBusinessService(
 func (service *businessService) CreateEdgeCluster(
 	ctx context.Context,
 	request *CreateEdgeClusterRequest) (*CreateEdgeClusterResponse, error) {
+	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
+	if err != nil {
+		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
+	}
+
+	_, err = edgeClusterProvisioner.NewProvision(
+		ctx,
+		&edgeClusterTypes.NewProvisionRequest{
+			Name:               strings.ToLower(request.EdgeCluster.Name),
+			NameSpace:          "test1",
+			ContainerIpAddress: "10.0.0.230",
+			ServicePort:        6443,
+			TargetPort:         6443,
+		})
+
+	if err != nil {
+		return nil, NewUnknownErrorWithError("Failed to provision egde cluster", err)
+	}
+
 	response, err := service.repositoryService.CreateEdgeCluster(ctx, &repository.CreateEdgeClusterRequest{
 		EdgeCluster: request.EdgeCluster,
 	})

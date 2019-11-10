@@ -135,10 +135,14 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						mockBusinessService.
 							EXPECT().
 							CreateEdgeCluster(ctx, gomock.Any()).
-							Do(func(_ context.Context, mappedRequest *business.CreateEdgeClusterRequest) {
-								Ω(mappedRequest.EdgeCluster).Should(Equal(request.EdgeCluster))
-							}).
-							Return(&response, nil)
+							DoAndReturn(
+								func(
+									_ context.Context,
+									mappedRequest *business.CreateEdgeClusterRequest) (*business.CreateEdgeClusterResponse, error) {
+									Ω(mappedRequest.EdgeCluster).Should(Equal(request.EdgeCluster))
+
+									return &response, nil
+								})
 
 						returnedResponse, err := endpoint(ctx, &request)
 
@@ -250,10 +254,14 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						mockBusinessService.
 							EXPECT().
 							ReadEdgeCluster(ctx, gomock.Any()).
-							Do(func(_ context.Context, mappedRequest *business.ReadEdgeClusterRequest) {
-								Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
-							}).
-							Return(&response, nil)
+							DoAndReturn(
+								func(
+									_ context.Context,
+									mappedRequest *business.ReadEdgeClusterRequest) (*business.ReadEdgeClusterResponse, error) {
+									Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
+
+									return &response, nil
+								})
 
 						returnedResponse, err := endpoint(ctx, &request)
 
@@ -365,10 +373,14 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						mockBusinessService.
 							EXPECT().
 							UpdateEdgeCluster(ctx, gomock.Any()).
-							Do(func(_ context.Context, mappedRequest *business.UpdateEdgeClusterRequest) {
-								Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
-							}).
-							Return(&response, nil)
+							DoAndReturn(
+								func(
+									_ context.Context,
+									mappedRequest *business.UpdateEdgeClusterRequest) (*business.UpdateEdgeClusterResponse, error) {
+									Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
+
+									return &response, nil
+								})
 
 						returnedResponse, err := endpoint(ctx, &request)
 
@@ -475,10 +487,14 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						mockBusinessService.
 							EXPECT().
 							DeleteEdgeCluster(ctx, gomock.Any()).
-							Do(func(_ context.Context, mappedRequest *business.DeleteEdgeClusterRequest) {
-								Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
-							}).
-							Return(&response, nil)
+							DoAndReturn(
+								func(
+									_ context.Context,
+									mappedRequest *business.DeleteEdgeClusterRequest) (*business.DeleteEdgeClusterResponse, error) {
+									Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
+
+									return &response, nil
+								})
 
 						returnedResponse, err := endpoint(ctx, &request)
 
@@ -612,13 +628,17 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						mockBusinessService.
 							EXPECT().
 							Search(ctx, gomock.Any()).
-							Do(func(_ context.Context, mappedRequest *business.SearchRequest) {
-								Ω(mappedRequest.Pagination).Should(Equal(request.Pagination))
-								Ω(mappedRequest.SortingOptions).Should(Equal(request.SortingOptions))
-								Ω(mappedRequest.EdgeClusterIDs).Should(Equal(request.EdgeClusterIDs))
-								Ω(mappedRequest.TenantIDs).Should(Equal(request.TenantIDs))
-							}).
-							Return(&response, nil)
+							DoAndReturn(
+								func(
+									_ context.Context,
+									mappedRequest *business.SearchRequest) (*business.SearchResponse, error) {
+									Ω(mappedRequest.Pagination).Should(Equal(request.Pagination))
+									Ω(mappedRequest.SortingOptions).Should(Equal(request.SortingOptions))
+									Ω(mappedRequest.EdgeClusterIDs).Should(Equal(request.EdgeClusterIDs))
+									Ω(mappedRequest.TenantIDs).Should(Equal(request.TenantIDs))
+
+									return &response, nil
+								})
 
 						returnedResponse, err := endpoint(ctx, &request)
 

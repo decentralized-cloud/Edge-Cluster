@@ -8,6 +8,8 @@ import (
 
 	"github.com/decentralized-cloud/edge-cluster/services/business"
 	"github.com/decentralized-cloud/edge-cluster/services/configuration"
+	"github.com/decentralized-cloud/edge-cluster/services/edgecluster"
+	edgeClusterTypes "github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	"github.com/decentralized-cloud/edge-cluster/services/endpoint"
 	"github.com/decentralized-cloud/edge-cluster/services/repository/memory"
 	"github.com/decentralized-cloud/edge-cluster/services/transport/grpc"
@@ -30,7 +32,7 @@ func StartService() {
 		_ = logger.Sync()
 	}()
 
-	if err = setupDependencies(); err != nil {
+	if err = setupDependencies(logger); err != nil {
 		logger.Fatal("Failed to setup dependecies", zap.Error(err))
 	}
 
@@ -82,8 +84,13 @@ func StartService() {
 	<-cleanupDone
 }
 
-func setupDependencies() (err error) {
+func setupDependencies(logger *zap.Logger) (err error) {
 	if configurationService, err = configuration.NewEnvConfigurationService(); err != nil {
+		return
+	}
+
+	var edgeClusterFactoryService edgeClusterTypes.EdgeClusterFactoryContract
+	if edgeClusterFactoryService, err = edgecluster.NewEdgeClusterFactoryService(logger); err != nil {
 		return
 	}
 
@@ -92,7 +99,7 @@ func setupDependencies() (err error) {
 		return
 	}
 
-	businessService, err := business.NewBusinessService(repositoryService)
+	businessService, err := business.NewBusinessService(repositoryService, edgeClusterFactoryService)
 	if err != nil {
 		return err
 	}

@@ -16,7 +16,7 @@ func (e UnknownError) Error() string {
 		return fmt.Sprintf("Unknown error occurred. Error message: %s.", e.Message)
 	}
 
-	return fmt.Sprintf("Unknown error occurred. Error message: %s. Error: %s", e.Message, e.Err.Error())
+	return fmt.Sprintf("Unknown error occurred. Error message: %s. Error: %v", e.Message, e.Err)
 }
 
 // Unwrap returns the err if provided through NewUnknownErrorWithError function, otherwise returns nil
@@ -58,7 +58,7 @@ func (e EdgeClusterAlreadyExistsError) Error() string {
 		return "Edge Cluster already exists."
 	}
 
-	return fmt.Sprintf("Edge Cluster already exists. Error: %s", e.Err.Error())
+	return fmt.Sprintf("Edge Cluster already exists. Error: %v", e.Err)
 }
 
 // Unwrap returns the err if provided through NewEdgeClusterAlreadyExistsErrorWithError function, otherwise returns nil
@@ -98,7 +98,7 @@ func (e EdgeClusterNotFoundError) Error() string {
 		return fmt.Sprintf("Edge Cluster not found. EdgeClusterID: %s.", e.EdgeClusterID)
 	}
 
-	return fmt.Sprintf("Edge Cluster not found. EdgeClusterID: %s. Error: %s", e.EdgeClusterID, e.Err.Error())
+	return fmt.Sprintf("Edge Cluster not found. EdgeClusterID: %s. Error: %v", e.EdgeClusterID, e.Err)
 }
 
 // Unwrap returns the err if provided through NewEdgeClusterNotFoundErrorWithError function, otherwise returns nil
