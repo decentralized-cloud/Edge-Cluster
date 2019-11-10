@@ -52,7 +52,7 @@ func (service *businessService) CreateEdgeCluster(
 	}
 
 	namespace := fmt.Sprintf("%s-%s", request.EdgeCluster.TenantID, request.EdgeCluster.Name)
-	hashedNamespace := fmt.Sprintf("%x", sha256.Sum256([]byte(namespace)))
+	hashedNamespace := fmt.Sprintf("%x", sha256.Sum224([]byte(namespace)))
 
 	_, err = edgeClusterProvisioner.NewProvision(
 		ctx,
