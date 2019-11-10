@@ -27,6 +27,9 @@ message EdgeCluster {
 
   // The edge cluster name
   string name = 2;
+
+  // cluster public ip address
+  string clusterPublicIPAddress = 3;
 }
 
 /**

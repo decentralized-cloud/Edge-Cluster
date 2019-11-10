@@ -52,11 +52,11 @@ func (service *businessService) CreateEdgeCluster(
 	_, err = edgeClusterProvisioner.NewProvision(
 		ctx,
 		&edgeClusterTypes.NewProvisionRequest{
-			Name:               strings.ToLower(request.EdgeCluster.Name),
-			NameSpace:          "test1",
-			ContainerIpAddress: "10.0.0.230",
-			ServicePort:        6443,
-			TargetPort:         6443,
+			Name:                   strings.ToLower(request.EdgeCluster.Name),
+			NameSpace:              "test1",
+			ClusterPublicIPAddress: request.EdgeCluster.ClusterPublicIPAddress,
+			ServicePort:            6443,
+			TargetPort:             6443,
 		})
 
 	if err != nil {
