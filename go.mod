@@ -15,6 +15,7 @@ require (
 	github.com/onsi/gomega v1.7.0
 	github.com/prometheus/client_golang v1.2.1
 	github.com/savsgio/atreugo/v9 v9.0.0
+	github.com/savsgio/go-logger v1.0.0
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/thoas/go-funk v0.4.0

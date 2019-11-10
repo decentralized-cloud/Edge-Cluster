@@ -3,8 +3,6 @@ package k3s
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
@@ -17,15 +15,15 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 const (
-	ContainerName           = "k3sserver"
-	ContainerImage          = "rancher/k3s:v0.8.1"
-	DeploymentReplica       = 1
-	DeploymentContainerPort = 80
+	containerName           = "k3sserver"
+	containerImage          = "rancher/k3s:v0.8.1"
+	deploymentContainerPort = 80
 )
+
+var deploymentReplica int32 = 1
 
 type k3sProvisioner struct {
 	logger    *zap.Logger
@@ -34,19 +32,20 @@ type k3sProvisioner struct {
 
 // NewK3SProvisioner creates new instance of the k3sProvisioner, setting up all dependencies and returns the instance
 // logger: Mandatory. Reference to the logger service
+// k8sRestConfig: Mandatory. Reference to the Rest config points to the running K8S cluster
 // Returns the new service or error if something goes wrong
-func NewK3SProvisioner(logger *zap.Logger) (types.EdgeClusterProvisionerContract, error) {
+func NewK3SProvisioner(
+	logger *zap.Logger,
+	k8sRestConfig *rest.Config) (types.EdgeClusterProvisionerContract, error) {
 	if logger == nil {
 		return nil, commonErrors.NewArgumentNilError("logger", "logger is required")
 	}
 
-	restConfig, err := getRestConfig(logger)
-
-	if err != nil {
-		return nil, types.NewUnknownErrorWithError("Failed to retrieve rest config", err)
+	if k8sRestConfig == nil {
+		return nil, commonErrors.NewArgumentNilError("k8sRestConfig", "k8sRestConfig is required")
 	}
 
-	clientset, err := kubernetes.NewForConfig(restConfig)
+	clientset, err := kubernetes.NewForConfig(k8sRestConfig)
 	if err != nil {
 		return nil, types.NewUnknownErrorWithError("Failed to create client set", err)
 	}
@@ -63,152 +62,114 @@ func NewK3SProvisioner(logger *zap.Logger) (types.EdgeClusterProvisionerContract
 // Returns either the result of provisioning new K3S edge cluster or error if something goes wrong.
 func (service *k3sProvisioner) NewProvision(
 	ctx context.Context,
-	request *types.NewProvisionRequest) (*types.NewProvisionResponse, error) {
+	request *types.NewProvisionRequest) (response *types.NewProvisionResponse, err error) {
+	response = nil
 
 	if request.NameSpace == "" {
 		request.NameSpace = apiv1.NamespaceDefault
 	}
 
 	//if not exisit create a namespace for the deployment
-	err := createProvisionNameSpace(request.NameSpace, service)
-
-	if err != nil {
-		return &types.NewProvisionResponse{}, err
+	if err = createProvisionNameSpace(request.NameSpace, service); err != nil {
+		return
 	}
 
 	// create pod
-	err = createDeployment(service, request)
-
-	if err != nil {
-		return &types.NewProvisionResponse{}, err
+	if err = createDeployment(service, request); err != nil {
+		return
 	}
 
-	err = createService(service, request)
-
-	if err != nil {
-		return &types.NewProvisionResponse{}, err
+	if err = createService(service, request); err != nil {
+		return
 	}
 
-	return &types.NewProvisionResponse{}, nil
+	response = &types.NewProvisionResponse{}
+
+	return
 }
 
-func createDeployment(service *k3sProvisioner, request *types.NewProvisionRequest) error {
+func createDeployment(service *k3sProvisioner, request *types.NewProvisionRequest) (err error) {
 	deploymentClient := service.clientset.AppsV1().Deployments(request.NameSpace)
-
 	deploymentConfig := makeDeploymentConfig(request)
 
 	result, err := deploymentClient.Create(deploymentConfig)
-
 	if err != nil {
-		service.logger.Fatal("failed to create pod",
-			zap.Any("Error", err),
+		service.logger.Error(
+			"failed to create pod",
+			zap.Error(err),
 			zap.Any("Config", deploymentConfig))
 
-		return err
+		return
 	}
 
-	service.logger.Info("created a pod",
+	service.logger.Info(
+		"created a pod",
 		zap.String("PodName", result.GetObjectMeta().GetName()))
 
-	return nil
+	return
 }
 
-func createService(service *k3sProvisioner, request *types.NewProvisionRequest) error {
+func createService(service *k3sProvisioner, request *types.NewProvisionRequest) (err error) {
 	serviceDeployment := service.clientset.CoreV1().Services(request.NameSpace)
-
 	serviceConfig := makeServiceConfig(request)
 
 	result, err := serviceDeployment.Create(serviceConfig)
-
 	if err != nil {
-		service.logger.Fatal("failed to create service",
-			zap.Any("Error", err),
+		service.logger.Error(
+			"failed to create service",
+			zap.Error(err),
 			zap.Any("Config", serviceConfig))
 
-		return err
+		return
 	}
 
-	service.logger.Info("created a service",
+	service.logger.Info(
+		"created a service",
 		zap.String("ServiceName", result.GetObjectMeta().GetName()))
 
-	return nil
+	return
 }
 
-func createProvisionNameSpace(namespace string, service *k3sProvisioner) error {
-	service.logger.Info("checking the namespace ",
-		zap.String("ServiceName", namespace))
+func createProvisionNameSpace(namespace string, service *k3sProvisioner) (err error) {
+	service.logger.Info("checking the namespace ", zap.String("ServiceName", namespace))
 
 	ns, err := service.clientset.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
-
 	if err != nil && strings.Contains(err.Error(), "not found") {
 		service.logger.Info(err.Error())
 		//create the name space
 		newNameSpace := makeNameSpaceConfig(namespace)
 
-		service.logger.Info("creating namespace" + namespace)
+		service.logger.Info("creating namespace", zap.String("namespace", namespace))
 
-		_, err = service.clientset.CoreV1().Namespaces().Create(newNameSpace)
+		if _, err = service.clientset.CoreV1().Namespaces().Create(newNameSpace); err != nil {
+			service.logger.Error("failed to create namespace", zap.Error(err))
 
-		if err != nil {
-			service.logger.Fatal("failed to create namespace",
-				zap.Any("Error", err))
-
-			return err
+			return
 		}
 
 	} else if err != nil {
-		service.logger.Fatal("failed to validate the requested namespace",
-			zap.Any("Error", err))
-		return err
+		service.logger.Error("failed to validate the requested namespace", zap.Error(err))
+
+		return
 	}
 
 	if ns != nil && ns.GetName() == namespace {
 		service.logger.Info("the namespace exists")
-		return nil
+
+		return
 	}
 
-	return nil
+	return
 }
 
-func getRestConfig(logger *zap.Logger) (*rest.Config, error) {
-	kubeconfig := os.Getenv("KUBECONFIG")
-
-	logger.Info("path ",
-		zap.String("KUBECONFIG", kubeconfig))
-
-	if kubeconfig != "" {
-		return clientcmd.BuildConfigFromFlags("", kubeconfig)
-	}
-
-	homePath, err := os.UserHomeDir()
-
-	logger.Info("homePath ",
-		zap.String("path", homePath))
-	if err != nil {
-		return nil, err
-	}
-
-	kubeconfigFilePath := filepath.Join(homePath, ".kube", "config")
-
-	logger.Info("kubePath ",
-		zap.String("kube path", kubeconfigFilePath))
-
-	_, err = os.Stat(kubeconfigFilePath)
-	if !os.IsNotExist(err) {
-		return clientcmd.BuildConfigFromFlags("", kubeconfigFilePath)
-	}
-
-	return rest.InClusterConfig()
-}
-
-func makeDeploymentConfig(request *types.NewProvisionRequest) *appsv1.Deployment {
-	deployment := &appsv1.Deployment{
+func makeDeploymentConfig(request *types.NewProvisionRequest) (deployment *appsv1.Deployment) {
+	deployment = &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      request.Name + "-deployment",
 			Namespace: request.NameSpace,
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: int32Ptr(DeploymentReplica),
+			Replicas: &deploymentReplica,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					"app": request.Name,
@@ -223,8 +184,8 @@ func makeDeploymentConfig(request *types.NewProvisionRequest) *appsv1.Deployment
 				Spec: apiv1.PodSpec{
 					Containers: []apiv1.Container{
 						{
-							Name:  ContainerName,
-							Image: ContainerImage,
+							Name:  containerName,
+							Image: containerImage,
 							Args: []string{
 								"server",
 								"--disable-agent",
@@ -234,7 +195,7 @@ func makeDeploymentConfig(request *types.NewProvisionRequest) *appsv1.Deployment
 								{
 									Name:          "http",
 									Protocol:      apiv1.ProtocolTCP,
-									ContainerPort: DeploymentContainerPort,
+									ContainerPort: deploymentContainerPort,
 								},
 							},
 						},
@@ -244,11 +205,10 @@ func makeDeploymentConfig(request *types.NewProvisionRequest) *appsv1.Deployment
 		},
 	}
 
-	return deployment
+	return
 }
 
-func makeServiceConfig(request *types.NewProvisionRequest) *apiv1.Service {
-
+func makeServiceConfig(request *types.NewProvisionRequest) (service *apiv1.Service) {
 	servicePorts := []v1.ServicePort{
 		{
 			Protocol:   apiv1.ProtocolTCP,
@@ -261,7 +221,7 @@ func makeServiceConfig(request *types.NewProvisionRequest) *apiv1.Service {
 		"app": request.Name,
 	}
 
-	service := &apiv1.Service{
+	service = &apiv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      request.Name + "-service",
 			Namespace: request.NameSpace,
@@ -276,19 +236,15 @@ func makeServiceConfig(request *types.NewProvisionRequest) *apiv1.Service {
 		},
 	}
 
-	return service
+	return
 }
 
-func makeNameSpaceConfig(namespace string) *v1.Namespace {
-	ns := &v1.Namespace{
+func makeNameSpaceConfig(namespace string) (ns *v1.Namespace) {
+	ns = &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: namespace,
 		},
 	}
 
-	return ns
-}
-
-func int32Ptr(i int32) *int32 {
-	return &i
+	return
 }
