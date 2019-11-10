@@ -20,7 +20,7 @@ import (
 const (
 	containerName           = "k3sserver"
 	containerImage          = "rancher/k3s:v0.8.1"
-	deploymentContainerPort = 80
+	deploymentContainerPort = 6443
 )
 
 var deploymentReplica int32 = 1
@@ -193,8 +193,6 @@ func makeDeploymentConfig(request *types.NewProvisionRequest) (deployment *appsv
 							},
 							Ports: []apiv1.ContainerPort{
 								{
-									Name:          "http",
-									Protocol:      apiv1.ProtocolTCP,
 									ContainerPort: deploymentContainerPort,
 								},
 							},
@@ -212,8 +210,8 @@ func makeServiceConfig(request *types.NewProvisionRequest) (service *apiv1.Servi
 	servicePorts := []v1.ServicePort{
 		{
 			Protocol:   apiv1.ProtocolTCP,
-			Port:       request.ServicePort,
-			TargetPort: intstr.FromInt(request.TargetPort),
+			Port:       6443,
+			TargetPort: intstr.FromInt(6443),
 		},
 	}
 

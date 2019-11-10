@@ -5,8 +5,6 @@ package types
 type NewProvisionRequest struct {
 	Name                   string
 	NameSpace              string
-	ServicePort            int32
-	TargetPort             int
 	ClusterPublicIPAddress string
 }
 
