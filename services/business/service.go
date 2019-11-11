@@ -51,6 +51,9 @@ func (service *businessService) CreateEdgeCluster(
 		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
 	}
 
+	//Trim EdgeCluster Name value
+	request.EdgeCluster.Name = strings.Trim(request.EdgeCluster.Name, " ")
+
 	namespace := fmt.Sprintf("%s-%s", request.EdgeCluster.TenantID, request.EdgeCluster.Name)
 	hashedNamespace := fmt.Sprintf("%x", sha256.Sum224([]byte(namespace)))
 

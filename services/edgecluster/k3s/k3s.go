@@ -191,6 +191,11 @@ func makeDeploymentConfig(request *types.NewProvisionRequest) (deployment *appsv
 								"--disable-agent",
 								"--advertise-address=" + request.ClusterPublicIPAddress,
 							},
+							Env: []apiv1.EnvVar{
+								{Name: "K3S_CLUSTER_SECRET", Value: "Random12345"},
+								{Name: "K3S_KUBECONFIG_OUTPUT", Value: "/output/kubeconfig.yaml"},
+								{Name: "K3S_KUBECONFIG_MODE", Value: "666"},
+							},
 							Ports: []apiv1.ContainerPort{
 								{
 									ContainerPort: deploymentContainerPort,
