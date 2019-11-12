@@ -32,4 +32,20 @@ type EdgeClusterProvisionerContract interface {
 	NewProvision(
 		ctx context.Context,
 		request *NewProvisionRequest) (*NewProvisionResponse, error)
+
+	// UpdateProvisionWithRetry updates an existing edge cluster.
+	// ctx: Mandatory The reference to the context
+	// request: Mandatory. The request to update an existing edge cluster.
+	// Returns either the result of updating an existing edge cluster or error if something goes wrong.
+	UpdateProvisionWithRetry(
+		ctx context.Context,
+		request *UpdateProvisionRequest) (response *UpdateProvisionResponse, err error)
+
+	// DeleteProvision deletes an edge cluster.
+	// ctx: Mandatory The reference to the context
+	// request: Mandatory. The request to delete an edge cluster
+	// Returns either the result of deleting an edge cluster or error if something goes wrong.
+	DeleteProvision(
+		ctx context.Context,
+		request *NewProvisionRequest) (response *NewProvisionResponse, err error)
 }

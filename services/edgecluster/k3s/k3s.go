@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/util/retry"
 )
 
 const (
@@ -86,6 +87,77 @@ func (service *k3sProvisioner) NewProvision(
 	response = &types.NewProvisionResponse{}
 
 	return
+}
+
+// UpdateProvisionWithRetry update and existing K3S edge cluster.
+// ctx: Mandatory The reference to the context
+// request: Mandatory. The request to update an edge cluster
+// Returns either the result of updating the K3S edge cluster or error if something goes wrong.
+func (service *k3sProvisioner) UpdateProvisionWithRetry(
+	ctx context.Context,
+	request *types.UpdateProvisionRequest) (response *types.UpdateProvisionResponse, err error) {
+	response = nil
+
+	updateClient := service.clientset.AppsV1().Deployments(request.NameSpace)
+
+	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		result, getErr := updateClient.Get(request.Name, metav1.GetOptions{})
+
+		if getErr != nil {
+			service.logger.Error(
+				"failed to create pod",
+				zap.Error(getErr))
+		}
+
+		//Do what need to be updated
+		//add necessary fileds to update
+		result.Spec.Replicas = &request.Replicas
+		//update image container
+		//result.Spec.Template.Spec.Containers[0].Image = edge.ContainerImage
+
+		_, updateErr := updateClient.Update(result)
+
+		if updateErr != nil {
+			service.logger.Error(
+				"failed to create pod",
+				zap.Error(updateErr))
+		}
+
+		return updateErr
+	})
+
+	if retryErr != nil {
+		service.logger.Error(
+			"failed to create pod",
+			zap.Error(retryErr))
+	}
+
+	response = &types.UpdateProvisionResponse{}
+
+	return
+}
+
+func (service *k3sProvisioner) DeleteProvision(
+	ctx context.Context,
+	request *types.NewProvisionRequest) (response *types.NewProvisionResponse, err error) {
+
+	deleteClient := service.clientset.AppsV1().Deployments(request.NameSpace)
+	deletePolicy := metav1.DeletePropagationForeground
+
+	deleteErr := deleteClient.Delete(request.Name, &metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	})
+
+	if deleteErr != nil {
+		service.logger.Error(
+			"failed to create pod",
+			zap.Error(deleteErr))
+	}
+
+	response = &types.NewProvisionResponse{}
+
+	return
+
 }
 
 func createDeployment(service *k3sProvisioner, request *types.NewProvisionRequest) (err error) {

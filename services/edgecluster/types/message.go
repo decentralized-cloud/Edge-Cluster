@@ -8,6 +8,18 @@ type NewProvisionRequest struct {
 	ClusterPublicIPAddress string
 }
 
+// UpdateProvisionRequest contains the request to update an existing supported edge cluser
+type UpdateProvisionRequest struct {
+	Name                   string
+	NameSpace              string
+	ClusterPublicIPAddress string
+	Replicas               int32
+}
+
 // NewProvisionResponse contains the result of provisioning a new supported edge cliuster
 type NewProvisionResponse struct {
+}
+
+// UpdateProvisionResponse contains the result of updating an existing supported edge cliuster
+type UpdateProvisionResponse struct {
 }

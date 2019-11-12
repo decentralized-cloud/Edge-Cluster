@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/decentralized-cloud/edge-cluster/models"
 	edgeClusterTypes "github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	"github.com/decentralized-cloud/edge-cluster/services/repository"
 	commonErrors "github.com/micro-business/go-core/system/errors"
@@ -54,8 +55,7 @@ func (service *businessService) CreateEdgeCluster(
 	//Trim EdgeCluster Name value
 	request.EdgeCluster.Name = strings.Trim(request.EdgeCluster.Name, " ")
 
-	namespace := fmt.Sprintf("%s-%s", request.EdgeCluster.TenantID, request.EdgeCluster.Name)
-	hashedNamespace := fmt.Sprintf("%x", sha256.Sum224([]byte(namespace)))
+	hashedNamespace := getNameSpaceFromRequest(request.EdgeCluster)
 
 	_, err = edgeClusterProvisioner.NewProvision(
 		ctx,
@@ -120,6 +120,28 @@ func (service *businessService) UpdateEdgeCluster(
 		EdgeCluster:   request.EdgeCluster,
 	})
 
+	if request.Replicas == 0 {
+		return nil, commonErrors.NewArgumentError("Replicas", "Value should be more than 0")
+	}
+	//Trim EdgeCluster Name value
+	request.EdgeCluster.Name = strings.Trim(request.EdgeCluster.Name, " ")
+
+	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
+	if err != nil {
+		return nil, NewUnknownErrorWithError("Failed to update the egde cluster", err)
+	}
+
+	hashedNamespace := getNameSpaceFromRequest(request.EdgeCluster)
+
+	_, err = edgeClusterProvisioner.UpdateProvisionWithRetry(
+		ctx,
+		&edgeClusterTypes.UpdateProvisionRequest{
+			Name:                   strings.ToLower(request.EdgeCluster.Name),
+			NameSpace:              hashedNamespace,
+			ClusterPublicIPAddress: request.EdgeCluster.ClusterPublicIPAddress,
+			Replicas:               request.Replicas,
+		})
+
 	if err != nil {
 		return &UpdateEdgeClusterResponse{
 			Err: mapRepositoryError(err, request.EdgeClusterID),
@@ -142,6 +164,21 @@ func (service *businessService) DeleteEdgeCluster(
 	_, err := service.repositoryService.DeleteEdgeCluster(ctx, &repository.DeleteEdgeClusterRequest{
 		EdgeClusterID: request.EdgeClusterID,
 	})
+
+	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
+	if err != nil {
+		return nil, NewUnknownErrorWithError("Failed to update the egde cluster", err)
+	}
+
+	hashedNamespace := getNameSpaceFromRequest(request.EdgeCluster)
+
+	_, err = edgeClusterProvisioner.DeleteProvision(
+		ctx,
+		&edgeClusterTypes.NewProvisionRequest{
+			Name:                   strings.ToLower(request.EdgeCluster.Name),
+			NameSpace:              hashedNamespace,
+			ClusterPublicIPAddress: request.EdgeCluster.ClusterPublicIPAddress,
+		})
 
 	if err != nil {
 		return &DeleteEdgeClusterResponse{
@@ -190,4 +227,10 @@ func mapRepositoryError(err error, edgeClusterID string) error {
 	}
 
 	return NewUnknownErrorWithError("", err)
+}
+
+func getNameSpaceFromRequest(edgeCluster models.EdgeCluster) string {
+	namespace := fmt.Sprintf("%s-%s", edgeCluster.TenantID, edgeCluster.Name)
+
+	return fmt.Sprintf("%x", sha256.Sum224([]byte(namespace)))
 }
