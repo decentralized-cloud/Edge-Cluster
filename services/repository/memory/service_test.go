@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/repository"
@@ -18,6 +19,8 @@ import (
 )
 
 func TestInMemoryRepositoryService(t *testing.T) {
+	rand.Seed(time.Now().UTC().UnixNano())
+
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "In-Memory Repository Service Tests")
 }
@@ -188,7 +191,6 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 		)
 
 		BeforeEach(func() {
-			rand.Seed(42)
 			edgeClusters = []models.EdgeCluster{}
 			tenantIDs = []string{}
 			for idx := 0; idx < rand.Intn(20)+10; idx++ {
@@ -267,6 +269,7 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				response, err := sut.Search(ctx, &repository.SearchRequest{})
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusters).Should(HaveLen(len(edgeClusterIDs)))
+				Ω(response.TotalCount).Should(Equal(int64(len(edgeClusterIDs))))
 
 				filteredEdgeClusters := funk.Filter(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) bool {
 					return !funk.Contains(edgeClusterIDs, edgeClusterWithCursor.EdgeClusterID)
@@ -293,6 +296,7 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				})
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusters).Should(HaveLen(numberOfEdgeClusterIDs))
+				Ω(response.TotalCount).Should(Equal(int64(numberOfEdgeClusterIDs)))
 
 				filteredEdgeClusters := funk.Filter(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) bool {
 					return !funk.Contains(edgeClusterIDs, edgeClusterWithCursor.EdgeClusterID)
@@ -319,6 +323,7 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				})
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusters).Should(HaveLen(numberOfTenantIDs))
+				Ω(response.TotalCount).Should(Equal(int64(numberOfTenantIDs)))
 
 				filteredEdgeClusters := funk.Filter(response.EdgeClusters, func(edgeClusterWithCursor models.EdgeClusterWithCursor) bool {
 					return !funk.Contains(tenantIDs, edgeClusterWithCursor.EdgeCluster.TenantID)

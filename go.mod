@@ -10,7 +10,7 @@ require (
 	github.com/golang/protobuf v1.3.2
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/lucsky/cuid v1.0.2
-	github.com/micro-business/go-core v0.0.12
+	github.com/micro-business/go-core v0.0.13
 	github.com/onsi/ginkgo v1.10.2
 	github.com/onsi/gomega v1.7.0
 	github.com/prometheus/client_golang v1.2.1

@@ -201,13 +201,26 @@ func decodeSearchRequest(
 			}).([]common.SortingOptionPair)
 	}
 
+	pagination := common.Pagination{}
+
+	if castedRequest.Pagination.HasAfter {
+		*pagination.After = castedRequest.Pagination.After
+	}
+
+	if castedRequest.Pagination.HasFirst {
+		*pagination.First = int(castedRequest.Pagination.First)
+	}
+
+	if castedRequest.Pagination.HasBefore {
+		*pagination.Before = castedRequest.Pagination.Before
+	}
+
+	if castedRequest.Pagination.HasLast {
+		*pagination.Last = int(castedRequest.Pagination.Last)
+	}
+
 	return &business.SearchRequest{
-		Pagination: common.Pagination{
-			After:  castedRequest.Pagination.After,
-			First:  int(castedRequest.Pagination.First),
-			Before: castedRequest.Pagination.Before,
-			Last:   int(castedRequest.Pagination.Last),
-		},
+		Pagination:     pagination,
 		EdgeClusterIDs: castedRequest.EdgeClusterIDs,
 		TenantIDs:      castedRequest.TenantIDs,
 		SortingOptions: sortingOptions,
@@ -227,6 +240,7 @@ func encodeSearchResponse(
 			Error:           edgeClusterGRPCContract.Error_NO_ERROR,
 			HasPreviousPage: castedResponse.HasPreviousPage,
 			HasNextPage:     castedResponse.HasNextPage,
+			TotalCount:      castedResponse.TotalCount,
 			EdgeClusters: funk.Map(castedResponse.EdgeClusters, func(edgeCluster models.EdgeClusterWithCursor) *edgeClusterGRPCContract.EdgeClusterWithCursor {
 				return &edgeClusterGRPCContract.EdgeClusterWithCursor{
 					EdgeClusterID: edgeCluster.EdgeClusterID,

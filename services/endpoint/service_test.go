@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/business"
@@ -26,6 +27,8 @@ const (
 )
 
 func TestEndpointCreatorService(t *testing.T) {
+	rand.Seed(time.Now().UTC().UnixNano())
+
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Endpoint Creator Service Tests")
 }
@@ -560,7 +563,6 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 
 			BeforeEach(func() {
 				endpoint = sut.SearchEndpoint()
-				rand.Seed(42)
 				edgeClusterIDs = []string{}
 				for idx := 0; idx < rand.Intn(20)+1; idx++ {
 					edgeClusterIDs = append(edgeClusterIDs, cuid.New())
@@ -573,10 +575,10 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 
 				request = business.SearchRequest{
 					Pagination: common.Pagination{
-						After:  cuid.New(),
-						First:  rand.Intn(1000),
-						Before: cuid.New(),
-						Last:   rand.Intn(1000),
+						After:  convertStringToPointer(cuid.New()),
+						First:  convertIntToPointer(rand.Intn(1000)),
+						Before: convertStringToPointer(cuid.New()),
+						Last:   convertIntToPointer(rand.Intn(1000)),
 					},
 					SortingOptions: []common.SortingOptionPair{
 						common.SortingOptionPair{
@@ -606,7 +608,12 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 					})
 				}
 
-				response = business.SearchResponse{EdgeClusters: edgeClusters}
+				response = business.SearchResponse{
+					HasPreviousPage: (rand.Intn(10) % 2) == 0,
+					HasNextPage:     (rand.Intn(10) % 2) == 0,
+					TotalCount:      rand.Int63n(1000),
+					EdgeClusters:    edgeClusters,
+				}
 			})
 
 			Context("SearchEndpoint function is returned", func() {
@@ -714,4 +721,12 @@ func assertArgumentError(expectedArgumentName, expectedMessage string, err error
 	Ω(argumentErr.ArgumentName).Should(Equal(expectedArgumentName))
 	Ω(strings.Contains(argumentErr.Error(), expectedMessage)).Should(BeTrue())
 	Ω(errors.Unwrap(err)).Should(Equal(nestedErr))
+}
+
+func convertStringToPointer(str string) *string {
+	return &str
+}
+
+func convertIntToPointer(i int) *int {
+	return &i
 }

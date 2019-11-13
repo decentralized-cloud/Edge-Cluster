@@ -145,5 +145,7 @@ func (service *repositoryService) Search(
 		response.EdgeClusters[idx].Cursor = strconv.Itoa(idx)
 	}
 
+	response.TotalCount = int64(len(response.EdgeClusters))
+
 	return response, nil
 }
