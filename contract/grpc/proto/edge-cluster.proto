@@ -55,6 +55,10 @@ message CreateEdgeClusterResponse {
 
   // The created edge cluster object
   EdgeCluster edgeCluster = 4;
+
+  // The cursor defines the position of the edge cluster in the repository that can be later
+  // referred to using pagination information
+  string cursor = 5;
 }
 
 /** Request to read an existing edge cluster
@@ -101,6 +105,10 @@ message UpdateEdgeClusterResponse {
 
   // The updated edge cluster object
   EdgeCluster edgeCluster = 3;
+
+  // The cursor defines the position of the edge cluster in the repository that can be later
+  // referred to using pagination information
+  string cursor = 4;
 }
 
 /**

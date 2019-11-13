@@ -47,6 +47,7 @@ func encodeCreateEdgeClusterResponse(
 				Name:                   castedResponse.EdgeCluster.Name,
 				ClusterPublicIPAddress: castedResponse.EdgeCluster.ClusterPublicIPAddress,
 			},
+			Cursor: castedResponse.Cursor,
 		}, nil
 	}
 
@@ -131,6 +132,7 @@ func encodeUpdateEdgeClusterResponse(
 				Name:                   castedResponse.EdgeCluster.Name,
 				ClusterPublicIPAddress: castedResponse.EdgeCluster.ClusterPublicIPAddress,
 			},
+			Cursor: castedResponse.Cursor,
 		}, nil
 	}
 

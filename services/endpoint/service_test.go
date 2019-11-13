@@ -96,6 +96,12 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 
 				response = business.CreateEdgeClusterResponse{
 					EdgeClusterID: cuid.New(),
+					EdgeCluster: models.EdgeCluster{
+						TenantID:               cuid.New(),
+						Name:                   cuid.New(),
+						ClusterPublicIPAddress: cuid.New(),
+					},
+					Cursor: cuid.New(),
 				}
 			})
 
@@ -335,7 +341,14 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						ClusterPublicIPAddress: clusterPublicIPAddress,
 					}}
 
-				response = business.UpdateEdgeClusterResponse{}
+				response = business.UpdateEdgeClusterResponse{
+					EdgeCluster: models.EdgeCluster{
+						TenantID:               cuid.New(),
+						Name:                   cuid.New(),
+						ClusterPublicIPAddress: cuid.New(),
+					},
+					Cursor: cuid.New(),
+				}
 			})
 
 			Context("UpdateEdgeClusterEndpoint function is returned", func() {

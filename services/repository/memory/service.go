@@ -38,6 +38,7 @@ func (service *repositoryService) CreateEdgeCluster(
 	return &repository.CreateEdgeClusterResponse{
 		EdgeClusterID: edgeClusterID,
 		EdgeCluster:   request.EdgeCluster,
+		Cursor:        edgeClusterID,
 	}, nil
 }
 
@@ -74,6 +75,7 @@ func (service *repositoryService) UpdateEdgeCluster(
 
 	return &repository.UpdateEdgeClusterResponse{
 		EdgeCluster: request.EdgeCluster,
+		Cursor:      request.EdgeClusterID,
 	}, nil
 }
 

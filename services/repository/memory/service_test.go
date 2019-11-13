@@ -59,6 +59,7 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				response, err := sut.CreateEdgeCluster(ctx, &createRequest)
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusterID).ShouldNot(BeNil())
+				Ω(response.Cursor).Should(Equal(response.EdgeClusterID))
 				assertEdgeCluster(response.EdgeCluster, createRequest.EdgeCluster)
 			})
 		})
@@ -94,6 +95,7 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 
 				updateResponse, err := sut.UpdateEdgeCluster(ctx, &updateRequest)
 				Ω(err).Should(BeNil())
+				Ω(updateResponse.Cursor).Should(Equal(edgeClusterID))
 				assertEdgeCluster(updateResponse.EdgeCluster, updateRequest.EdgeCluster)
 
 				readResponse, err := sut.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{EdgeClusterID: edgeClusterID})
