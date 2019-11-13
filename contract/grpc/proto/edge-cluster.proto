@@ -189,7 +189,7 @@ message SearchRequest {
  */
 message EdgeClusterWithCursor {
   // The edge cluster object
-  EdgeCluster edgecluster = 1;
+  EdgeCluster edgeCluster = 1;
 
   // The unique edge cluster identifier
   string edgeClusterID = 2;
