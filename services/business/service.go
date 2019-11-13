@@ -120,10 +120,8 @@ func (service *businessService) UpdateEdgeCluster(
 		EdgeCluster:   request.EdgeCluster,
 	})
 
-	if request.Replicas == 0 {
-		return nil, commonErrors.NewArgumentError("Replicas", "Value should be more than 0")
-	}
-	//Trim EdgeCluster Name value
+	//Trim EdgeCluster values
+	request.K3SClusterSecret = strings.Trim(request.K3SClusterSecret, " ")
 	request.EdgeCluster.Name = strings.Trim(request.EdgeCluster.Name, " ")
 
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
@@ -139,7 +137,7 @@ func (service *businessService) UpdateEdgeCluster(
 			Name:                   strings.ToLower(request.EdgeCluster.Name),
 			NameSpace:              hashedNamespace,
 			ClusterPublicIPAddress: request.EdgeCluster.ClusterPublicIPAddress,
-			Replicas:               request.Replicas,
+			K3SClusterSecret:       request.K3SClusterSecret,
 		})
 
 	if err != nil {

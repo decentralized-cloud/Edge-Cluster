@@ -92,8 +92,7 @@ message UpdateEdgeClusterRequest {
   // The edge cluster object contains the updated edge cluster details to update
   EdgeCluster edgeCluster = 2;
 
-  //Pod replicas value to update
-  //temporary put it out of edge cluster 
+  //K3s secret value to update
   string K3SClusterSecret = 3;
 }
 

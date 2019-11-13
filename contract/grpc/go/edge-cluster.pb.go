@@ -383,8 +383,7 @@ type UpdateEdgeClusterRequest struct {
 	EdgeClusterID string `protobuf:"bytes,1,opt,name=edgeClusterID,proto3" json:"edgeClusterID,omitempty"`
 	// The edge cluster object contains the updated edge cluster details to update
 	EdgeCluster *EdgeCluster `protobuf:"bytes,2,opt,name=edgeCluster,proto3" json:"edgeCluster,omitempty"`
-	//Pod replicas value to update
-	//temporary put it out of edge cluster
+	//K3s secret value to update
 	K3SClusterSecret     string   `protobuf:"bytes,3,opt,name=K3SClusterSecret,proto3" json:"K3SClusterSecret,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
