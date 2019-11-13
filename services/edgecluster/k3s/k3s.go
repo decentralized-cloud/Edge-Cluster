@@ -115,8 +115,7 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 
 func (service *k3sProvisioner) DeleteProvision(
 	ctx context.Context,
-	request *types.NewProvisionRequest) (response *types.NewProvisionResponse, err error) {
-
+	request *types.DeleteProvisionRequest) (response *types.DeleteProvisionResponse, err error) {
 	service.logger.Info("deleting Provisio")
 
 	err = deleteEdgeClient(service, request)
@@ -127,12 +126,12 @@ func (service *k3sProvisioner) DeleteProvision(
 			zap.Error(err))
 	}
 
-	response = &types.NewProvisionResponse{}
+	response = &types.DeleteProvisionResponse{}
 
 	return
 }
 
-func deleteEdgeClient(service *k3sProvisioner, request *types.NewProvisionRequest) error {
+func deleteEdgeClient(service *k3sProvisioner, request *types.DeleteProvisionRequest) error {
 	deleteClient := service.clientset.AppsV1().Deployments(request.NameSpace)
 	deletePolicy := metav1.DeletePropagationForeground
 

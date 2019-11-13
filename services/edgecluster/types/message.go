@@ -8,6 +8,14 @@ type NewProvisionRequest struct {
 	ClusterPublicIPAddress string
 }
 
+// NewProvisionResponse contains the result of provisioning a new supported edge cliuster
+type NewProvisionResponse struct {
+}
+
+// UpdateProvisionResponse contains the result of updating an existing supported edge cliuster
+type UpdateProvisionResponse struct {
+}
+
 // UpdateProvisionRequest contains the request to update an existing supported edge cluser
 type UpdateProvisionRequest struct {
 	Name                   string
@@ -16,10 +24,12 @@ type UpdateProvisionRequest struct {
 	K3SClusterSecret       string
 }
 
-// NewProvisionResponse contains the result of provisioning a new supported edge cliuster
-type NewProvisionResponse struct {
+// DeleteProvisionRequest contains the request to delete an existing provision
+type DeleteProvisionRequest struct {
+	Name      string
+	NameSpace string
 }
 
-// UpdateProvisionResponse contains the result of updating an existing supported edge cliuster
-type UpdateProvisionResponse struct {
+// DeleteProvisionResponse contains the result of deleting an existing edge cluster provision
+type DeleteProvisionResponse struct {
 }

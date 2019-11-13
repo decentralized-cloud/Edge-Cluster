@@ -47,5 +47,5 @@ type EdgeClusterProvisionerContract interface {
 	// Returns either the result of deleting an edge cluster or error if something goes wrong.
 	DeleteProvision(
 		ctx context.Context,
-		request *NewProvisionRequest) (response *NewProvisionResponse, err error)
+		request *DeleteProvisionRequest) (response *DeleteProvisionResponse, err error)
 }

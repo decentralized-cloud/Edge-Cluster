@@ -115,13 +115,7 @@ func (service *businessService) ReadEdgeCluster(
 func (service *businessService) UpdateEdgeCluster(
 	ctx context.Context,
 	request *UpdateEdgeClusterRequest) (*UpdateEdgeClusterResponse, error) {
-	response, err := service.repositoryService.UpdateEdgeCluster(ctx, &repository.UpdateEdgeClusterRequest{
-		EdgeClusterID: request.EdgeClusterID,
-		EdgeCluster:   request.EdgeCluster,
-	})
-
 	//Trim EdgeCluster values
-	request.K3SClusterSecret = strings.Trim(request.K3SClusterSecret, " ")
 	request.EdgeCluster.Name = strings.Trim(request.EdgeCluster.Name, " ")
 
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
@@ -139,6 +133,15 @@ func (service *businessService) UpdateEdgeCluster(
 			ClusterPublicIPAddress: request.EdgeCluster.ClusterPublicIPAddress,
 			K3SClusterSecret:       request.K3SClusterSecret,
 		})
+
+	if err != nil {
+		return nil, NewUnknownErrorWithError("Failed to update the existing edge cluster provision", err)
+	}
+
+	response, err := service.repositoryService.UpdateEdgeCluster(ctx, &repository.UpdateEdgeClusterRequest{
+		EdgeClusterID: request.EdgeClusterID,
+		EdgeCluster:   request.EdgeCluster,
+	})
 
 	if err != nil {
 		return &UpdateEdgeClusterResponse{
@@ -159,24 +162,23 @@ func (service *businessService) UpdateEdgeCluster(
 func (service *businessService) DeleteEdgeCluster(
 	ctx context.Context,
 	request *DeleteEdgeClusterRequest) (*DeleteEdgeClusterResponse, error) {
-	_, err := service.repositoryService.DeleteEdgeCluster(ctx, &repository.DeleteEdgeClusterRequest{
-		EdgeClusterID: request.EdgeClusterID,
-	})
-
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
-	if err != nil {
-		return nil, NewUnknownErrorWithError("Failed to update the egde cluster", err)
-	}
-
 	hashedNamespace := getNameSpaceFromRequest(request.EdgeCluster)
 
 	_, err = edgeClusterProvisioner.DeleteProvision(
 		ctx,
-		&edgeClusterTypes.NewProvisionRequest{
-			Name:                   strings.ToLower(request.EdgeCluster.Name),
-			NameSpace:              hashedNamespace,
-			ClusterPublicIPAddress: request.EdgeCluster.ClusterPublicIPAddress,
+		&edgeClusterTypes.DeleteProvisionRequest{
+			Name:      strings.ToLower(request.EdgeCluster.Name),
+			NameSpace: hashedNamespace,
 		})
+
+	if err != nil {
+		return nil, NewUnknownErrorWithError("Failed to update the existing edge cluster provision", err)
+	}
+
+	_, err = service.repositoryService.DeleteEdgeCluster(ctx, &repository.DeleteEdgeClusterRequest{
+		EdgeClusterID: request.EdgeClusterID,
+	})
 
 	if err != nil {
 		return &DeleteEdgeClusterResponse{

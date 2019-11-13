@@ -51,6 +51,16 @@ var _ = Describe("Business Service Tests", func() {
 			NewProvision(ctx, gomock.Any()).
 			Return(&edgeClusterTypes.NewProvisionResponse{}, nil).
 			AnyTimes()
+		mockEdgeClusterProvisionerService.
+			EXPECT().
+			UpdateProvisionWithRetry(ctx, gomock.Any()).
+			Return(&edgeClusterTypes.UpdateProvisionResponse{}, nil).
+			AnyTimes()
+		mockEdgeClusterProvisionerService.
+			EXPECT().
+			DeleteProvision(ctx, gomock.Any()).
+			Return(&edgeClusterTypes.DeleteProvisionResponse{}, nil).
+			AnyTimes()
 
 		mockEdgeClusterFactoryService = edgeClusterFactoryMock.NewMockEdgeClusterFactoryContract(mockCtrl)
 		mockEdgeClusterFactoryService.
@@ -136,7 +146,7 @@ var _ = Describe("Business Service Tests", func() {
 					Ω(response.Err).Should(BeNil())
 				})
 
-				When("And edge cluster repository CreateEdgeCluster return EdgeClusterAlreadyExistError", func() {
+				When("edge cluster repository CreateEdgeCluster return EdgeClusterAlreadyExistError", func() {
 					It("should return EdgeClusterAlreadyExistsError", func() {
 						expectedError := repository.NewEdgeClusterAlreadyExistsError()
 						mockRepositoryService.
@@ -150,7 +160,7 @@ var _ = Describe("Business Service Tests", func() {
 					})
 				})
 
-				When("And edge cluster repository CreateEdgeCluster return any other error", func() {
+				When("edge cluster repository CreateEdgeCluster return any other error", func() {
 					It("should return UnknownError", func() {
 						expectedError := errors.New(cuid.New())
 						mockRepositoryService.
@@ -164,7 +174,7 @@ var _ = Describe("Business Service Tests", func() {
 					})
 				})
 
-				When("And edge cluster repository CreateEdgeCluster return no error", func() {
+				When("edge cluster repository CreateEdgeCluster return no error", func() {
 					It("should return expected details", func() {
 						expectedResponse := repository.CreateEdgeClusterResponse{
 							EdgeClusterID: cuid.New(),
@@ -230,7 +240,7 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("And edge cluster repository ReadEdgeCluster cannot find provided edge cluster", func() {
+			When("edge cluster repository ReadEdgeCluster cannot find provided edge cluster", func() {
 				It("should return EdgeClusterNotFoundError", func() {
 					expectedError := repository.NewEdgeClusterNotFoundError(request.EdgeClusterID)
 					mockRepositoryService.
@@ -244,7 +254,7 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("And edge cluster repository ReadEdgeCluster return any other error", func() {
+			When("edge cluster repository ReadEdgeCluster return any other error", func() {
 				It("should return UnknownError", func() {
 					expectedError := errors.New(cuid.New())
 					mockRepositoryService.
@@ -258,7 +268,7 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("And edge cluster repository ReadEdgeCluster return no error", func() {
+			When("edge cluster repository ReadEdgeCluster return no error", func() {
 				It("should return the edgeClusterID", func() {
 					expectedResponse := repository.ReadEdgeClusterResponse{
 						EdgeCluster: models.EdgeCluster{
@@ -318,7 +328,7 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("And edge cluster repository UpdateEdgeCluster cannot find provided edge cluster", func() {
+			When("edge cluster repository UpdateEdgeCluster cannot find provided edge cluster", func() {
 				It("should return EdgeClusterNotFoundError", func() {
 					expectedError := repository.NewEdgeClusterNotFoundError(request.EdgeClusterID)
 					mockRepositoryService.
@@ -332,7 +342,7 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("And edge cluster repository UpdateEdgeCluster return any other error", func() {
+			When("edge cluster repository UpdateEdgeCluster return any other error", func() {
 				It("should return UnknownError", func() {
 					expectedError := errors.New(cuid.New())
 					mockRepositoryService.
@@ -346,7 +356,7 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("And edge cluster repository UpdateEdgeCluster return no error", func() {
+			When("edge cluster repository UpdateEdgeCluster return no error", func() {
 				It("should return expected details", func() {
 					expectedResponse := repository.UpdateEdgeClusterResponse{
 						EdgeCluster: models.EdgeCluster{
