@@ -13,7 +13,7 @@ type UpdateProvisionRequest struct {
 	Name                   string
 	NameSpace              string
 	ClusterPublicIPAddress string
-	Replicas               int32
+	K3SClusterSecret       string
 }
 
 // NewProvisionResponse contains the result of provisioning a new supported edge cliuster

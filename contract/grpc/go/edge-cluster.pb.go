@@ -382,10 +382,13 @@ type UpdateEdgeClusterRequest struct {
 	// The unique edge cluster identifier
 	EdgeClusterID string `protobuf:"bytes,1,opt,name=edgeClusterID,proto3" json:"edgeClusterID,omitempty"`
 	// The edge cluster object contains the updated edge cluster details to update
-	EdgeCluster          *EdgeCluster `protobuf:"bytes,2,opt,name=edgeCluster,proto3" json:"edgeCluster,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
-	XXX_unrecognized     []byte       `json:"-"`
-	XXX_sizecache        int32        `json:"-"`
+	EdgeCluster *EdgeCluster `protobuf:"bytes,2,opt,name=edgeCluster,proto3" json:"edgeCluster,omitempty"`
+	//Pod replicas value to update
+	//temporary put it out of edge cluster
+	K3SClusterSecret     string   `protobuf:"bytes,3,opt,name=K3SClusterSecret,proto3" json:"K3SClusterSecret,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *UpdateEdgeClusterRequest) Reset()         { *m = UpdateEdgeClusterRequest{} }
@@ -425,6 +428,13 @@ func (m *UpdateEdgeClusterRequest) GetEdgeCluster() *EdgeCluster {
 		return m.EdgeCluster
 	}
 	return nil
+}
+
+func (m *UpdateEdgeClusterRequest) GetK3SClusterSecret() string {
+	if m != nil {
+		return m.K3SClusterSecret
+	}
+	return ""
 }
 
 //*
@@ -501,10 +511,12 @@ func (m *UpdateEdgeClusterResponse) GetCursor() string {
 // Request to delete an existing edge cluster
 type DeleteEdgeClusterRequest struct {
 	// The unique edge cluster identifier
-	EdgeClusterID        string   `protobuf:"bytes,1,opt,name=edgeClusterID,proto3" json:"edgeClusterID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	EdgeClusterID string `protobuf:"bytes,1,opt,name=edgeClusterID,proto3" json:"edgeClusterID,omitempty"`
+	// The edge cluster object contains the edge cluster details to delete
+	EdgeCluster          *EdgeCluster `protobuf:"bytes,2,opt,name=edgeCluster,proto3" json:"edgeCluster,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
 }
 
 func (m *DeleteEdgeClusterRequest) Reset()         { *m = DeleteEdgeClusterRequest{} }
@@ -537,6 +549,13 @@ func (m *DeleteEdgeClusterRequest) GetEdgeClusterID() string {
 		return m.EdgeClusterID
 	}
 	return ""
+}
+
+func (m *DeleteEdgeClusterRequest) GetEdgeCluster() *EdgeCluster {
+	if m != nil {
+		return m.EdgeCluster
+	}
+	return nil
 }
 
 //*

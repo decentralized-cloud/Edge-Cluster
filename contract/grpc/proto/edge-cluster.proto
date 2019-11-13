@@ -91,6 +91,10 @@ message UpdateEdgeClusterRequest {
 
   // The edge cluster object contains the updated edge cluster details to update
   EdgeCluster edgeCluster = 2;
+
+  //Pod replicas value to update
+  //temporary put it out of edge cluster 
+  string K3SClusterSecret = 3;
 }
 
 /**
@@ -117,6 +121,9 @@ message UpdateEdgeClusterResponse {
 message DeleteEdgeClusterRequest {
   // The unique edge cluster identifier
   string edgeClusterID = 1;
+
+  // The edge cluster object contains the edge cluster details to delete
+  EdgeCluster edgeCluster = 2;
 }
 
 /**

@@ -98,38 +98,14 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 	request *types.UpdateProvisionRequest) (response *types.UpdateProvisionResponse, err error) {
 	response = nil
 
-	updateClient := service.clientset.AppsV1().Deployments(request.NameSpace)
+	service.logger.Info("Updating Provision With Retry")
 
-	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		result, getErr := updateClient.Get(request.Name, metav1.GetOptions{})
+	err = updateEdgeClient(service, request)
 
-		if getErr != nil {
-			service.logger.Error(
-				"failed to create pod",
-				zap.Error(getErr))
-		}
-
-		//Do what need to be updated
-		//add necessary fileds to update
-		result.Spec.Replicas = &request.Replicas
-		//update image container
-		//result.Spec.Template.Spec.Containers[0].Image = edge.ContainerImage
-
-		_, updateErr := updateClient.Update(result)
-
-		if updateErr != nil {
-			service.logger.Error(
-				"failed to create pod",
-				zap.Error(updateErr))
-		}
-
-		return updateErr
-	})
-
-	if retryErr != nil {
+	if err != nil {
 		service.logger.Error(
-			"failed to create pod",
-			zap.Error(retryErr))
+			"failed to update the pod",
+			zap.Error(err))
 	}
 
 	response = &types.UpdateProvisionResponse{}
@@ -141,23 +117,70 @@ func (service *k3sProvisioner) DeleteProvision(
 	ctx context.Context,
 	request *types.NewProvisionRequest) (response *types.NewProvisionResponse, err error) {
 
-	deleteClient := service.clientset.AppsV1().Deployments(request.NameSpace)
-	deletePolicy := metav1.DeletePropagationForeground
+	service.logger.Info("deleting Provisio")
 
-	deleteErr := deleteClient.Delete(request.Name, &metav1.DeleteOptions{
-		PropagationPolicy: &deletePolicy,
-	})
+	err = deleteEdgeClient(service, request)
 
-	if deleteErr != nil {
+	if err != nil {
 		service.logger.Error(
-			"failed to create pod",
-			zap.Error(deleteErr))
+			"failed to delete pod",
+			zap.Error(err))
 	}
 
 	response = &types.NewProvisionResponse{}
 
 	return
+}
 
+func deleteEdgeClient(service *k3sProvisioner, request *types.NewProvisionRequest) error {
+	deleteClient := service.clientset.AppsV1().Deployments(request.NameSpace)
+	deletePolicy := metav1.DeletePropagationForeground
+
+	err := deleteClient.Delete(request.Name, &metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	})
+
+	return err
+}
+
+func updateEdgeClient(service *k3sProvisioner, request *types.UpdateProvisionRequest) error {
+	updateClient := service.clientset.AppsV1().Deployments(request.NameSpace)
+
+	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		result, getErr := updateClient.Get(request.Name, metav1.GetOptions{})
+
+		if getErr != nil {
+			service.logger.Error(
+				"failed to update the pod",
+				zap.Error(getErr))
+		}
+
+		//Do what need to be updated
+		//add necessary fileds to update
+		for _, container := range result.Spec.Template.Spec.Containers {
+			if container.Name == request.Name {
+				for _, env := range container.Env {
+					if env.Name == "K3S_CLUSTER_SECRET" {
+						env.Value = request.K3SClusterSecret
+					}
+				}
+			}
+		}
+		//update image container
+		//result.Spec.Template.Spec.Containers[0].Image = edge.ContainerImage
+
+		_, updateErr := updateClient.Update(result)
+
+		if updateErr != nil {
+			service.logger.Error(
+				"failed to update the pod",
+				zap.Error(updateErr))
+		}
+
+		return updateErr
+	})
+
+	return retryErr
 }
 
 func createDeployment(service *k3sProvisioner, request *types.NewProvisionRequest) (err error) {
