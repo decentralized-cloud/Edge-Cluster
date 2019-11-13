@@ -59,5 +59,6 @@ type SearchRequest struct {
 type SearchResponse struct {
 	HasPreviousPage bool
 	HasNextPage     bool
+	TotalCount      int64
 	EdgeClusters    []models.EdgeClusterWithCursor
 }
