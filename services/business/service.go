@@ -82,6 +82,7 @@ func (service *businessService) CreateEdgeCluster(
 	return &CreateEdgeClusterResponse{
 		EdgeClusterID: response.EdgeClusterID,
 		EdgeCluster:   response.EdgeCluster,
+		Cursor:        response.Cursor,
 	}, nil
 }
 
@@ -127,6 +128,7 @@ func (service *businessService) UpdateEdgeCluster(
 
 	return &UpdateEdgeClusterResponse{
 		EdgeCluster: response.EdgeCluster,
+		Cursor:      response.Cursor,
 	}, nil
 }
 

@@ -15,6 +15,7 @@ type CreateEdgeClusterRequest struct {
 type CreateEdgeClusterResponse struct {
 	EdgeClusterID string
 	EdgeCluster   models.EdgeCluster
+	Cursor        string
 }
 
 // ReadEdgeClusterRequest contains the request to read an existing edge cluster
@@ -36,6 +37,7 @@ type UpdateEdgeClusterRequest struct {
 // UpdateEdgeClusterResponse contains the result of updating an existing edge cluster
 type UpdateEdgeClusterResponse struct {
 	EdgeCluster models.EdgeCluster
+	Cursor      string
 }
 
 // DeleteEdgeClusterRequest contains the request to delete an existing edge cluster

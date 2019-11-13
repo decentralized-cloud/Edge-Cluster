@@ -128,13 +128,7 @@ var _ = Describe("Business Service Tests", func() {
 								mappedRequest *repository.CreateEdgeClusterRequest) (*repository.CreateEdgeClusterResponse, error) {
 								Ω(mappedRequest.EdgeCluster).Should(Equal(request.EdgeCluster))
 
-								return &repository.CreateEdgeClusterResponse{
-									EdgeClusterID: cuid.New(),
-									EdgeCluster: models.EdgeCluster{
-										TenantID:               cuid.New(),
-										Name:                   cuid.New(),
-										ClusterPublicIPAddress: cuid.New(),
-									}}, nil
+								return &repository.CreateEdgeClusterResponse{}, nil
 							})
 
 					response, err := sut.CreateEdgeCluster(ctx, &request)
@@ -178,7 +172,9 @@ var _ = Describe("Business Service Tests", func() {
 								TenantID:               cuid.New(),
 								Name:                   cuid.New(),
 								ClusterPublicIPAddress: cuid.New(),
-							}}
+							},
+							Cursor: cuid.New(),
+						}
 
 						mockRepositoryService.
 							EXPECT().
@@ -264,16 +260,19 @@ var _ = Describe("Business Service Tests", func() {
 
 			When("And edge cluster repository ReadEdgeCluster return no error", func() {
 				It("should return the edgeClusterID", func() {
-					edgeCluster := models.EdgeCluster{Name: cuid.New()}
+					expectedResponse := repository.ReadEdgeClusterResponse{
+						EdgeCluster: models.EdgeCluster{
+							Name: cuid.New(),
+						}}
 					mockRepositoryService.
 						EXPECT().
 						ReadEdgeCluster(gomock.Any(), gomock.Any()).
-						Return(&repository.ReadEdgeClusterResponse{EdgeCluster: edgeCluster}, nil)
+						Return(&expectedResponse, nil)
 
 					response, err := sut.ReadEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(BeNil())
-					assertEdgeCluster(response.EdgeCluster, edgeCluster)
+					assertEdgeCluster(response.EdgeCluster, expectedResponse.EdgeCluster)
 				})
 			})
 		})
@@ -354,7 +353,9 @@ var _ = Describe("Business Service Tests", func() {
 							Name:                   cuid.New(),
 							TenantID:               cuid.New(),
 							ClusterPublicIPAddress: cuid.New(),
-						}}
+						},
+						Cursor: cuid.New(),
+					}
 					mockRepositoryService.
 						EXPECT().
 						UpdateEdgeCluster(gomock.Any(), gomock.Any()).
