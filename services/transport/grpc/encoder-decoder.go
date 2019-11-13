@@ -244,7 +244,7 @@ func encodeSearchResponse(
 			EdgeClusters: funk.Map(castedResponse.EdgeClusters, func(edgeCluster models.EdgeClusterWithCursor) *edgeClusterGRPCContract.EdgeClusterWithCursor {
 				return &edgeClusterGRPCContract.EdgeClusterWithCursor{
 					EdgeClusterID: edgeCluster.EdgeClusterID,
-					Edgecluster: &edgeClusterGRPCContract.EdgeCluster{
+					EdgeCluster: &edgeClusterGRPCContract.EdgeCluster{
 						TenantID:               edgeCluster.EdgeCluster.TenantID,
 						Name:                   edgeCluster.EdgeCluster.Name,
 						ClusterPublicIPAddress: edgeCluster.EdgeCluster.ClusterPublicIPAddress,
