@@ -26,7 +26,6 @@ type UpdateProvisionRequest struct {
 
 // DeleteProvisionRequest contains the request to delete an existing provision
 type DeleteProvisionRequest struct {
-	Name      string
 	NameSpace string
 }
 

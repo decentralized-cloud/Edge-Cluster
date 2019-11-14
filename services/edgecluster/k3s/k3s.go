@@ -135,7 +135,7 @@ func deleteEdgeClient(service *k3sProvisioner, request *types.DeleteProvisionReq
 	deleteClient := service.clientset.AppsV1().Deployments(request.NameSpace)
 	deletePolicy := metav1.DeletePropagationForeground
 
-	err := deleteClient.Delete(request.Name, &metav1.DeleteOptions{
+	err := deleteClient.Delete(request.NameSpace, &metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	})
 

@@ -120,9 +120,6 @@ message UpdateEdgeClusterResponse {
 message DeleteEdgeClusterRequest {
   // The unique edge cluster identifier
   string edgeClusterID = 1;
-
-  // The edge cluster object contains the edge cluster details to delete
-  EdgeCluster edgeCluster = 2;
 }
 
 /**
