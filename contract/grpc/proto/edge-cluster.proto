@@ -91,6 +91,9 @@ message UpdateEdgeClusterRequest {
 
   // The edge cluster object contains the updated edge cluster details to update
   EdgeCluster edgeCluster = 2;
+
+  //K3s secret value to update
+  string K3SClusterSecret = 3;
 }
 
 /**

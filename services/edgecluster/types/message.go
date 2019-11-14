@@ -11,3 +11,24 @@ type NewProvisionRequest struct {
 // NewProvisionResponse contains the result of provisioning a new supported edge cliuster
 type NewProvisionResponse struct {
 }
+
+// UpdateProvisionResponse contains the result of updating an existing supported edge cliuster
+type UpdateProvisionResponse struct {
+}
+
+// UpdateProvisionRequest contains the request to update an existing supported edge cluser
+type UpdateProvisionRequest struct {
+	Name                   string
+	NameSpace              string
+	ClusterPublicIPAddress string
+	K3SClusterSecret       string
+}
+
+// DeleteProvisionRequest contains the request to delete an existing provision
+type DeleteProvisionRequest struct {
+	NameSpace string
+}
+
+// DeleteProvisionResponse contains the result of deleting an existing edge cluster provision
+type DeleteProvisionResponse struct {
+}

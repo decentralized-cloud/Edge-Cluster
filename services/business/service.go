@@ -46,6 +46,17 @@ func NewBusinessService(
 func (service *businessService) CreateEdgeCluster(
 	ctx context.Context,
 	request *CreateEdgeClusterRequest) (*CreateEdgeClusterResponse, error) {
+
+	response, err := service.repositoryService.CreateEdgeCluster(ctx, &repository.CreateEdgeClusterRequest{
+		EdgeCluster: request.EdgeCluster,
+	})
+
+	if err != nil {
+		return &CreateEdgeClusterResponse{
+			Err: mapRepositoryError(err, ""),
+		}, nil
+	}
+
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
 	if err != nil {
 		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
@@ -54,8 +65,7 @@ func (service *businessService) CreateEdgeCluster(
 	//Trim EdgeCluster Name value
 	request.EdgeCluster.Name = strings.Trim(request.EdgeCluster.Name, " ")
 
-	namespace := fmt.Sprintf("%s-%s", request.EdgeCluster.TenantID, request.EdgeCluster.Name)
-	hashedNamespace := fmt.Sprintf("%x", sha256.Sum224([]byte(namespace)))
+	hashedNamespace := getNameSpaceFromEdgeClusterID(response.EdgeClusterID)
 
 	_, err = edgeClusterProvisioner.NewProvision(
 		ctx,
@@ -67,16 +77,6 @@ func (service *businessService) CreateEdgeCluster(
 
 	if err != nil {
 		return nil, NewUnknownErrorWithError("Failed to provision egde cluster", err)
-	}
-
-	response, err := service.repositoryService.CreateEdgeCluster(ctx, &repository.CreateEdgeClusterRequest{
-		EdgeCluster: request.EdgeCluster,
-	})
-
-	if err != nil {
-		return &CreateEdgeClusterResponse{
-			Err: mapRepositoryError(err, ""),
-		}, nil
 	}
 
 	return &CreateEdgeClusterResponse{
@@ -115,6 +115,7 @@ func (service *businessService) ReadEdgeCluster(
 func (service *businessService) UpdateEdgeCluster(
 	ctx context.Context,
 	request *UpdateEdgeClusterRequest) (*UpdateEdgeClusterResponse, error) {
+
 	response, err := service.repositoryService.UpdateEdgeCluster(ctx, &repository.UpdateEdgeClusterRequest{
 		EdgeClusterID: request.EdgeClusterID,
 		EdgeCluster:   request.EdgeCluster,
@@ -124,6 +125,29 @@ func (service *businessService) UpdateEdgeCluster(
 		return &UpdateEdgeClusterResponse{
 			Err: mapRepositoryError(err, request.EdgeClusterID),
 		}, nil
+	}
+
+	//Trim EdgeCluster values
+	request.EdgeCluster.Name = strings.Trim(request.EdgeCluster.Name, " ")
+
+	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
+	if err != nil {
+		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
+	}
+
+	hashedNamespace := getNameSpaceFromEdgeClusterID(request.EdgeClusterID)
+
+	_, err = edgeClusterProvisioner.UpdateProvisionWithRetry(
+		ctx,
+		&edgeClusterTypes.UpdateProvisionRequest{
+			Name:                   strings.ToLower(request.EdgeCluster.Name),
+			NameSpace:              hashedNamespace,
+			ClusterPublicIPAddress: request.EdgeCluster.ClusterPublicIPAddress,
+			K3SClusterSecret:       request.K3SClusterSecret,
+		})
+
+	if err != nil {
+		return nil, NewUnknownErrorWithError("Failed to update the existing edge cluster provision", err)
 	}
 
 	return &UpdateEdgeClusterResponse{
@@ -139,6 +163,7 @@ func (service *businessService) UpdateEdgeCluster(
 func (service *businessService) DeleteEdgeCluster(
 	ctx context.Context,
 	request *DeleteEdgeClusterRequest) (*DeleteEdgeClusterResponse, error) {
+
 	_, err := service.repositoryService.DeleteEdgeCluster(ctx, &repository.DeleteEdgeClusterRequest{
 		EdgeClusterID: request.EdgeClusterID,
 	})
@@ -147,6 +172,23 @@ func (service *businessService) DeleteEdgeCluster(
 		return &DeleteEdgeClusterResponse{
 			Err: mapRepositoryError(err, request.EdgeClusterID),
 		}, nil
+	}
+
+	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
+	if err != nil {
+		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
+	}
+
+	hashedNamespace := getNameSpaceFromEdgeClusterID(request.EdgeClusterID)
+
+	_, err = edgeClusterProvisioner.DeleteProvision(
+		ctx,
+		&edgeClusterTypes.DeleteProvisionRequest{
+			NameSpace: hashedNamespace,
+		})
+
+	if err != nil {
+		return nil, NewUnknownErrorWithError("Failed to delete the existing edge cluster provision", err)
 	}
 
 	return &DeleteEdgeClusterResponse{}, nil
@@ -190,4 +232,8 @@ func mapRepositoryError(err error, edgeClusterID string) error {
 	}
 
 	return NewUnknownErrorWithError("", err)
+}
+
+func getNameSpaceFromEdgeClusterID(edgeClusterID string) string {
+	return fmt.Sprintf("%x", sha256.Sum224([]byte(edgeClusterID)))
 }

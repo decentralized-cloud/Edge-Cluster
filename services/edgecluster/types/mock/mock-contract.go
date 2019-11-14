@@ -86,3 +86,33 @@ func (mr *MockEdgeClusterProvisionerContractMockRecorder) NewProvision(ctx, requ
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewProvision", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).NewProvision), ctx, request)
 }
+
+// UpdateProvisionWithRetry mocks base method
+func (m *MockEdgeClusterProvisionerContract) UpdateProvisionWithRetry(ctx context.Context, request *types.UpdateProvisionRequest) (*types.UpdateProvisionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateProvisionWithRetry", ctx, request)
+	ret0, _ := ret[0].(*types.UpdateProvisionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateProvisionWithRetry indicates an expected call of UpdateProvisionWithRetry
+func (mr *MockEdgeClusterProvisionerContractMockRecorder) UpdateProvisionWithRetry(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProvisionWithRetry", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).UpdateProvisionWithRetry), ctx, request)
+}
+
+// DeleteProvision mocks base method
+func (m *MockEdgeClusterProvisionerContract) DeleteProvision(ctx context.Context, request *types.DeleteProvisionRequest) (*types.DeleteProvisionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteProvision", ctx, request)
+	ret0, _ := ret[0].(*types.DeleteProvisionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteProvision indicates an expected call of DeleteProvision
+func (mr *MockEdgeClusterProvisionerContractMockRecorder) DeleteProvision(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProvision", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).DeleteProvision), ctx, request)
+}
