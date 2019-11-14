@@ -132,7 +132,7 @@ func (service *businessService) UpdateEdgeCluster(
 
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
 	if err != nil {
-		return nil, NewUnknownErrorWithError("Failed to update the egde cluster", err)
+		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
 	}
 
 	hashedNamespace := getNameSpaceFromEdgeClusterID(request.EdgeClusterID)
@@ -175,6 +175,9 @@ func (service *businessService) DeleteEdgeCluster(
 	}
 
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
+	if err != nil {
+		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
+	}
 
 	hashedNamespace := getNameSpaceFromEdgeClusterID(request.EdgeClusterID)
 
@@ -185,7 +188,7 @@ func (service *businessService) DeleteEdgeCluster(
 		})
 
 	if err != nil {
-		return nil, NewUnknownErrorWithError("Failed to update the existing edge cluster provision", err)
+		return nil, NewUnknownErrorWithError("Failed to delete the existing edge cluster provision", err)
 	}
 
 	return &DeleteEdgeClusterResponse{}, nil
