@@ -3,9 +3,6 @@ package business
 
 import (
 	"context"
-	"crypto/sha256"
-	"fmt"
-	"strings"
 
 	edgeClusterTypes "github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	"github.com/decentralized-cloud/edge-cluster/services/repository"
@@ -62,16 +59,10 @@ func (service *businessService) CreateEdgeCluster(
 		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
 	}
 
-	//Trim EdgeCluster Name value
-	request.EdgeCluster.Name = strings.Trim(request.EdgeCluster.Name, " ")
-
-	hashedNamespace := getNameSpaceFromEdgeClusterID(response.EdgeClusterID)
-
 	_, err = edgeClusterProvisioner.NewProvision(
 		ctx,
 		&edgeClusterTypes.NewProvisionRequest{
-			Name:                   strings.ToLower(request.EdgeCluster.Name),
-			NameSpace:              hashedNamespace,
+			EdgeClusterID:          response.EdgeClusterID,
 			ClusterPublicIPAddress: request.EdgeCluster.ClusterPublicIPAddress,
 		})
 
@@ -127,21 +118,14 @@ func (service *businessService) UpdateEdgeCluster(
 		}, nil
 	}
 
-	//Trim EdgeCluster values
-	request.EdgeCluster.Name = strings.Trim(request.EdgeCluster.Name, " ")
-
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
 	if err != nil {
 		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
 	}
 
-	hashedNamespace := getNameSpaceFromEdgeClusterID(request.EdgeClusterID)
-
 	_, err = edgeClusterProvisioner.UpdateProvisionWithRetry(
 		ctx,
 		&edgeClusterTypes.UpdateProvisionRequest{
-			Name:                   strings.ToLower(request.EdgeCluster.Name),
-			NameSpace:              hashedNamespace,
 			ClusterPublicIPAddress: request.EdgeCluster.ClusterPublicIPAddress,
 			K3SClusterSecret:       request.K3SClusterSecret,
 		})
@@ -179,12 +163,10 @@ func (service *businessService) DeleteEdgeCluster(
 		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
 	}
 
-	hashedNamespace := getNameSpaceFromEdgeClusterID(request.EdgeClusterID)
-
 	_, err = edgeClusterProvisioner.DeleteProvision(
 		ctx,
 		&edgeClusterTypes.DeleteProvisionRequest{
-			NameSpace: hashedNamespace,
+			EdgeClusterID: request.EdgeClusterID,
 		})
 
 	if err != nil {
@@ -232,8 +214,4 @@ func mapRepositoryError(err error, edgeClusterID string) error {
 	}
 
 	return NewUnknownErrorWithError("", err)
-}
-
-func getNameSpaceFromEdgeClusterID(edgeClusterID string) string {
-	return fmt.Sprintf("%x", sha256.Sum224([]byte(edgeClusterID)))
 }
