@@ -1,0 +1,10 @@
+{{- if .Values.clusterRole.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "edge-cluster.clusterRoleName" . }}
+rules:
+  - apiGroups: ["", "apps"]
+    resources: ["deployments", "replicasets", "pods", "services", "namespaces"]
+    verbs: ["create", "get", "delete", "update", "edit", "watch", "exec", "list"]
+{{- end -}}

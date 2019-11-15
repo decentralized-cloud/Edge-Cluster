@@ -52,6 +52,28 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{/*
+Create the name of the cluster role to use
+*/}}
+{{- define "edge-cluster.clusterRoleName" -}}
+{{- if .Values.clusterRole.create -}}
+    {{ default (include "edge-cluster.fullname" .) .Values.clusterRole.name }}
+{{- else -}}
+    {{ default "default" .Values.clusterRole.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the name of the cluster role binding to use
+*/}}
+{{- define "edge-cluster.clusterRoleBindingName" -}}
+{{- if .Values.clusterRoleBinding.create -}}
+    {{ default (include "edge-cluster.fullname" .) .Values.clusterRoleBinding.name }}
+{{- else -}}
+    {{ default "default" .Values.clusterRoleBinding.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "edge-cluster.serviceAccountName" -}}
