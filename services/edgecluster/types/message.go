@@ -3,23 +3,22 @@ package types
 
 // NewProvisionRequest contains the request to provision a new supported edge cluser
 type NewProvisionRequest struct {
-	EdgeClusterID          string
-	ClusterPublicIPAddress string
+	EdgeClusterID    string
+	K3SClusterSecret string
 }
 
 // NewProvisionResponse contains the result of provisioning a new supported edge cliuster
 type NewProvisionResponse struct {
 }
 
-// UpdateProvisionResponse contains the result of updating an existing supported edge cliuster
-type UpdateProvisionResponse struct {
-}
-
 // UpdateProvisionRequest contains the request to update an existing supported edge cluser
 type UpdateProvisionRequest struct {
-	EdgeClusterID          string
-	ClusterPublicIPAddress string
-	K3SClusterSecret       string
+	EdgeClusterID    string
+	K3SClusterSecret string
+}
+
+// UpdateProvisionResponse contains the result of updating an existing supported edge cliuster
+type UpdateProvisionResponse struct {
 }
 
 // DeleteProvisionRequest contains the request to delete an existing provision
