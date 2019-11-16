@@ -106,6 +106,8 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 	request *types.UpdateProvisionRequest) (response *types.UpdateProvisionResponse, err error) {
 	response = nil
 
+	service.logger.Info("metadata", zap.Any("request", request))
+
 	service.logger.Info("Updating Provision With Retry")
 
 	nameSpace, clusterName := getMetaData(request.EdgeClusterID)
@@ -181,7 +183,7 @@ func updateEdgeClient(service *k3sProvisioner,
 	updateClient := service.clientset.AppsV1().Deployments(namespace)
 
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		result, getErr := updateClient.Get(namespace, metav1.GetOptions{})
+		result, getErr := updateClient.Get(clusterName, metav1.GetOptions{})
 
 		if getErr != nil {
 			service.logger.Error(
@@ -192,6 +194,9 @@ func updateEdgeClient(service *k3sProvisioner,
 		//Do what need to be updated
 		//add necessary fileds to update
 		for _, container := range result.Spec.Template.Spec.Containers {
+
+			service.logger.Info("update value", zap.String("name:", container.Name))
+
 			if container.Name == clusterName {
 				for _, env := range container.Env {
 					if env.Name == "K3S_CLUSTER_SECRET" {

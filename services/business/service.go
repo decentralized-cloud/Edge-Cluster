@@ -126,6 +126,7 @@ func (service *businessService) UpdateEdgeCluster(
 	_, err = edgeClusterProvisioner.UpdateProvisionWithRetry(
 		ctx,
 		&edgeClusterTypes.UpdateProvisionRequest{
+			EdgeClusterID:          request.EdgeClusterID,
 			ClusterPublicIPAddress: request.EdgeCluster.ClusterPublicIPAddress,
 			K3SClusterSecret:       request.K3SClusterSecret,
 		})
