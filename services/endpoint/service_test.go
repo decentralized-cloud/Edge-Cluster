@@ -22,10 +22,6 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-const (
-	clusterPublicIPAddress = "10.0.0.230"
-)
-
 func TestEndpointCreatorService(t *testing.T) {
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -88,18 +84,18 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				endpoint = sut.CreateEdgeClusterEndpoint()
 				request = business.CreateEdgeClusterRequest{
 					EdgeCluster: models.EdgeCluster{
-						TenantID:               cuid.New(),
-						Name:                   cuid.New(),
-						ClusterPublicIPAddress: clusterPublicIPAddress,
+						TenantID:         cuid.New(),
+						Name:             cuid.New(),
+						K3SClusterSecret: cuid.New(),
 					},
 				}
 
 				response = business.CreateEdgeClusterResponse{
 					EdgeClusterID: cuid.New(),
 					EdgeCluster: models.EdgeCluster{
-						TenantID:               cuid.New(),
-						Name:                   cuid.New(),
-						ClusterPublicIPAddress: cuid.New(),
+						TenantID:         cuid.New(),
+						Name:             cuid.New(),
+						K3SClusterSecret: cuid.New(),
 					},
 					Cursor: cuid.New(),
 				}
@@ -219,9 +215,9 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 
 				response = business.ReadEdgeClusterResponse{
 					EdgeCluster: models.EdgeCluster{
-						TenantID:               cuid.New(),
-						Name:                   cuid.New(),
-						ClusterPublicIPAddress: clusterPublicIPAddress,
+						TenantID:         cuid.New(),
+						Name:             cuid.New(),
+						K3SClusterSecret: cuid.New(),
 					},
 				}
 			})
@@ -336,16 +332,16 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				request = business.UpdateEdgeClusterRequest{
 					EdgeClusterID: cuid.New(),
 					EdgeCluster: models.EdgeCluster{
-						TenantID:               cuid.New(),
-						Name:                   cuid.New(),
-						ClusterPublicIPAddress: clusterPublicIPAddress,
+						TenantID:         cuid.New(),
+						Name:             cuid.New(),
+						K3SClusterSecret: cuid.New(),
 					}}
 
 				response = business.UpdateEdgeClusterResponse{
 					EdgeCluster: models.EdgeCluster{
-						TenantID:               cuid.New(),
-						Name:                   cuid.New(),
-						ClusterPublicIPAddress: cuid.New(),
+						TenantID:         cuid.New(),
+						Name:             cuid.New(),
+						K3SClusterSecret: cuid.New(),
 					},
 					Cursor: cuid.New(),
 				}
@@ -613,9 +609,9 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 					edgeClusters = append(edgeClusters, models.EdgeClusterWithCursor{
 						EdgeClusterID: cuid.New(),
 						EdgeCluster: models.EdgeCluster{
-							Name:                   cuid.New(),
-							TenantID:               cuid.New(),
-							ClusterPublicIPAddress: clusterPublicIPAddress,
+							Name:             cuid.New(),
+							TenantID:         cuid.New(),
+							K3SClusterSecret: cuid.New(),
 						},
 						Cursor: cuid.New(),
 					})

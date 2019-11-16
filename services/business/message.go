@@ -32,9 +32,8 @@ type ReadEdgeClusterResponse struct {
 
 // UpdateEdgeClusterRequest contains the request to update an existing edge cluster
 type UpdateEdgeClusterRequest struct {
-	EdgeClusterID    string
-	EdgeCluster      models.EdgeCluster
-	K3SClusterSecret string
+	EdgeClusterID string
+	EdgeCluster   models.EdgeCluster
 }
 
 // UpdateEdgeClusterResponse contains the result of updating an existing edge cluster
