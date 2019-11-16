@@ -68,22 +68,22 @@ func (service *k3sProvisioner) NewProvision(
 	request *types.NewProvisionRequest) (response *types.NewProvisionResponse, err error) {
 	response = nil
 
-	var nameSpace string = ""
+	nameSpace, clusterName := getMetaData(request.EdgeClusterID)
 
-	if request.EdgeClusterID == "" {
+	service.logger.Info("metadata",
+		zap.String("nameSpace", nameSpace),
+		zap.String("name", clusterName))
+
+	if nameSpace == "" {
 		nameSpace = apiv1.NamespaceDefault
-	} else {
-		nameSpace = getHashCodeFromEdgeClusterID(request.EdgeClusterID)
 	}
-
-	clusterName := getHashCodeFromEdgeClusterID(request.EdgeClusterID)
 
 	//if not exisit create a namespace for the deployment
 	if err = createProvisionNameSpace(service, nameSpace); err != nil {
 		return
 	}
 
-	// create pod
+	// create edge cluster
 	if err = createDeployment(service, nameSpace, clusterName, request.ClusterPublicIPAddress); err != nil {
 		return
 	}
@@ -108,15 +108,17 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 
 	service.logger.Info("Updating Provision With Retry")
 
-	nameSpace := getHashCodeFromEdgeClusterID(request.EdgeClusterID)
+	nameSpace, clusterName := getMetaData(request.EdgeClusterID)
 
-	clusterName := getHashCodeFromEdgeClusterID(request.EdgeClusterID)
+	service.logger.Info("metadata",
+		zap.String("nameSpace", nameSpace),
+		zap.String("name", clusterName))
 
 	err = updateEdgeClient(service, nameSpace, clusterName, request.K3SClusterSecret)
 
 	if err != nil {
 		service.logger.Error(
-			"failed to update the pod",
+			"failed to update the edge cluster",
 			zap.Error(err))
 	}
 
@@ -130,14 +132,25 @@ func (service *k3sProvisioner) DeleteProvision(
 	request *types.DeleteProvisionRequest) (response *types.DeleteProvisionResponse, err error) {
 	service.logger.Info("deleting Provisio")
 
-	nameSpace := getHashCodeFromEdgeClusterID(request.EdgeClusterID)
-	clusterName := getHashCodeFromEdgeClusterID(request.EdgeClusterID)
+	nameSpace, clusterName := getMetaData(request.EdgeClusterID)
+
+	service.logger.Info("metadata",
+		zap.String("nameSpace", nameSpace),
+		zap.String("name", clusterName))
 
 	err = deleteEdgeClient(service, nameSpace, clusterName)
 
 	if err != nil {
 		service.logger.Error(
-			"failed to delete pod",
+			"failed to delete edge cluster",
+			zap.Error(err))
+	}
+
+	err = deleteProvisionNameSpace(service, nameSpace)
+
+	if err != nil {
+		service.logger.Error(
+			"failed to delete namespace",
 			zap.Error(err))
 	}
 
@@ -172,7 +185,7 @@ func updateEdgeClient(service *k3sProvisioner,
 
 		if getErr != nil {
 			service.logger.Error(
-				"failed to update the pod",
+				"failed to update the edge cluster",
 				zap.Error(getErr))
 		}
 
@@ -194,7 +207,7 @@ func updateEdgeClient(service *k3sProvisioner,
 
 		if updateErr != nil {
 			service.logger.Error(
-				"failed to update the pod",
+				"failed to update the edge custer",
 				zap.Error(updateErr))
 		}
 
@@ -216,7 +229,7 @@ func createDeployment(service *k3sProvisioner,
 	result, err := deploymentClient.Create(deploymentConfig)
 	if err != nil {
 		service.logger.Error(
-			"failed to create pod",
+			"failed to create edge cluster",
 			zap.Error(err),
 			zap.Any("Config", deploymentConfig))
 
@@ -224,8 +237,8 @@ func createDeployment(service *k3sProvisioner,
 	}
 
 	service.logger.Info(
-		"created a pod",
-		zap.String("PodName", result.GetObjectMeta().GetName()))
+		"created a edge cluster",
+		zap.String("Edge cluster Name", result.GetObjectMeta().GetName()))
 
 	return
 }
@@ -286,6 +299,21 @@ func createProvisionNameSpace(service *k3sProvisioner, namespace string) (err er
 	}
 
 	return
+}
+
+func deleteProvisionNameSpace(service *k3sProvisioner, namespace string) (err error) {
+
+	deletePolicy := metav1.DeletePropagationForeground
+
+	if err = service.clientset.CoreV1().Namespaces().Delete(namespace, &metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	}); err != nil {
+		service.logger.Error("failed to delete namespace", zap.Error(err))
+
+		return err
+	}
+
+	return nil
 }
 
 func makeDeploymentConfig(namespace string,
@@ -362,7 +390,7 @@ func makeServiceConfig(namespace string,
 	//todo add anotation to connect metallb
 	service = &apiv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      clusterName + "-s",
+			Name:      clusterName,
 			Namespace: namespace,
 			Labels: map[string]string{
 				"k8s-app": clusterName,
@@ -389,6 +417,23 @@ func makeNameSpaceConfig(namespace string) (ns *v1.Namespace) {
 	return
 }
 
-func getHashCodeFromEdgeClusterID(edgeClusterID string) string {
-	return fmt.Sprintf("%x", sha256.Sum224([]byte(edgeClusterID)))
+func getMetaData(edgeClusterID string) (string, string) {
+
+	var namespace, clustername string = "ns", "edge"
+
+	if edgeClusterID != "" {
+		hashCode := fmt.Sprintf("%x", sha256.Sum224([]byte(edgeClusterID)))
+
+		sequence := []rune(hashCode)
+
+		for i, s := range sequence {
+			if i < 32 {
+				namespace += strings.TrimSpace(string(s))
+			} else {
+				clustername += strings.TrimSpace(string(s))
+			}
+		}
+	}
+
+	return namespace, clustername
 }
