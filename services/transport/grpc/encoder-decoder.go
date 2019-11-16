@@ -107,8 +107,7 @@ func decodeUpdateEdgeClusterRequest(
 	castedRequest := request.(*edgeClusterGRPCContract.UpdateEdgeClusterRequest)
 
 	return &business.UpdateEdgeClusterRequest{
-		EdgeClusterID:    castedRequest.EdgeClusterID,
-		K3SClusterSecret: castedRequest.K3SClusterSecret,
+		EdgeClusterID: castedRequest.EdgeClusterID,
 		EdgeCluster: models.EdgeCluster{
 			TenantID:         castedRequest.EdgeCluster.TenantID,
 			Name:             castedRequest.EdgeCluster.Name,

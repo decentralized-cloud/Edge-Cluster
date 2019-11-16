@@ -131,7 +131,7 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 func (service *k3sProvisioner) DeleteProvision(
 	ctx context.Context,
 	request *types.DeleteProvisionRequest) (response *types.DeleteProvisionResponse, err error) {
-	service.logger.Info("deleting Provisio")
+	service.logger.Info("deleting Provision")
 
 	nameSpace, clusterName := service.getMetaData(request.EdgeClusterID)
 
@@ -252,10 +252,6 @@ func (service *k3sProvisioner) createDeployment(
 			"created a edge cluster",
 			zap.String("Edge cluster Name", result.GetObjectMeta().GetName()))
 	}
-
-	service.logger.Info(
-		"created a edge cluster",
-		zap.String("Edge cluster Name", result.GetObjectMeta().GetName()))
 
 	return
 }
