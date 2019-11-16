@@ -106,8 +106,6 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 	request *types.UpdateProvisionRequest) (response *types.UpdateProvisionResponse, err error) {
 	response = nil
 
-	service.logger.Info("metadata", zap.Any("request", request))
-
 	service.logger.Info("Updating Provision With Retry")
 
 	nameSpace, clusterName := getMetaData(request.EdgeClusterID)
@@ -193,21 +191,17 @@ func updateEdgeClient(service *k3sProvisioner,
 
 		//Do what need to be updated
 		//add necessary fileds to update
-		for _, container := range result.Spec.Template.Spec.Containers {
+		containerIndex := getContainerIndex(result.Spec.Template.Spec.Containers)
+		if containerIndex > -1 {
 
-			service.logger.Info("update value", zap.String("name:", container.Name))
+			envIndex := getEnvIndex(result.Spec.Template.Spec.Containers[containerIndex].Env)
 
-			if container.Name == clusterName {
-				for _, env := range container.Env {
-					if env.Name == "K3S_CLUSTER_SECRET" {
-						env.Value = secretKey
-					}
-				}
-			}
+			result.Spec.Template.Spec.Containers[containerIndex].Env[envIndex].Value = secretKey
 		}
+
 		//update image container
 		//result.Spec.Template.Spec.Containers[0].Image = edge.ContainerImage
-
+		service.logger.Info("config", zap.Any("spec", result))
 		_, updateErr := updateClient.Update(result)
 
 		if updateErr != nil {
@@ -220,6 +214,28 @@ func updateEdgeClient(service *k3sProvisioner,
 	})
 
 	return retryErr
+}
+
+func getContainerIndex(containers []v1.Container) int {
+
+	for index, container := range containers {
+		if container.Name == containerName {
+			return index
+		}
+	}
+
+	return -1
+}
+
+func getEnvIndex(envList []v1.EnvVar) int {
+
+	for index, env := range envList {
+		if env.Name == "K3S_CLUSTER_SECRET" {
+			return index
+		}
+	}
+
+	return -1
 }
 
 func createDeployment(service *k3sProvisioner,
