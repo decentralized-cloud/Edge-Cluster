@@ -84,18 +84,18 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				endpoint = sut.CreateEdgeClusterEndpoint()
 				request = business.CreateEdgeClusterRequest{
 					EdgeCluster: models.EdgeCluster{
-						TenantID:         cuid.New(),
-						Name:             cuid.New(),
-						K3SClusterSecret: cuid.New(),
+						TenantID:      cuid.New(),
+						Name:          cuid.New(),
+						ClusterSecret: cuid.New(),
 					},
 				}
 
 				response = business.CreateEdgeClusterResponse{
 					EdgeClusterID: cuid.New(),
 					EdgeCluster: models.EdgeCluster{
-						TenantID:         cuid.New(),
-						Name:             cuid.New(),
-						K3SClusterSecret: cuid.New(),
+						TenantID:      cuid.New(),
+						Name:          cuid.New(),
+						ClusterSecret: cuid.New(),
 					},
 					Cursor: cuid.New(),
 				}
@@ -215,9 +215,9 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 
 				response = business.ReadEdgeClusterResponse{
 					EdgeCluster: models.EdgeCluster{
-						TenantID:         cuid.New(),
-						Name:             cuid.New(),
-						K3SClusterSecret: cuid.New(),
+						TenantID:      cuid.New(),
+						Name:          cuid.New(),
+						ClusterSecret: cuid.New(),
 					},
 				}
 			})
@@ -332,16 +332,16 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				request = business.UpdateEdgeClusterRequest{
 					EdgeClusterID: cuid.New(),
 					EdgeCluster: models.EdgeCluster{
-						TenantID:         cuid.New(),
-						Name:             cuid.New(),
-						K3SClusterSecret: cuid.New(),
+						TenantID:      cuid.New(),
+						Name:          cuid.New(),
+						ClusterSecret: cuid.New(),
 					}}
 
 				response = business.UpdateEdgeClusterResponse{
 					EdgeCluster: models.EdgeCluster{
-						TenantID:         cuid.New(),
-						Name:             cuid.New(),
-						K3SClusterSecret: cuid.New(),
+						TenantID:      cuid.New(),
+						Name:          cuid.New(),
+						ClusterSecret: cuid.New(),
 					},
 					Cursor: cuid.New(),
 				}
@@ -609,9 +609,9 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 					edgeClusters = append(edgeClusters, models.EdgeClusterWithCursor{
 						EdgeClusterID: cuid.New(),
 						EdgeCluster: models.EdgeCluster{
-							Name:             cuid.New(),
-							TenantID:         cuid.New(),
-							K3SClusterSecret: cuid.New(),
+							Name:          cuid.New(),
+							TenantID:      cuid.New(),
+							ClusterSecret: cuid.New(),
 						},
 						Cursor: cuid.New(),
 					})

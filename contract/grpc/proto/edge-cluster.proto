@@ -42,8 +42,8 @@ message EdgeCluster {
   // The edge cluster name
   string name = 2;
 
-  // K3s secret value to update
-  string k3SClusterSecret = 3;
+  // Cluster secret value
+  string clusterSecret = 3;
 }
 
 

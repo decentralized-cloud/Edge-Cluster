@@ -3,9 +3,9 @@ package models
 
 // EdgeCluster defines the Edge Cluster object
 type EdgeCluster struct {
-	TenantID         string
-	Name             string
-	K3SClusterSecret string
+	TenantID      string
+	Name          string
+	ClusterSecret string
 }
 
 // EdgeClusterWithCursor implements the pair of the edge cluster with a cursor that determines the

@@ -13,7 +13,7 @@ func (val EdgeCluster) Validate() error {
 		validation.Field(&val.TenantID, validation.Required),
 		// Name cannot be empty
 		validation.Field(&val.Name, validation.Required),
-		// K3SClusterSecret cannot be empty
-		validation.Field(&val.K3SClusterSecret, validation.Required),
+		// clusterSecret cannot be empty
+		validation.Field(&val.ClusterSecret, validation.Required),
 	)
 }
