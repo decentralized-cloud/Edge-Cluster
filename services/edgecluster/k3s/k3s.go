@@ -163,58 +163,59 @@ func (service *k3sProvisioner) DeleteProvision(
 func (service *k3sProvisioner) deleteEdgeClient(
 	namespace string,
 	clusterName string) error {
-	deleteClient := service.clientset.AppsV1().Deployments(namespace)
+	client := service.clientset.AppsV1().Deployments(namespace)
 	deletePolicy := metav1.DeletePropagationForeground
-	err := deleteClient.Delete(clusterName, &metav1.DeleteOptions{
+
+	return client.Delete(clusterName, &metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	})
-
-	return err
 }
 
 func (service *k3sProvisioner) updateEdgeClient(
 	namespace string,
 	clusterName string,
 	secretKey string) error {
-	updateClient := service.clientset.AppsV1().Deployments(namespace)
-	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		result, getErr := updateClient.Get(clusterName, metav1.GetOptions{})
+	return retry.RetryOnConflict(
+		retry.DefaultRetry,
+		func() (err error) {
+			client := service.clientset.AppsV1().Deployments(namespace)
 
-		if getErr != nil {
-			service.logger.Error(
-				"failed to update the edge cluster",
-				zap.Error(getErr))
-		}
+			result, err := client.Get(clusterName, metav1.GetOptions{})
+			if err != nil {
+				service.logger.Error(
+					"failed to update the edge cluster",
+					zap.Error(err))
 
-		//Do what need to be updated
-		//add necessary fileds to update
-		containerIndex := getContainerIndex(result.Spec.Template.Spec.Containers)
-		if containerIndex > -1 {
+				return
+			}
 
-			envIndex := getEnvIndex(result.Spec.Template.Spec.Containers[containerIndex].Env)
+			//Do what need to be updated
+			//add necessary fileds to update
+			containerIndex := getContainerIndex(result.Spec.Template.Spec.Containers)
+			if containerIndex > -1 {
+				envIndex := getEnvIndex(result.Spec.Template.Spec.Containers[containerIndex].Env)
 
-			result.Spec.Template.Spec.Containers[containerIndex].Env[envIndex].Value = secretKey
-		}
+				result.Spec.Template.Spec.Containers[containerIndex].Env[envIndex].Value = secretKey
+			}
 
-		//update image container
-		//result.Spec.Template.Spec.Containers[0].Image = edge.ContainerImage
-		service.logger.Info("config", zap.Any("spec", result))
-		_, updateErr := updateClient.Update(result)
+			//update image container
+			//result.Spec.Template.Spec.Containers[0].Image = edge.ContainerImage
+			service.logger.Info("config", zap.Any("spec", result))
 
-		if updateErr != nil {
-			service.logger.Error(
-				"failed to update the edge custer",
-				zap.Error(updateErr))
-		}
+			_, err = client.Update(result)
+			if err != nil {
+				service.logger.Error(
+					"failed to update the edge custer",
+					zap.Error(err))
 
-		return updateErr
-	})
+				return
+			}
 
-	return retryErr
+			return
+		})
 }
 
 func getContainerIndex(containers []v1.Container) int {
-
 	for index, container := range containers {
 		if container.Name == containerName {
 			return index
@@ -225,7 +226,6 @@ func getContainerIndex(containers []v1.Container) int {
 }
 
 func getEnvIndex(envList []v1.EnvVar) int {
-
 	for index, env := range envList {
 		if env.Name == "K3S_CLUSTER_SECRET" {
 			return index
@@ -239,10 +239,10 @@ func (service *k3sProvisioner) createDeployment(
 	namespace string,
 	clusterName string,
 	k3SClusterSecret string) (err error) {
-	deploymentClient := service.clientset.AppsV1().Deployments(namespace)
-	deploymentConfig := service.makeDeploymentConfig(namespace, clusterName, k3SClusterSecret)
+	client := service.clientset.AppsV1().Deployments(namespace)
+	deploymentConfig := service.makeDeploymentConfig(namespace, clusterName, k3SClusterSecret, "10.0.0.1")
 
-	if result, err := deploymentClient.Create(deploymentConfig); err != nil {
+	if result, err := client.Create(deploymentConfig); err != nil {
 		service.logger.Error(
 			"failed to create edge cluster",
 			zap.Error(err),
@@ -268,7 +268,7 @@ func (service *k3sProvisioner) createService(
 			zap.Any("Config", serviceConfig))
 	} else {
 		service.logger.Info(
-			"created a service",
+			"created the service",
 			zap.String("ServiceName", result.GetObjectMeta().GetName()))
 	}
 
@@ -280,27 +280,33 @@ func (service *k3sProvisioner) createProvisionNameSpace(namespace string) (err e
 
 	ns, err := service.clientset.CoreV1().Namespaces().Get(namespace, metav1.GetOptions{})
 	if err != nil && strings.Contains(err.Error(), "not found") {
-		service.logger.Info(err.Error())
-		//create the name space
+		service.logger.Info(
+			"creating namespace",
+			zap.String("namespace", namespace))
 
-		service.logger.Info("creating namespace", zap.String("namespace", namespace))
-
-		newNameSpace := service.makeNameSpaceConfig(namespace)
-
-		if _, err = service.clientset.CoreV1().Namespaces().Create(newNameSpace); err != nil {
-			service.logger.Error("failed to create namespace", zap.Error(err))
+		namespaceConfig := service.makeNameSpaceConfig(namespace)
+		if _, err = service.clientset.CoreV1().Namespaces().Create(namespaceConfig); err != nil {
+			service.logger.Error(
+				"failed to create namespace",
+				zap.Error(err),
+				zap.String("namespace", namespace))
 
 			return
 		}
 
 	} else if err != nil {
-		service.logger.Error("failed to validate the requested namespace", zap.Error(err))
+		service.logger.Error(
+			"failed to validate the requested namespace",
+			zap.Error(err),
+			zap.String("namespace", namespace))
 
 		return
 	}
 
 	if ns != nil && ns.GetName() == namespace {
-		service.logger.Info("the namespace exists")
+		service.logger.Info(
+			"namespace already exists",
+			zap.String("namespace", namespace))
 
 		return
 	}
@@ -325,8 +331,9 @@ func (service *k3sProvisioner) deleteProvisionNameSpace(namespace string) (err e
 
 func (service *k3sProvisioner) makeDeploymentConfig(namespace string,
 	clusterName string,
-	k3SClusterSecret string) (deployment *appsv1.Deployment) {
-	deployment = &appsv1.Deployment{
+	k3SClusterSecret string,
+	advertiseIPAddress string) *appsv1.Deployment {
+	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      clusterName,
 			Namespace: namespace,
@@ -352,7 +359,7 @@ func (service *k3sProvisioner) makeDeploymentConfig(namespace string,
 							Args: []string{
 								"server",
 								"--disable-agent",
-								"--advertise-address=10.0.0.1",
+								fmt.Sprintf("--advertise-address=%s", advertiseIPAddress),
 							},
 							Env: []apiv1.EnvVar{
 								{Name: "K3S_CLUSTER_SECRET", Value: k3SClusterSecret},
@@ -370,8 +377,6 @@ func (service *k3sProvisioner) makeDeploymentConfig(namespace string,
 			},
 		},
 	}
-
-	return
 }
 
 func (service *k3sProvisioner) makeServiceConfig(
@@ -413,28 +418,16 @@ func (service *k3sProvisioner) makeServiceConfig(
 	return
 }
 
-func (service *k3sProvisioner) makeNameSpaceConfig(namespace string) (ns *v1.Namespace) {
-	ns = &v1.Namespace{
+func (service *k3sProvisioner) makeNameSpaceConfig(namespace string) *v1.Namespace {
+	return &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: namespace,
 		},
 	}
-
-	return
 }
 
-func (service *k3sProvisioner) getMetaData(edgeClusterID string) (namespace string, clusterName string) {
-	namespace, clusterName = "ns", "edge"
-	hashCode := fmt.Sprintf("%x", sha256.Sum224([]byte(edgeClusterID)))
-	sequence := []rune(hashCode)
+func (service *k3sProvisioner) getMetaData(edgeClusterID string) (string, string) {
+	hashCode := fmt.Sprintf("%x", sha256.Sum256([]byte(edgeClusterID)))
 
-	for i, s := range sequence {
-		if i < 32 {
-			namespace += strings.TrimSpace(string(s))
-		} else {
-			clusterName += strings.TrimSpace(string(s))
-		}
-	}
-
-	return
+	return fmt.Sprintf("ns-%s", hashCode), fmt.Sprintf("edge-%s", hashCode)
 }
