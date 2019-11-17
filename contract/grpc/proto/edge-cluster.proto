@@ -235,15 +235,18 @@ message SearchRequest {
  * that can later referred to using pagination information.
  */
 message EdgeClusterWithCursor {
-  // The edge cluster object
-  EdgeCluster edgeCluster = 1;
-
   // The unique edge cluster identifier
-  string edgeClusterID = 2;
+  string edgeClusterID = 1;
 
   // The cursor defines the position of the edge cluster in the repository that can be later
   // referred to using pagination information
-  string cursor = 3;
+  string cursor = 2;
+
+  // The edge cluster object
+  EdgeCluster edgeCluster = 3;
+
+  // The edge cluster provisioning details
+  EdgeClusterProvisioningDetail provisioningDetail = 4;
 }
 
 /**
