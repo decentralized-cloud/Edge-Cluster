@@ -427,7 +427,7 @@ func (service *k3sProvisioner) makeNameSpaceConfig(namespace string) *v1.Namespa
 }
 
 func (service *k3sProvisioner) getMetaData(edgeClusterID string) (string, string) {
-	hashCode := fmt.Sprintf("%x", sha256.Sum256([]byte(edgeClusterID)))
+	hashCode := fmt.Sprintf("%x", sha256.Sum224([]byte(edgeClusterID)))
 
 	return fmt.Sprintf("ns-%s", hashCode), fmt.Sprintf("edge-%s", hashCode)
 }
