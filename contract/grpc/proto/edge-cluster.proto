@@ -19,6 +19,20 @@ enum Error {
 }
 
 /**
+ * The different edge cluster status
+ */
+ enum EdgeClusterStatus {
+  // Indicates that the edge cluster is still being provisioned and it is not ready to use yet
+  Provisioning = 0;
+
+  // Indicates that the edge cluster is ready to use
+  Ready = 1;
+
+  // Indicates that the edge cluster is being deleted
+  Deleting = 2;
+}
+
+/**
  * The edge cluster object
  */
 message EdgeCluster {
@@ -28,8 +42,24 @@ message EdgeCluster {
   // The edge cluster name
   string name = 2;
 
-  // cluster public ip address
-  string clusterPublicIPAddress = 3;
+  // K3s secret value to update
+  string k3SClusterSecret = 3;
+}
+
+
+/**
+ * The edge cluster provisioning details contains details such as current status of the edge cluster
+ * as well as the public IP address of the cluster to connect to
+ */
+message EdgeClusterProvisioningDetail {
+  // The edge cluster status
+  EdgeClusterStatus status = 1;
+
+  // The edge cluster public IP address to connect to
+  string publicIPAddress = 2;
+
+  // The provisioned edge cluster kubeconfig content
+  string kubeConfigContent = 3;
 }
 
 /**
@@ -59,6 +89,9 @@ message CreateEdgeClusterResponse {
   // The cursor defines the position of the edge cluster in the repository that can be later
   // referred to using pagination information
   string cursor = 5;
+
+  // The edge cluster provisioning details
+  EdgeClusterProvisioningDetail provisioningDetail = 6;
 }
 
 /** Request to read an existing edge cluster
@@ -80,6 +113,9 @@ message ReadEdgeClusterResponse {
 
   // The edge cluster object
   EdgeCluster edgeCluster = 3;
+
+  // The edge cluster provisioning details
+  EdgeClusterProvisioningDetail provisioningDetail = 6;
 }
 
 /**
@@ -91,9 +127,6 @@ message UpdateEdgeClusterRequest {
 
   // The edge cluster object contains the updated edge cluster details to update
   EdgeCluster edgeCluster = 2;
-
-  //K3s secret value to update
-  string K3SClusterSecret = 3;
 }
 
 /**
@@ -112,6 +145,9 @@ message UpdateEdgeClusterResponse {
   // The cursor defines the position of the edge cluster in the repository that can be later
   // referred to using pagination information
   string cursor = 4;
+
+  // The edge cluster provisioning details
+  EdgeClusterProvisioningDetail provisioningDetail = 6;
 }
 
 /**
