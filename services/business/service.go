@@ -62,8 +62,8 @@ func (service *businessService) CreateEdgeCluster(
 	_, err = edgeClusterProvisioner.NewProvision(
 		ctx,
 		&edgeClusterTypes.NewProvisionRequest{
-			EdgeClusterID:    response.EdgeClusterID,
-			K3SClusterSecret: request.EdgeCluster.K3SClusterSecret,
+			EdgeClusterID: response.EdgeClusterID,
+			ClusterSecret: request.EdgeCluster.ClusterSecret,
 		})
 
 	if err != nil {
@@ -126,8 +126,8 @@ func (service *businessService) UpdateEdgeCluster(
 	_, err = edgeClusterProvisioner.UpdateProvisionWithRetry(
 		ctx,
 		&edgeClusterTypes.UpdateProvisionRequest{
-			EdgeClusterID:    request.EdgeClusterID,
-			K3SClusterSecret: request.EdgeCluster.K3SClusterSecret,
+			EdgeClusterID: request.EdgeClusterID,
+			ClusterSecret: request.EdgeCluster.ClusterSecret,
 		})
 
 	if err != nil {

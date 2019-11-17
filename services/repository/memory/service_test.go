@@ -37,9 +37,9 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 		ctx = context.Background()
 		createRequest = repository.CreateEdgeClusterRequest{
 			EdgeCluster: models.EdgeCluster{
-				TenantID:         cuid.New(),
-				Name:             cuid.New(),
-				K3SClusterSecret: cuid.New(),
+				TenantID:      cuid.New(),
+				Name:          cuid.New(),
+				ClusterSecret: cuid.New(),
 			}}
 	})
 
@@ -88,9 +88,9 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				updateRequest := repository.UpdateEdgeClusterRequest{
 					EdgeClusterID: edgeClusterID,
 					EdgeCluster: models.EdgeCluster{
-						TenantID:         cuid.New(),
-						Name:             cuid.New(),
-						K3SClusterSecret: cuid.New(),
+						TenantID:      cuid.New(),
+						Name:          cuid.New(),
+						ClusterSecret: cuid.New(),
 					}}
 
 				updateResponse, err := sut.UpdateEdgeCluster(ctx, &updateRequest)
@@ -152,9 +152,9 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				updateRequest := repository.UpdateEdgeClusterRequest{
 					EdgeClusterID: edgeClusterID,
 					EdgeCluster: models.EdgeCluster{
-						TenantID:         cuid.New(),
-						Name:             cuid.New(),
-						K3SClusterSecret: cuid.New(),
+						TenantID:      cuid.New(),
+						Name:          cuid.New(),
+						ClusterSecret: cuid.New(),
 					}}
 				response, err := sut.UpdateEdgeCluster(ctx, &updateRequest)
 				Ω(err).Should(HaveOccurred())
@@ -202,18 +202,18 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 				edgeClusters = append(
 					edgeClusters,
 					models.EdgeCluster{
-						TenantID:         tenantID,
-						Name:             cuid.New(),
-						K3SClusterSecret: cuid.New(),
+						TenantID:      tenantID,
+						Name:          cuid.New(),
+						ClusterSecret: cuid.New(),
 					})
 			}
 
 			edgeClusterIDs = funk.Map(edgeClusters, func(edgeCluster models.EdgeCluster) string {
 				response, _ := sut.CreateEdgeCluster(ctx, &repository.CreateEdgeClusterRequest{
 					EdgeCluster: models.EdgeCluster{
-						TenantID:         edgeCluster.TenantID,
-						Name:             edgeCluster.Name,
-						K3SClusterSecret: edgeCluster.K3SClusterSecret,
+						TenantID:      edgeCluster.TenantID,
+						Name:          edgeCluster.Name,
+						ClusterSecret: edgeCluster.ClusterSecret,
 					},
 				})
 
@@ -289,7 +289,7 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 
 			BeforeEach(func() {
 				shuffeledEdgeClusterIDs = funk.ShuffleString(edgeClusterIDs)
-				numberOfEdgeClusterIDs = rand.Intn(10)
+				numberOfEdgeClusterIDs = rand.Intn(10) + 1
 			})
 
 			It("should return filtered edge cluster list", func() {
@@ -316,7 +316,7 @@ var _ = Describe("In-Memory Repository Service Tests", func() {
 
 			BeforeEach(func() {
 				shuffeledTenantIDs = funk.ShuffleString(tenantIDs)
-				numberOfTenantIDs = rand.Intn(10)
+				numberOfTenantIDs = rand.Intn(10) + 1
 			})
 
 			It("should return filtered edge cluster list", func() {
@@ -341,5 +341,5 @@ func assertEdgeCluster(edgeCluster, expectedEdgeCluster models.EdgeCluster) {
 	Ω(edgeCluster).ShouldNot(BeNil())
 	Ω(edgeCluster.TenantID).Should(Equal(expectedEdgeCluster.TenantID))
 	Ω(edgeCluster.Name).Should(Equal(expectedEdgeCluster.Name))
-	Ω(edgeCluster.K3SClusterSecret).Should(Equal(expectedEdgeCluster.K3SClusterSecret))
+	Ω(edgeCluster.ClusterSecret).Should(Equal(expectedEdgeCluster.ClusterSecret))
 }

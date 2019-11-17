@@ -83,7 +83,7 @@ func (service *k3sProvisioner) NewProvision(
 	}
 
 	// create edge cluster
-	if err = service.createDeployment(nameSpace, clusterName, request.K3SClusterSecret); err != nil {
+	if err = service.createDeployment(nameSpace, clusterName, request.ClusterSecret); err != nil {
 		return
 	}
 
@@ -115,7 +115,7 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 		zap.String("nameSpace", nameSpace),
 		zap.String("name", clusterName))
 
-	err = service.updateEdgeClient(nameSpace, clusterName, request.K3SClusterSecret)
+	err = service.updateEdgeClient(nameSpace, clusterName, request.ClusterSecret)
 
 	if err != nil {
 		service.logger.Error(
