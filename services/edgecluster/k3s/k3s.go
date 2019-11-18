@@ -24,6 +24,7 @@ const (
 	containerName           = "k3sserver"
 	containerImage          = "rancher/k3s:v0.8.1"
 	deploymentContainerPort = 6443
+	internalName            = "k3s"
 )
 
 var deploymentReplica int32 = 1
@@ -67,27 +68,24 @@ func (service *k3sProvisioner) NewProvision(
 	ctx context.Context,
 	request *types.NewProvisionRequest) (response *types.NewProvisionResponse, err error) {
 	response = nil
-	nameSpace, clusterName := service.getMetaData(request.EdgeClusterID)
+	namespace := getNamespace(request.EdgeClusterID)
 
-	service.logger.Info("metadata",
-		zap.String("nameSpace", nameSpace),
-		zap.String("name", clusterName))
-
-	if nameSpace == "" {
-		nameSpace = apiv1.NamespaceDefault
-	}
+	service.logger.Info("metadata", zap.String("namespace", namespace))
 
 	//if not exisit create a namespace for the deployment
-	if err = service.createProvisionNameSpace(nameSpace); err != nil {
+	if err = service.createProvisionNameSpace(namespace); err != nil {
 		return
 	}
 
 	// create edge cluster
-	if err = service.createDeployment(nameSpace, clusterName, request.ClusterSecret); err != nil {
+	if err = service.createDeployment(
+		namespace,
+		internalName,
+		request.ClusterSecret); err != nil {
 		return
 	}
 
-	if err = service.createService(nameSpace, clusterName); err != nil {
+	if err = service.createService(namespace); err != nil {
 		return
 	}
 
@@ -109,13 +107,12 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 
 	service.logger.Info("Updating Provision With Retry")
 
-	nameSpace, clusterName := service.getMetaData(request.EdgeClusterID)
+	namespace := getNamespace(request.EdgeClusterID)
 
 	service.logger.Info("metadata",
-		zap.String("nameSpace", nameSpace),
-		zap.String("name", clusterName))
+		zap.String("namespace", namespace))
 
-	err = service.updateEdgeClient(nameSpace, clusterName, request.ClusterSecret)
+	err = service.updateEdgeClient(namespace, request.ClusterSecret)
 
 	if err != nil {
 		service.logger.Error(
@@ -133,13 +130,11 @@ func (service *k3sProvisioner) DeleteProvision(
 	request *types.DeleteProvisionRequest) (response *types.DeleteProvisionResponse, err error) {
 	service.logger.Info("deleting Provision")
 
-	nameSpace, clusterName := service.getMetaData(request.EdgeClusterID)
+	namespace := getNamespace(request.EdgeClusterID)
 
-	service.logger.Info("metadata",
-		zap.String("nameSpace", nameSpace),
-		zap.String("name", clusterName))
+	service.logger.Info("metadata", zap.String("namespace", namespace))
 
-	err = service.deleteEdgeClient(nameSpace, clusterName)
+	err = service.deleteEdgeClient(namespace)
 
 	if err != nil {
 		service.logger.Error(
@@ -147,7 +142,7 @@ func (service *k3sProvisioner) DeleteProvision(
 			zap.Error(err))
 	}
 
-	err = service.deleteProvisionNameSpace(nameSpace)
+	err = service.deleteProvisionNameSpace(namespace)
 
 	if err != nil {
 		service.logger.Error(
@@ -160,27 +155,24 @@ func (service *k3sProvisioner) DeleteProvision(
 	return
 }
 
-func (service *k3sProvisioner) deleteEdgeClient(
-	namespace string,
-	clusterName string) error {
+func (service *k3sProvisioner) deleteEdgeClient(namespace string) error {
 	client := service.clientset.AppsV1().Deployments(namespace)
 	deletePolicy := metav1.DeletePropagationForeground
 
-	return client.Delete(clusterName, &metav1.DeleteOptions{
+	return client.Delete(internalName, &metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	})
 }
 
 func (service *k3sProvisioner) updateEdgeClient(
 	namespace string,
-	clusterName string,
 	secretKey string) error {
 	return retry.RetryOnConflict(
 		retry.DefaultRetry,
 		func() (err error) {
 			client := service.clientset.AppsV1().Deployments(namespace)
 
-			result, err := client.Get(clusterName, metav1.GetOptions{})
+			result, err := client.Get(internalName, metav1.GetOptions{})
 			if err != nil {
 				service.logger.Error(
 					"failed to update the edge cluster",
@@ -256,11 +248,10 @@ func (service *k3sProvisioner) createDeployment(
 	return
 }
 
-func (service *k3sProvisioner) createService(
-	namespace string,
-	clusterName string) (err error) {
+func (service *k3sProvisioner) createService(namespace string) (err error) {
 	serviceDeployment := service.clientset.CoreV1().Services(namespace)
-	serviceConfig := service.makeServiceConfig(namespace, clusterName)
+	serviceConfig := service.makeServiceConfig(namespace)
+
 	if result, err := serviceDeployment.Create(serviceConfig); err != nil {
 		service.logger.Error(
 			"failed to create service",
@@ -379,9 +370,7 @@ func (service *k3sProvisioner) makeDeploymentConfig(namespace string,
 	}
 }
 
-func (service *k3sProvisioner) makeServiceConfig(
-	namespace string,
-	clusterName string) (apiv1Service *apiv1.Service) {
+func (service *k3sProvisioner) makeServiceConfig(namespace string) (apiv1Service *apiv1.Service) {
 	servicePorts := []v1.ServicePort{
 		{
 			Protocol:   apiv1.ProtocolTCP,
@@ -391,7 +380,7 @@ func (service *k3sProvisioner) makeServiceConfig(
 	}
 
 	serviceSelector := map[string]string{
-		"app": clusterName,
+		"app": internalName,
 	}
 
 	annotation := map[string]string{
@@ -401,17 +390,17 @@ func (service *k3sProvisioner) makeServiceConfig(
 	//todo add anotation to connect metallb
 	apiv1Service = &apiv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      clusterName,
+			Name:      internalName,
 			Namespace: namespace,
 			Labels: map[string]string{
-				"k8s-app": clusterName,
+				"k8s-app": internalName,
 			},
 			Annotations: annotation,
 		},
 		Spec: apiv1.ServiceSpec{
-			Ports:     servicePorts,
-			Selector:  serviceSelector,
-			ClusterIP: "",
+			Ports:    servicePorts,
+			Selector: serviceSelector,
+			Type:     apiv1.ServiceTypeLoadBalancer,
 		},
 	}
 
@@ -426,8 +415,6 @@ func (service *k3sProvisioner) makeNameSpaceConfig(namespace string) *v1.Namespa
 	}
 }
 
-func (service *k3sProvisioner) getMetaData(edgeClusterID string) (string, string) {
-	hashCode := fmt.Sprintf("%x", sha256.Sum224([]byte(edgeClusterID)))
-
-	return fmt.Sprintf("ns-%s", hashCode), fmt.Sprintf("edge-%s", hashCode)
+func getNamespace(edgeClusterID string) string {
+	return fmt.Sprintf("%x", sha256.Sum224([]byte(edgeClusterID)))
 }
