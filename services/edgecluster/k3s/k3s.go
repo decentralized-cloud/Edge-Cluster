@@ -27,6 +27,7 @@ const (
 	internalName            = "k3s"
 )
 
+var waitForFunctionToBeReadyTimeout int64 = 60
 var deploymentReplica int32 = 1
 
 type k3sProvisioner struct {
@@ -77,17 +78,25 @@ func (service *k3sProvisioner) NewProvision(
 		return
 	}
 
+	//create a loadbalancer
+	externalIP, err := service.createService(namespace)
+
+	if err != nil {
+		return
+	}
+
+	service.logger.Info("load balancer:", zap.String("externalIP", externalIP))
+
 	// create edge cluster
 	if err = service.createDeployment(
 		namespace,
 		internalName,
-		request.ClusterSecret); err != nil {
+		request.ClusterSecret,
+		externalIP); err != nil {
 		return
 	}
 
-	if err = service.createService(namespace); err != nil {
-		return
-	}
+	//TODO: we can watch and wait for status and return it here or through a separate API call
 
 	response = &types.NewProvisionResponse{}
 
@@ -230,9 +239,10 @@ func getEnvIndex(envList []v1.EnvVar) int {
 func (service *k3sProvisioner) createDeployment(
 	namespace string,
 	clusterName string,
-	k3SClusterSecret string) (err error) {
+	k3SClusterSecret string,
+	publicIP string) (err error) {
 	client := service.clientset.AppsV1().Deployments(namespace)
-	deploymentConfig := service.makeDeploymentConfig(namespace, clusterName, k3SClusterSecret, "10.0.0.1")
+	deploymentConfig := service.makeDeploymentConfig(namespace, clusterName, k3SClusterSecret, publicIP)
 
 	if result, err := client.Create(deploymentConfig); err != nil {
 		service.logger.Error(
@@ -248,11 +258,13 @@ func (service *k3sProvisioner) createDeployment(
 	return
 }
 
-func (service *k3sProvisioner) createService(namespace string) (err error) {
+func (service *k3sProvisioner) createService(namespace string) (externalIP string, err error) {
 	serviceDeployment := service.clientset.CoreV1().Services(namespace)
 	serviceConfig := service.makeServiceConfig(namespace)
 
-	if result, err := serviceDeployment.Create(serviceConfig); err != nil {
+	result, err := serviceDeployment.Create(serviceConfig)
+
+	if err != nil {
 		service.logger.Error(
 			"failed to create service",
 			zap.Error(err),
@@ -263,7 +275,32 @@ func (service *k3sProvisioner) createService(namespace string) (err error) {
 			zap.String("ServiceName", result.GetObjectMeta().GetName()))
 	}
 
-	return
+	//need to wait for a couple of seconds to get the external IPs
+	watch, err := service.clientset.CoreV1().Services(namespace).Watch(metav1.ListOptions{
+		Watch:          true,
+		TimeoutSeconds: &waitForFunctionToBeReadyTimeout,
+	})
+
+	if err != nil {
+		service.logger.Error(
+			"failed to fetch the service",
+			zap.Error(err))
+		return "", err
+	}
+
+	for event := range watch.ResultChan() {
+		if service, ok := event.Object.(*v1.Service); ok {
+			for _, item := range service.Status.LoadBalancer.Ingress {
+				if item.IP != "" {
+					watch.Stop()
+
+					return item.IP, nil
+				}
+			}
+		}
+	}
+
+	return "", nil
 }
 
 func (service *k3sProvisioner) createProvisionNameSpace(namespace string) (err error) {
