@@ -11,7 +11,7 @@ import (
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster"
 	edgeClusterTypes "github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	"github.com/decentralized-cloud/edge-cluster/services/endpoint"
-	"github.com/decentralized-cloud/edge-cluster/services/repository/memory"
+	"github.com/decentralized-cloud/edge-cluster/services/repository/mongodb"
 	"github.com/decentralized-cloud/edge-cluster/services/transport/grpc"
 	"github.com/decentralized-cloud/edge-cluster/services/transport/https"
 	"go.uber.org/zap"
@@ -94,7 +94,7 @@ func setupDependencies(logger *zap.Logger) (err error) {
 		return
 	}
 
-	repositoryService, err := memory.NewRepositoryService()
+	repositoryService, err := mongodb.NewMongodbRepositoryService(configurationService)
 	if err != nil {
 		return
 	}

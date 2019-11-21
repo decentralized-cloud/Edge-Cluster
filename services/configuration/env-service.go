@@ -59,3 +59,27 @@ func (service *envConfigurationService) GetHttpsPort() (int, error) {
 
 	return portNumber, nil
 }
+
+// GetDatabaseConnectionString retrieves the database connection string
+// Returns the database connection string or error if something goes wrong
+func (service *envConfigurationService) GetDatabaseConnectionString() (string, error) {
+	connectionString := os.Getenv("DATABASE_CONNECTION_STRING")
+
+	if strings.Trim(connectionString, " ") == "" {
+		return "", NewUnknownError("DATABASE_CONNECTION_STRING is required")
+	}
+
+	return connectionString, nil
+}
+
+// GetDatabaseName retrieves the database name
+// Returns the database name or error if something goes wrong
+func (service *envConfigurationService) GetDatabaseName() (string, error) {
+	databaseName := os.Getenv("EDGE_CLUSTER_DATABASE_NAME")
+
+	if strings.Trim(databaseName, " ") == "" {
+		return "", NewUnknownError("EDGE_CLUSTER_DATABASE_NAME is required")
+	}
+
+	return databaseName, nil
+}

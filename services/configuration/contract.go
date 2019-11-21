@@ -18,4 +18,12 @@ type ConfigurationContract interface {
 	// GetHttpsPort retrieves HTTPS port number
 	// Returns the HTTPS port number or error if something goes wrong
 	GetHttpsPort() (int, error)
+
+	// GetDatabaseConnectionString retrieves the database connection string
+	// Returns the database connection string or error if something goes wrong
+	GetDatabaseConnectionString() (string, error)
+
+	// GetDatabaseName retrieves the database name
+	// Returns the database name or error if something goes wrong
+	GetDatabaseName() (string, error)
 }

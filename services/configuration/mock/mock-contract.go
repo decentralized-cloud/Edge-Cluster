@@ -5,8 +5,9 @@
 package mock_configuration
 
 import (
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockConfigurationContract is a mock of ConfigurationContract interface
@@ -90,4 +91,34 @@ func (m *MockConfigurationContract) GetHttpsPort() (int, error) {
 func (mr *MockConfigurationContractMockRecorder) GetHttpsPort() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetHttpsPort", reflect.TypeOf((*MockConfigurationContract)(nil).GetHttpsPort))
+}
+
+// GetDatabaseConnectionString mocks base method
+func (m *MockConfigurationContract) GetDatabaseConnectionString() (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDatabaseConnectionString")
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDatabaseConnectionString indicates an expected call of GetDatabaseConnectionString
+func (mr *MockConfigurationContractMockRecorder) GetDatabaseConnectionString() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDatabaseConnectionString", reflect.TypeOf((*MockConfigurationContract)(nil).GetDatabaseConnectionString))
+}
+
+// GetDatabaseName mocks base method
+func (m *MockConfigurationContract) GetDatabaseName() (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDatabaseName")
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDatabaseName indicates an expected call of GetDatabaseName
+func (mr *MockConfigurationContractMockRecorder) GetDatabaseName() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDatabaseName", reflect.TypeOf((*MockConfigurationContract)(nil).GetDatabaseName))
 }
