@@ -87,6 +87,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						TenantID:      cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
+						ClusterType:   models.K3S,
 					},
 				}
 
@@ -96,6 +97,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						TenantID:      cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
+						ClusterType:   models.K3S,
 					},
 					Cursor: cuid.New(),
 				}
@@ -218,6 +220,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						TenantID:      cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
+						ClusterType:   models.K3S,
 					},
 				}
 			})
@@ -335,6 +338,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						TenantID:      cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
+						ClusterType:   models.K3S,
 					}}
 
 				response = business.UpdateEdgeClusterResponse{
@@ -342,6 +346,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						TenantID:      cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
+						ClusterType:   models.K3S,
 					},
 					Cursor: cuid.New(),
 				}
@@ -612,6 +617,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 							Name:          cuid.New(),
 							TenantID:      cuid.New(),
 							ClusterSecret: cuid.New(),
+							ClusterType:   models.K3S,
 						},
 						Cursor: cuid.New(),
 					})

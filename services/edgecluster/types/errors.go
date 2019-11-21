@@ -1,7 +1,11 @@
 // Package types defines the contracts that are used to provision a supported edge cluster and managing them
 package types
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/decentralized-cloud/edge-cluster/models"
+)
 
 // UnknownError indicates that an unknown error has happened<Paste>
 type UnknownError struct {
@@ -46,49 +50,47 @@ func NewUnknownErrorWithError(message string, err error) error {
 	}
 }
 
-// EdgeClusterNotSupportedError indicates that the requested edge cluster is not suipported
-type EdgeClusterNotSupportedError struct {
-	Err             error
-	EdgeClusterType EdgeClusterType
+// EdgeClusterTypeNotSupportedError indicates that the edge cluster type is not supported
+type EdgeClusterTypeNotSupportedError struct {
+	ClusterType models.ClusterType
+	Err         error
 }
 
-// Error returns message for the EdgeClusterNotSupportedError error type
+// Error returns message for the EdgeClusterTypeNotSupportedError error type
 // Returns the error nessage
-func (e EdgeClusterNotSupportedError) Error() string {
+func (e EdgeClusterTypeNotSupportedError) Error() string {
 	if e.Err == nil {
-		return "Edge Cluster not supported."
+		return fmt.Sprintf("Edge Cluster Type is not supported. Clustertype: %v.", e.ClusterType)
 	}
 
-	return fmt.Sprintf("Edge Cluster not supported. Error: %v", e.Err)
+	return fmt.Sprintf("Edge Cluster Type is not supported. ClusterType: %v. Error: %v", e.ClusterType, e.Err)
 }
 
-// Unwrap returns the err if provided through NewEdgeClusterNotSupportedErrorWithError function, otherwise returns nil
-func (e EdgeClusterNotSupportedError) Unwrap() error {
+// Unwrap returns the err if provided through NewEdgeClusterTypeNotSupportedErrorWithError function, otherwise returns nil
+func (e EdgeClusterTypeNotSupportedError) Unwrap() error {
 	return e.Err
 }
 
-// IsEdgeClusterNotSupportedError indicates whether the error is of type EdgeClusterNotSupportedError
-func IsEdgeClusterNotSupportedError(err error) bool {
-	_, ok := err.(EdgeClusterNotSupportedError)
+// IsEdgeClusterTypeNotSupportedError indicates whether the error is of type EdgeClusterTypeNotSupportedError
+func IsEdgeClusterTypeNotSupportedError(err error) bool {
+	_, ok := err.(EdgeClusterTypeNotSupportedError)
 
 	return ok
 }
 
-// NewEdgeClusterNotSupportedError creates a new EdgeClusterNotSupportedError error
-// edgeClusterType: Mandatory. The type of the edge cluster that is not suppoorted
-func NewEdgeClusterNotSupportedError(edgeClusterType EdgeClusterType) error {
-	return EdgeClusterNotSupportedError{
-		EdgeClusterType: edgeClusterType,
+// NewEdgeClusterTypeNotSupportedError creates a new EdgeClusterTypeNotSupportedError error
+// clusterType: Mandatory. The edge cluster type that is not supported
+func NewEdgeClusterTypeNotSupportedError(clusterType models.ClusterType) error {
+	return EdgeClusterTypeNotSupportedError{
+		ClusterType: clusterType,
 	}
 }
 
-// NewEdgeClusterNotSupportedErrorWithError creates a new EdgeClusterNotSupportedError error
-// edgeClusterType: Mandatory. The type of the edge cluster that is not suppoorted
-func NewEdgeClusterNotSupportedErrorWithError(
-	edgeClusterType EdgeClusterType,
-	err error) error {
-	return EdgeClusterNotSupportedError{
-		Err:             err,
-		EdgeClusterType: edgeClusterType,
+// NewEdgeClusterTypeNotSupportedErrorWithError creates a new EdgeClusterTypeNotSupportedError error
+// clusterType: Mandatory. The edge cluster type that is not supported
+func NewEdgeClusterTypeNotSupportedErrorWithError(clusterType models.ClusterType, err error) error {
+	return EdgeClusterTypeNotSupportedError{
+		ClusterType: clusterType,
+		Err:         err,
 	}
 }

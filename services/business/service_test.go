@@ -65,7 +65,7 @@ var _ = Describe("Business Service Tests", func() {
 		mockEdgeClusterFactoryService = edgeClusterFactoryMock.NewMockEdgeClusterFactoryContract(mockCtrl)
 		mockEdgeClusterFactoryService.
 			EXPECT().
-			Create(ctx, edgeClusterTypes.K3S).
+			Create(ctx, models.K3S).
 			Return(mockEdgeClusterProvisionerService, nil).
 			AnyTimes()
 
@@ -123,6 +123,7 @@ var _ = Describe("Business Service Tests", func() {
 					TenantID:      cuid.New(),
 					Name:          cuid.New(),
 					ClusterSecret: cuid.New(),
+					ClusterType:   models.K3S,
 				}}
 		})
 
@@ -182,6 +183,7 @@ var _ = Describe("Business Service Tests", func() {
 								TenantID:      cuid.New(),
 								Name:          cuid.New(),
 								ClusterSecret: cuid.New(),
+								ClusterType:   models.K3S,
 							},
 							Cursor: cuid.New(),
 						}
@@ -231,6 +233,7 @@ var _ = Describe("Business Service Tests", func() {
 										Name:          cuid.New(),
 										TenantID:      cuid.New(),
 										ClusterSecret: cuid.New(),
+										ClusterType:   models.K3S,
 									}}, nil
 							})
 
@@ -300,6 +303,7 @@ var _ = Describe("Business Service Tests", func() {
 					Name:          cuid.New(),
 					TenantID:      cuid.New(),
 					ClusterSecret: cuid.New(),
+					ClusterType:   models.K3S,
 				},
 			}
 		})
@@ -318,6 +322,7 @@ var _ = Describe("Business Service Tests", func() {
 								Ω(mappedRequest.EdgeCluster.Name).Should(Equal(request.EdgeCluster.Name))
 								Ω(mappedRequest.EdgeCluster.TenantID).Should(Equal(request.EdgeCluster.TenantID))
 								Ω(mappedRequest.EdgeCluster.ClusterSecret).Should(Equal(request.EdgeCluster.ClusterSecret))
+								Ω(mappedRequest.EdgeCluster.ClusterType).Should(Equal(request.EdgeCluster.ClusterType))
 
 								return &repository.UpdateEdgeClusterResponse{}, nil
 							})
@@ -363,6 +368,7 @@ var _ = Describe("Business Service Tests", func() {
 							Name:          cuid.New(),
 							TenantID:      cuid.New(),
 							ClusterSecret: cuid.New(),
+							ClusterType:   models.K3S,
 						},
 						Cursor: cuid.New(),
 					}
@@ -543,6 +549,7 @@ var _ = Describe("Business Service Tests", func() {
 								TenantID:      cuid.New(),
 								Name:          cuid.New(),
 								ClusterSecret: cuid.New(),
+								ClusterType:   models.K3S,
 							},
 							Cursor: cuid.New(),
 						})
@@ -618,6 +625,7 @@ func assertEdgeCluster(edgeCluster, expectedEdgeCluster models.EdgeCluster) {
 	Ω(edgeCluster.TenantID).Should(Equal(expectedEdgeCluster.TenantID))
 	Ω(edgeCluster.Name).Should(Equal(expectedEdgeCluster.Name))
 	Ω(edgeCluster.ClusterSecret).Should(Equal(expectedEdgeCluster.ClusterSecret))
+	Ω(edgeCluster.ClusterType).Should(Equal(expectedEdgeCluster.ClusterType))
 }
 
 func convertStringToPointer(str string) *string {

@@ -1,12 +1,10 @@
 // Package types defines the contracts that are used to provision a supported edge cluster and managing them
 package types
 
-import "context"
+import (
+	"context"
 
-type EdgeClusterType int
-
-const (
-	K3S EdgeClusterType = iota
+	"github.com/decentralized-cloud/edge-cluster/models"
 )
 
 // EdgeClusterFactoryContract defines the factory method that are used to create provisioner
@@ -15,11 +13,11 @@ type EdgeClusterFactoryContract interface {
 	// Create instantiates a new edge cluster provisioner of a requested edge cluster type and returns
 	// it to the caller.
 	// ctx: Mandatory The reference to the context
-	// edgeClusterType: Mandatory. The type of edge cluster provisioner to be instantiated
+	// clusterType: Mandatory. The type of edge cluster provisioner to be instantiated
 	// Returns either the result of instantiating a edge cluster provisioner or error if something goes wrong.
 	Create(
 		ctx context.Context,
-		edgeClusterType EdgeClusterType) (EdgeClusterProvisionerContract, error)
+		clusterType models.ClusterType) (EdgeClusterProvisionerContract, error)
 }
 
 // EdgeClusterProvisionerContract defines the methods that are required to provision a supported

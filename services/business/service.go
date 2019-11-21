@@ -54,7 +54,7 @@ func (service *businessService) CreateEdgeCluster(
 		}, nil
 	}
 
-	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
+	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, request.EdgeCluster.ClusterType)
 	if err != nil {
 		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
 	}
@@ -118,7 +118,7 @@ func (service *businessService) UpdateEdgeCluster(
 		}, nil
 	}
 
-	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
+	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, request.EdgeCluster.ClusterType)
 	if err != nil {
 		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
 	}
@@ -158,7 +158,7 @@ func (service *businessService) DeleteEdgeCluster(
 		}, nil
 	}
 
-	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeClusterTypes.K3S)
+	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, request.EdgeCluster.ClusterType)
 	if err != nil {
 		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
 	}
