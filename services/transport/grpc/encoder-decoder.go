@@ -3,6 +3,7 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 
 	edgeClusterGRPCContract "github.com/decentralized-cloud/edge-cluster/contract/grpc/go"
 	"github.com/decentralized-cloud/edge-cluster/models"
@@ -21,12 +22,14 @@ func decodeCreateEdgeClusterRequest(
 	request interface{}) (interface{}, error) {
 	castedRequest := request.(*edgeClusterGRPCContract.CreateEdgeClusterRequest)
 
+	edgeCluster, err := mapEdgeClusterFromGrpc(castedRequest.EdgeCluster)
+	if err != nil {
+		return nil, err
+	}
+
 	return &business.CreateEdgeClusterRequest{
-		EdgeCluster: models.EdgeCluster{
-			TenantID:      castedRequest.EdgeCluster.TenantID,
-			Name:          castedRequest.EdgeCluster.Name,
-			ClusterSecret: castedRequest.EdgeCluster.ClusterSecret,
-		}}, nil
+		EdgeCluster: edgeCluster,
+	}, nil
 }
 
 // encodeCreateEdgeClusterResponse encodes CreateEdgeCluster response from business object to GRPC object
@@ -39,15 +42,16 @@ func encodeCreateEdgeClusterResponse(
 	castedResponse := response.(*business.CreateEdgeClusterResponse)
 
 	if castedResponse.Err == nil {
+		edgeCluster, err := mapEdgeClusterToGrpc(castedResponse.EdgeCluster)
+		if err != nil {
+			return nil, err
+		}
+
 		return &edgeClusterGRPCContract.CreateEdgeClusterResponse{
 			Error:         edgeClusterGRPCContract.Error_NO_ERROR,
 			EdgeClusterID: castedResponse.EdgeClusterID,
-			EdgeCluster: &edgeClusterGRPCContract.EdgeCluster{
-				TenantID:      castedResponse.EdgeCluster.TenantID,
-				Name:          castedResponse.EdgeCluster.Name,
-				ClusterSecret: castedResponse.EdgeCluster.ClusterSecret,
-			},
-			Cursor: castedResponse.Cursor,
+			EdgeCluster:   edgeCluster,
+			Cursor:        castedResponse.Cursor,
 		}, nil
 	}
 
@@ -81,13 +85,14 @@ func encodeReadEdgeClusterResponse(
 	castedResponse := response.(*business.ReadEdgeClusterResponse)
 
 	if castedResponse.Err == nil {
+		edgeCluster, err := mapEdgeClusterToGrpc(castedResponse.EdgeCluster)
+		if err != nil {
+			return nil, err
+		}
+
 		return &edgeClusterGRPCContract.ReadEdgeClusterResponse{
-			Error: edgeClusterGRPCContract.Error_NO_ERROR,
-			EdgeCluster: &edgeClusterGRPCContract.EdgeCluster{
-				TenantID:      castedResponse.EdgeCluster.TenantID,
-				Name:          castedResponse.EdgeCluster.Name,
-				ClusterSecret: castedResponse.EdgeCluster.ClusterSecret,
-			},
+			Error:       edgeClusterGRPCContract.Error_NO_ERROR,
+			EdgeCluster: edgeCluster,
 		}, nil
 	}
 
@@ -106,13 +111,15 @@ func decodeUpdateEdgeClusterRequest(
 	request interface{}) (interface{}, error) {
 	castedRequest := request.(*edgeClusterGRPCContract.UpdateEdgeClusterRequest)
 
+	edgeCluster, err := mapEdgeClusterFromGrpc(castedRequest.EdgeCluster)
+	if err != nil {
+		return nil, err
+	}
+
 	return &business.UpdateEdgeClusterRequest{
 		EdgeClusterID: castedRequest.EdgeClusterID,
-		EdgeCluster: models.EdgeCluster{
-			TenantID:      castedRequest.EdgeCluster.TenantID,
-			Name:          castedRequest.EdgeCluster.Name,
-			ClusterSecret: castedRequest.EdgeCluster.ClusterSecret,
-		}}, nil
+		EdgeCluster:   edgeCluster,
+	}, nil
 }
 
 // encodeUpdateEdgeClusterResponse encodes UpdateEdgeCluster response from business object to GRPC object
@@ -125,14 +132,15 @@ func encodeUpdateEdgeClusterResponse(
 	castedResponse := response.(*business.UpdateEdgeClusterResponse)
 
 	if castedResponse.Err == nil {
+		edgeCluster, err := mapEdgeClusterToGrpc(castedResponse.EdgeCluster)
+		if err != nil {
+			return nil, err
+		}
+
 		return &edgeClusterGRPCContract.UpdateEdgeClusterResponse{
-			Error: edgeClusterGRPCContract.Error_NO_ERROR,
-			EdgeCluster: &edgeClusterGRPCContract.EdgeCluster{
-				TenantID:      castedResponse.EdgeCluster.TenantID,
-				Name:          castedResponse.EdgeCluster.Name,
-				ClusterSecret: castedResponse.EdgeCluster.ClusterSecret,
-			},
-			Cursor: castedResponse.Cursor,
+			Error:       edgeClusterGRPCContract.Error_NO_ERROR,
+			EdgeCluster: edgeCluster,
+			Cursor:      castedResponse.Cursor,
 		}, nil
 	}
 
@@ -246,14 +254,12 @@ func encodeSearchResponse(
 			HasNextPage:     castedResponse.HasNextPage,
 			TotalCount:      castedResponse.TotalCount,
 			EdgeClusters: funk.Map(castedResponse.EdgeClusters, func(edgeCluster models.EdgeClusterWithCursor) *edgeClusterGRPCContract.EdgeClusterWithCursor {
+				mappedEdgeCluster, _ := mapEdgeClusterToGrpc(edgeCluster.EdgeCluster)
+
 				return &edgeClusterGRPCContract.EdgeClusterWithCursor{
 					EdgeClusterID: edgeCluster.EdgeClusterID,
-					EdgeCluster: &edgeClusterGRPCContract.EdgeCluster{
-						TenantID:      edgeCluster.EdgeCluster.TenantID,
-						Name:          edgeCluster.EdgeCluster.Name,
-						ClusterSecret: edgeCluster.EdgeCluster.ClusterSecret,
-					},
-					Cursor: edgeCluster.Cursor,
+					EdgeCluster:   mappedEdgeCluster,
+					Cursor:        edgeCluster.Cursor,
 				}
 			}).([]*edgeClusterGRPCContract.EdgeClusterWithCursor),
 		}, nil
@@ -283,4 +289,46 @@ func mapError(err error) edgeClusterGRPCContract.Error {
 	}
 
 	panic("Error type undefined.")
+}
+
+func mapEdgeClusterFromGrpc(grpcEdgeCluster *edgeClusterGRPCContract.EdgeCluster) (edgeCluster models.EdgeCluster, err error) {
+	var clusterType models.ClusterType
+
+	if grpcEdgeCluster.ClusterType == edgeClusterGRPCContract.ClusterType_K3S {
+		clusterType = models.K3S
+	} else {
+		err = fmt.Errorf("Cluster type is not supported: %v", grpcEdgeCluster.ClusterType)
+
+		return
+	}
+
+	edgeCluster = models.EdgeCluster{
+		TenantID:      grpcEdgeCluster.TenantID,
+		Name:          grpcEdgeCluster.Name,
+		ClusterSecret: grpcEdgeCluster.ClusterSecret,
+		ClusterType:   clusterType,
+	}
+
+	return
+}
+
+func mapEdgeClusterToGrpc(edgeCluster models.EdgeCluster) (grpcEdgeCluster *edgeClusterGRPCContract.EdgeCluster, err error) {
+	var clusterType edgeClusterGRPCContract.ClusterType
+
+	if edgeCluster.ClusterType == models.K3S {
+		clusterType = edgeClusterGRPCContract.ClusterType_K3S
+	} else {
+		err = fmt.Errorf("Cluster type is not supported: %v", edgeCluster.ClusterType)
+
+		return
+	}
+
+	grpcEdgeCluster = &edgeClusterGRPCContract.EdgeCluster{
+		TenantID:      edgeCluster.TenantID,
+		Name:          edgeCluster.Name,
+		ClusterSecret: edgeCluster.ClusterSecret,
+		ClusterType:   clusterType,
+	}
+
+	return
 }

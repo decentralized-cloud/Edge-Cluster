@@ -1,7 +1,9 @@
 // Package business implements different business services required by the edge-cluster service
 package business
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // UnknownError indicates that an unknown error has happened<Paste>
 type UnknownError struct {

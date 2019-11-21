@@ -19,6 +19,14 @@ enum Error {
 }
 
 /**
+ * The different error types
+ */
+enum ClusterType {
+  // K3S cluster
+  K3S = 0;
+}
+
+/**
  * The different edge cluster status
  */
  enum EdgeClusterStatus {
@@ -44,6 +52,9 @@ message EdgeCluster {
 
   // Cluster secret value
   string clusterSecret = 3;
+
+  // Cluster secret value
+  ClusterType clusterType = 4;
 }
 
 

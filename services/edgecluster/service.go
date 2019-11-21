@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/k3s"
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	commonErrors "github.com/micro-business/go-core/system/errors"
@@ -44,19 +45,19 @@ func NewEdgeClusterFactoryService(logger *zap.Logger) (types.EdgeClusterFactoryC
 
 // Create instantiates a new edge cluster provisioner of a requested edge cluster type and returns
 // it to the caller.
-// ctx: Optional The reference to the context
-// edgeClusterType: Mandatory. The type of edge cluster provisioner to be instantiated
+// ctx: Mandatory The reference to the context
+// clusterType: Mandatory. The type of edge cluster provisioner to be instantiated
 // Returns either the result of instantiating a edge cluster provisioner or error if something goes wrong.
 func (service *edgeClusterFactoryService) Create(
 	ctx context.Context,
-	edgeClusterType types.EdgeClusterType) (types.EdgeClusterProvisionerContract, error) {
-	if edgeClusterType == types.K3S {
+	clusterType models.ClusterType) (types.EdgeClusterProvisionerContract, error) {
+	if clusterType == models.K3S {
 		return k3s.NewK3SProvisioner(
 			service.logger,
 			service.k8sRestConfig)
 	}
 
-	return nil, types.NewEdgeClusterNotSupportedError(edgeClusterType)
+	return nil, types.NewEdgeClusterTypeNotSupportedError(clusterType)
 }
 
 func (service *edgeClusterFactoryService) getRestConfig() (*rest.Config, error) {

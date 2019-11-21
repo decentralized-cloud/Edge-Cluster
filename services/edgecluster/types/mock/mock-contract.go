@@ -6,6 +6,7 @@ package mock_types
 
 import (
 	context "context"
+	models "github.com/decentralized-cloud/edge-cluster/models"
 	types "github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
@@ -35,18 +36,18 @@ func (m *MockEdgeClusterFactoryContract) EXPECT() *MockEdgeClusterFactoryContrac
 }
 
 // Create mocks base method
-func (m *MockEdgeClusterFactoryContract) Create(ctx context.Context, edgeClusterType types.EdgeClusterType) (types.EdgeClusterProvisionerContract, error) {
+func (m *MockEdgeClusterFactoryContract) Create(ctx context.Context, clusterType models.ClusterType) (types.EdgeClusterProvisionerContract, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, edgeClusterType)
+	ret := m.ctrl.Call(m, "Create", ctx, clusterType)
 	ret0, _ := ret[0].(types.EdgeClusterProvisionerContract)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockEdgeClusterFactoryContractMockRecorder) Create(ctx, edgeClusterType interface{}) *gomock.Call {
+func (mr *MockEdgeClusterFactoryContractMockRecorder) Create(ctx, clusterType interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockEdgeClusterFactoryContract)(nil).Create), ctx, edgeClusterType)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockEdgeClusterFactoryContract)(nil).Create), ctx, clusterType)
 }
 
 // MockEdgeClusterProvisionerContract is a mock of EdgeClusterProvisionerContract interface

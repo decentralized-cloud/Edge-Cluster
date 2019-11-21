@@ -57,6 +57,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				TenantID:      cuid.New(),
 				Name:          cuid.New(),
 				ClusterSecret: cuid.New(),
+				ClusterType:   models.K3S,
 			},
 		}
 	})
@@ -125,6 +126,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 						TenantID:      cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
+						ClusterType:   models.K3S,
 					},
 				}
 
@@ -176,6 +178,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 						TenantID:      cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
+						ClusterType:   models.K3S,
 					},
 				}
 
@@ -223,6 +226,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				edgeClusterSecret := fmt.Sprintf("%s%d", "ClusterSecret", i)
 				createRequest.EdgeCluster.Name = edgeClusterName
 				createRequest.EdgeCluster.ClusterSecret = edgeClusterSecret
+				createRequest.EdgeCluster.ClusterType = models.K3S
 				response, _ := sut.CreateEdgeCluster(ctx, &createRequest)
 				edgeClusterIDs = append(edgeClusterIDs, response.EdgeClusterID)
 				tenantIDs = append(tenantIDs, response.EdgeCluster.TenantID)
@@ -458,4 +462,5 @@ func assertEdgeCluster(edgeCluster, expectedEdgeCluster models.EdgeCluster) {
 	Ω(edgeCluster.Name).Should(Equal(expectedEdgeCluster.Name))
 	Ω(edgeCluster.TenantID).Should(Equal(expectedEdgeCluster.TenantID))
 	Ω(edgeCluster.ClusterSecret).Should(Equal(expectedEdgeCluster.ClusterSecret))
+	Ω(edgeCluster.ClusterType).Should(Equal(expectedEdgeCluster.ClusterType))
 }
