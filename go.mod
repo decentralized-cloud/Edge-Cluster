@@ -11,7 +11,8 @@ require (
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/lucsky/cuid v1.0.2
-	github.com/micro-business/go-core v0.0.13
+	github.com/micro-business/go-core v0.0.15
+	github.com/micro-business/gokit-core v0.0.1
 	github.com/onsi/ginkgo v1.10.3
 	github.com/onsi/gomega v1.7.1
 	github.com/prometheus/client_golang v1.2.1
@@ -25,7 +26,6 @@ require (
 	go.mongodb.org/mongo-driver v1.1.3
 	go.uber.org/zap v1.13.0
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
-	golang.org/x/tools v0.0.0-20191206204035-259af5ff87bd // indirect
 	google.golang.org/grpc v1.25.1
 	k8s.io/api v0.0.0-20191016110408-35e52d86657a
 	k8s.io/apimachinery v0.0.0-20191004115801-a2eda9f80ab8
