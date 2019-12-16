@@ -14,11 +14,13 @@ import (
 	"github.com/decentralized-cloud/edge-cluster/services/repository/mongodb"
 	"github.com/decentralized-cloud/edge-cluster/services/transport/grpc"
 	"github.com/decentralized-cloud/edge-cluster/services/transport/https"
+	"github.com/micro-business/gokit-core/middleware"
 	"go.uber.org/zap"
 )
 
 var configurationService configuration.ConfigurationContract
 var endpointCreatorService endpoint.EndpointCreatorContract
+var middlewareProviderService middleware.MiddlewareProviderContract
 
 // StartService setups all dependecies required to start the EdgeCluster service and
 // start the service
@@ -39,7 +41,8 @@ func StartService() {
 	grpcTransportService, err := grpc.NewTransportService(
 		logger,
 		configurationService,
-		endpointCreatorService)
+		endpointCreatorService,
+		middlewareProviderService)
 	if err != nil {
 		logger.Fatal("Failed to create gRPC transport service", zap.Error(err))
 	}
@@ -86,6 +89,10 @@ func StartService() {
 
 func setupDependencies(logger *zap.Logger) (err error) {
 	if configurationService, err = configuration.NewEnvConfigurationService(); err != nil {
+		return
+	}
+
+	if middlewareProviderService, err = middleware.NewMiddlewareProviderService(logger, true, ""); err != nil {
 		return
 	}
 
