@@ -115,7 +115,6 @@ func (service *transportService) Stop() error {
 	return nil
 }
 
-// newServer creates a new GRPC server that can serve edgeCluster GRPC requests and process them
 func (service *transportService) setupHandlers() {
 	var createEdgeClusterEndpoint gokitEndpoint.Endpoint
 	{
