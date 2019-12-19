@@ -122,8 +122,8 @@ func (service *transportService) setupHandlers() {
 		createEdgeClusterEndpoint = service.middlewareProviderService.CreateLoggingMiddleware("CreateEdgeCluster")(createEdgeClusterEndpoint)
 		service.createEdgeClusterHandler = gokitgrpc.NewServer(
 			createEdgeClusterEndpoint,
-			decodeSearchRequest,
-			encodeSearchResponse,
+			decodeCreateEdgeClusterRequest,
+			encodeCreateEdgeClusterResponse,
 		)
 	}
 
@@ -133,8 +133,8 @@ func (service *transportService) setupHandlers() {
 		readEdgeClusterEndpoint = service.middlewareProviderService.CreateLoggingMiddleware("ReadEdgeCluster")(readEdgeClusterEndpoint)
 		service.readEdgeClusterHandler = gokitgrpc.NewServer(
 			readEdgeClusterEndpoint,
-			decodeSearchRequest,
-			encodeSearchResponse,
+			decodeReadEdgeClusterRequest,
+			encodeReadEdgeClusterResponse,
 		)
 	}
 
@@ -144,8 +144,8 @@ func (service *transportService) setupHandlers() {
 		updateEdgeClusterEndpoint = service.middlewareProviderService.CreateLoggingMiddleware("UpdateEdgeCluster")(updateEdgeClusterEndpoint)
 		service.updateEdgeClusterHandler = gokitgrpc.NewServer(
 			updateEdgeClusterEndpoint,
-			decodeSearchRequest,
-			encodeSearchResponse,
+			decodeUpdateEdgeClusterRequest,
+			encodeUpdateEdgeClusterResponse,
 		)
 	}
 
@@ -155,8 +155,8 @@ func (service *transportService) setupHandlers() {
 		deleteEdgeClusterEndpoint = service.middlewareProviderService.CreateLoggingMiddleware("DeleteEdgeCluster")(deleteEdgeClusterEndpoint)
 		service.deleteEdgeClusterHandler = gokitgrpc.NewServer(
 			deleteEdgeClusterEndpoint,
-			decodeSearchRequest,
-			encodeSearchResponse,
+			decodeDeleteEdgeClusterRequest,
+			encodeDeleteEdgeClusterResponse,
 		)
 	}
 
