@@ -18,6 +18,6 @@ RUN export VERSION=$(awk '/version: /{print $NF}' helm-charts/Chart.yaml);mv -f 
 WORKDIR /src/helm
 RUN helm repo index . --url https://decentralized-cloud.github.io/helm/
 RUN git add .
-RUN git commit -am "CI: Tenant - $VERSION"
+RUN git commit -am "CI: Edge Cluster - $VERSION"
 RUN git push
 
