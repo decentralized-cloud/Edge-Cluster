@@ -22,7 +22,7 @@ import (
 
 const (
 	containerName           = "k3sserver"
-	containerImage          = "rancher/k3s:v1.17.4-k3s1"
+	containerImage          = "rancher/k3s:v1.20.0-k3s2"
 	deploymentContainerPort = 6443
 	internalName            = "k3s"
 )
