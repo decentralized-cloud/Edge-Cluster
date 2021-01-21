@@ -390,8 +390,6 @@ func (service *k3sProvisioner) makeDeploymentConfig(namespace string,
 							Image: containerImage,
 							Args: []string{
 								"server",
-								"--disable-agent",
-								fmt.Sprintf("--advertise-address=%s", advertiseIPAddress),
 							},
 							Env: []apiv1.EnvVar{
 								{Name: "K3S_CLUSTER_SECRET", Value: k3SClusterSecret},
