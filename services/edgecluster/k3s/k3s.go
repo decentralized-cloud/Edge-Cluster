@@ -92,8 +92,7 @@ func (service *k3sProvisioner) NewProvision(
 		ctx,
 		namespace,
 		internalName,
-		request.ClusterSecret,
-		externalIP); err != nil {
+		request.ClusterSecret); err != nil {
 		return
 	}
 
@@ -242,10 +241,9 @@ func (service *k3sProvisioner) createDeployment(
 	ctx context.Context,
 	namespace string,
 	clusterName string,
-	k3SClusterSecret string,
-	publicIP string) (err error) {
+	k3SClusterSecret string) (err error) {
 	client := service.clientset.AppsV1().Deployments(namespace)
-	deploymentConfig := service.makeDeploymentConfig(namespace, clusterName, k3SClusterSecret, publicIP)
+	deploymentConfig := service.makeDeploymentConfig(namespace, clusterName, k3SClusterSecret)
 
 	if result, err := client.Create(ctx, deploymentConfig, metav1.CreateOptions{}); err != nil {
 		service.logger.Error(
@@ -363,8 +361,7 @@ func (service *k3sProvisioner) deleteProvisionNameSpace(ctx context.Context, nam
 
 func (service *k3sProvisioner) makeDeploymentConfig(namespace string,
 	clusterName string,
-	k3SClusterSecret string,
-	advertiseIPAddress string) *appsv1.Deployment {
+	k3SClusterSecret string) *appsv1.Deployment {
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      clusterName,
