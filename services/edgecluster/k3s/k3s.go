@@ -21,10 +21,10 @@ import (
 )
 
 const (
-	containerName           = "k3sserver"
-	containerImage          = "rancher/k3s:v1.20.0-k3s2"
-	deploymentContainerPort = 6443
-	internalName            = "k3s"
+	containerName  = "k3sserver"
+	containerImage = "rancher/k3s:v1.20.0-k3s2"
+	k3sPort        = 6443
+	internalName   = "k3s"
 )
 
 var waitForFunctionToBeReadyTimeout int64 = 60
@@ -398,7 +398,8 @@ func (service *k3sProvisioner) makeDeploymentConfig(namespace string,
 							},
 							Ports: []apiv1.ContainerPort{
 								{
-									ContainerPort: deploymentContainerPort,
+									Name:          "k3s",
+									ContainerPort: k3sPort,
 								},
 							},
 						},
@@ -412,9 +413,10 @@ func (service *k3sProvisioner) makeDeploymentConfig(namespace string,
 func (service *k3sProvisioner) makeServiceConfig(namespace string) (apiv1Service *apiv1.Service) {
 	servicePorts := []v1.ServicePort{
 		{
+			Name:       "k3s",
 			Protocol:   apiv1.ProtocolTCP,
-			Port:       6443,
-			TargetPort: intstr.FromInt(6443),
+			Port:       k3sPort,
+			TargetPort: intstr.FromInt(k3sPort),
 		},
 	}
 
