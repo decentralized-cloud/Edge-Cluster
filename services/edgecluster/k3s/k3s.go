@@ -422,11 +422,6 @@ func (service *k3sProvisioner) makeServiceConfig(namespace string) (apiv1Service
 		"app": internalName,
 	}
 
-	annotation := map[string]string{
-		"metallb.universe.tf/address-pool": "default",
-	}
-
-	//todo add anotation to connect metallb
 	apiv1Service = &apiv1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      internalName,
@@ -434,7 +429,6 @@ func (service *k3sProvisioner) makeServiceConfig(namespace string) (apiv1Service
 			Labels: map[string]string{
 				"k8s-app": internalName,
 			},
-			Annotations: annotation,
 		},
 		Spec: apiv1.ServiceSpec{
 			Ports:    servicePorts,
