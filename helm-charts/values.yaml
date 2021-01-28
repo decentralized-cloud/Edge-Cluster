@@ -14,19 +14,8 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-clusterRole:
-  # Specifies whether a cluster role should be created
-  create: true
-  # The name of the cluster role to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name:
-
-clusterRoleBinding:
-  # Specifies whether a cluster role binding should be created
-  create: true
-  # The name of the cluster role binding to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name:
+rbac:
+  install: true
 
 serviceAccount:
   # Specifies whether a service account should be created
