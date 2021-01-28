@@ -1,10 +1,9 @@
-{{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
 */}}
 {{- define "edge-cluster.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
 
 {{/*
 Create a default fully qualified app name.
@@ -12,24 +11,24 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "edge-cluster.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "edge-cluster.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
 
 {{/*
 Common labels
@@ -41,7 +40,7 @@ helm.sh/chart: {{ include "edge-cluster.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- end -}}
+{{- end }}
 
 {{/*
 Selector labels
@@ -49,37 +48,15 @@ Selector labels
 {{- define "edge-cluster.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "edge-cluster.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end -}}
-
-{{/*
-Create the name of the cluster role to use
-*/}}
-{{- define "edge-cluster.clusterRoleName" -}}
-{{- if .Values.clusterRole.create -}}
-    {{ default (include "edge-cluster.fullname" .) .Values.clusterRole.name }}
-{{- else -}}
-    {{ default "default" .Values.clusterRole.name }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Create the name of the cluster role binding to use
-*/}}
-{{- define "edge-cluster.clusterRoleBindingName" -}}
-{{- if .Values.clusterRoleBinding.create -}}
-    {{ default (include "edge-cluster.fullname" .) .Values.clusterRoleBinding.name }}
-{{- else -}}
-    {{ default "default" .Values.clusterRoleBinding.name }}
-{{- end -}}
-{{- end -}}
+{{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
 {{- define "edge-cluster.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create -}}
-    {{ default (include "edge-cluster.fullname" .) .Values.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "edge-cluster.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
