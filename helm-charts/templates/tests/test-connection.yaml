@@ -3,13 +3,13 @@ kind: Pod
 metadata:
   name: "{{ include "edge-cluster.fullname" . }}-test-connection"
   labels:
-{{ include "edge-cluster.labels" . | nindent 4 }}
+    {{- include "edge-cluster.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": test-success
+    "helm.sh/hook": test
 spec:
   containers:
     - name: wget
       image: busybox
       command: ['wget']
-      args:  ['{{ include "edge-cluster.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "edge-cluster.fullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never
