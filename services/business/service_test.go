@@ -48,8 +48,8 @@ var _ = Describe("Business Service Tests", func() {
 		mockEdgeClusterProvisionerService = edgeClusterFactoryMock.NewMockEdgeClusterProvisionerContract(mockCtrl)
 		mockEdgeClusterProvisionerService.
 			EXPECT().
-			NewProvision(ctx, gomock.Any()).
-			Return(&edgeClusterTypes.NewProvisionResponse{}, nil).
+			CreateProvision(ctx, gomock.Any()).
+			Return(&edgeClusterTypes.CreateProvisionResponse{}, nil).
 			AnyTimes()
 		mockEdgeClusterProvisionerService.
 			EXPECT().
@@ -60,6 +60,12 @@ var _ = Describe("Business Service Tests", func() {
 			EXPECT().
 			DeleteProvision(ctx, gomock.Any()).
 			Return(&edgeClusterTypes.DeleteProvisionResponse{}, nil).
+			AnyTimes()
+
+		mockEdgeClusterProvisionerService.
+			EXPECT().
+			GetProvisionDetails(ctx, gomock.Any()).
+			Return(&edgeClusterTypes.GetProvisionDetailsResponse{}, nil).
 			AnyTimes()
 
 		mockEdgeClusterFactoryService = edgeClusterFactoryMock.NewMockEdgeClusterFactoryContract(mockCtrl)
@@ -486,11 +492,11 @@ var _ = Describe("Business Service Tests", func() {
 					Last:   convertIntToPointer(rand.Intn(1000)),
 				},
 				SortingOptions: []common.SortingOptionPair{
-					common.SortingOptionPair{
+					{
 						Name:      cuid.New(),
 						Direction: common.Ascending,
 					},
-					common.SortingOptionPair{
+					{
 						Name:      cuid.New(),
 						Direction: common.Descending,
 					},

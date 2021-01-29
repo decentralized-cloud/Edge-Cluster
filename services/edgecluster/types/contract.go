@@ -23,27 +23,35 @@ type EdgeClusterFactoryContract interface {
 // EdgeClusterProvisionerContract defines the methods that are required to provision a supported
 // type of edge cluster
 type EdgeClusterProvisionerContract interface {
-	// NewProvision provisions a new edge cluster.
+	// CreateProvision provisions a new edge cluster.
 	// ctx: Mandatory The reference to the context
 	// request: Mandatory. The request to provision a new edge cluster
 	// Returns either the result of provisioning new edge cluster or error if something goes wrong.
-	NewProvision(
+	CreateProvision(
 		ctx context.Context,
-		request *NewProvisionRequest) (*NewProvisionResponse, error)
+		request *CreateProvisionRequest) (*CreateProvisionResponse, error)
 
-	// UpdateProvisionWithRetry updates an existing edge cluster.
+	// UpdateProvisionWithRetry updates an existing provision.
 	// ctx: Mandatory The reference to the context
-	// request: Mandatory. The request to update an existing edge cluster.
-	// Returns either the result of updating an existing edge cluster or error if something goes wrong.
+	// request: Mandatory. The request to update an existing provision
+	// Returns either the result of updating an existing provision or error if something goes wrong.
 	UpdateProvisionWithRetry(
 		ctx context.Context,
 		request *UpdateProvisionRequest) (response *UpdateProvisionResponse, err error)
 
-	// DeleteProvision deletes an edge cluster.
+	// DeleteProvision deletes an existing provision.
 	// ctx: Mandatory The reference to the context
-	// request: Mandatory. The request to delete an edge cluster
-	// Returns either the result of deleting an edge cluster or error if something goes wrong.
+	// request: Mandatory. The request to delete an existing provision
+	// Returns either the result of deleting an existing provision or error if something goes wrong.
 	DeleteProvision(
 		ctx context.Context,
 		request *DeleteProvisionRequest) (response *DeleteProvisionResponse, err error)
+
+	// GetProvisionDetails retrieves information on an existing provision.
+	// ctx: Mandatory The reference to the context
+	// request: Mandatory. The request to retrieve information on an existing provision
+	// Returns either the result of retrieving information on an provision or error if something goes wrong.
+	GetProvisionDetails(
+		ctx context.Context,
+		request *GetProvisionDetailsRequest) (response *GetProvisionDetailsResponse, err error)
 }

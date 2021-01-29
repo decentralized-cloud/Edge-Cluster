@@ -1,6 +1,8 @@
 // Package models defines the different object models used in EdgeCluster
 package models
 
+import v1 "k8s.io/api/core/v1"
+
 type ClusterType int
 
 const (
@@ -20,5 +22,6 @@ type EdgeCluster struct {
 type EdgeClusterWithCursor struct {
 	EdgeClusterID string
 	EdgeCluster   EdgeCluster
+	Ingress       []v1.LoadBalancerIngress
 	Cursor        string
 }
