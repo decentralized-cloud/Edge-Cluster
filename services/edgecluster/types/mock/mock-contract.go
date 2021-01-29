@@ -73,19 +73,19 @@ func (m *MockEdgeClusterProvisionerContract) EXPECT() *MockEdgeClusterProvisione
 	return m.recorder
 }
 
-// NewProvision mocks base method
-func (m *MockEdgeClusterProvisionerContract) NewProvision(ctx context.Context, request *types.NewProvisionRequest) (*types.NewProvisionResponse, error) {
+// CreateProvision mocks base method
+func (m *MockEdgeClusterProvisionerContract) CreateProvision(ctx context.Context, request *types.CreateProvisionRequest) (*types.CreateProvisionResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "NewProvision", ctx, request)
-	ret0, _ := ret[0].(*types.NewProvisionResponse)
+	ret := m.ctrl.Call(m, "CreateProvision", ctx, request)
+	ret0, _ := ret[0].(*types.CreateProvisionResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// NewProvision indicates an expected call of NewProvision
-func (mr *MockEdgeClusterProvisionerContractMockRecorder) NewProvision(ctx, request interface{}) *gomock.Call {
+// CreateProvision indicates an expected call of CreateProvision
+func (mr *MockEdgeClusterProvisionerContractMockRecorder) CreateProvision(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewProvision", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).NewProvision), ctx, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProvision", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).CreateProvision), ctx, request)
 }
 
 // UpdateProvisionWithRetry mocks base method
@@ -116,4 +116,19 @@ func (m *MockEdgeClusterProvisionerContract) DeleteProvision(ctx context.Context
 func (mr *MockEdgeClusterProvisionerContractMockRecorder) DeleteProvision(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProvision", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).DeleteProvision), ctx, request)
+}
+
+// GetProvisionDetails mocks base method
+func (m *MockEdgeClusterProvisionerContract) GetProvisionDetails(ctx context.Context, request *types.GetProvisionDetailsRequest) (*types.GetProvisionDetailsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProvisionDetails", ctx, request)
+	ret0, _ := ret[0].(*types.GetProvisionDetailsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProvisionDetails indicates an expected call of GetProvisionDetails
+func (mr *MockEdgeClusterProvisionerContractMockRecorder) GetProvisionDetails(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProvisionDetails", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).GetProvisionDetails), ctx, request)
 }

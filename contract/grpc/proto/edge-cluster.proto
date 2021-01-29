@@ -27,20 +27,6 @@ enum ClusterType {
 }
 
 /**
- * The different edge cluster status
- */
- enum EdgeClusterStatus {
-  // Indicates that the edge cluster is still being provisioned and it is not ready to use yet
-  Provisioning = 0;
-
-  // Indicates that the edge cluster is ready to use
-  Ready = 1;
-
-  // Indicates that the edge cluster is being deleted
-  Deleting = 2;
-}
-
-/**
  * The edge cluster object
  */
 message EdgeCluster {
@@ -57,20 +43,57 @@ message EdgeCluster {
   ClusterType clusterType = 4;
 }
 
+/**
+ *  Protocol defines network protocols.
+ */
+ enum Protocol {
+  // TCP protocol
+  TCP = 0;
+
+  // UDP protocol
+  UDP = 1;
+
+  // SCTP protocol
+  SCTP = 2;
+}
 
 /**
- * The edge cluster provisioning details contains details such as current status of the edge cluster
- * as well as the public IP address of the cluster to connect to
+ * Ingress represents the status of a load-balancer ingress point
+ * traffic intended for the service should be sent to an ingress point.
  */
-message EdgeClusterProvisioningDetail {
+ message PortStatus {
+  // The port number of the edge-cluster master port of which status is recorded here
+  int32 port = 1;
+
+  // The protocol of the edge-cluster master port of which status is recorded here
+  Protocol protcol = 2;
+}
+
+/**
+ * Ingress represents the status of a load-balancer ingress point
+ * traffic intended for the service should be sent to an ingress point.
+ */
+ message Ingress {
   // The edge cluster status
-  EdgeClusterStatus status = 1;
+  string ip = 1;
 
   // The edge cluster public IP address to connect to
-  string publicIPAddress = 2;
+  string hostname = 2;
+
+  // Ports is a list of records of edge-cluster master ports
+  repeated PortStatus ports = 3;
+}
+
+/**
+ * The edge cluster provision details contains details such as current status of the edge cluster
+ * as well as ingress address of the edge cluster to connect to
+ */
+message EdgeClusterProvisionDetail {
+  // The ingress details of the edge cluster master node
+  repeated Ingress ingress = 1;
 
   // The provisioned edge cluster kubeconfig content
-  string kubeConfigContent = 3;
+  string kubeConfigContent = 2;
 }
 
 /**
@@ -101,8 +124,8 @@ message CreateEdgeClusterResponse {
   // referred to using pagination information
   string cursor = 5;
 
-  // The edge cluster provisioning details
-  EdgeClusterProvisioningDetail provisioningDetail = 6;
+  // The edge cluster provision details
+  EdgeClusterProvisionDetail provisionDetail = 6;
 }
 
 /** Request to read an existing edge cluster
@@ -125,8 +148,8 @@ message ReadEdgeClusterResponse {
   // The edge cluster object
   EdgeCluster edgeCluster = 3;
 
-  // The edge cluster provisioning details
-  EdgeClusterProvisioningDetail provisioningDetail = 6;
+  // The edge cluster provision details
+  EdgeClusterProvisionDetail provisionDetail = 6;
 }
 
 /**
@@ -157,8 +180,8 @@ message UpdateEdgeClusterResponse {
   // referred to using pagination information
   string cursor = 4;
 
-  // The edge cluster provisioning details
-  EdgeClusterProvisioningDetail provisioningDetail = 6;
+  // The edge cluster provision details
+  EdgeClusterProvisionDetail provisionDetail = 6;
 }
 
 /**
@@ -256,8 +279,8 @@ message EdgeClusterWithCursor {
   // The edge cluster object
   EdgeCluster edgeCluster = 3;
 
-  // The edge cluster provisioning details
-  EdgeClusterProvisioningDetail provisioningDetail = 4;
+  // The edge cluster provision details
+  EdgeClusterProvisionDetail provisionDetail = 4;
 }
 
 /**
