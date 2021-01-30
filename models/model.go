@@ -41,12 +41,18 @@ type Port struct {
 	Port int32
 }
 
+// ProvisionDetails represents the provision detail of an edge cluster
+type ProvisionDetails struct {
+	Ingress           []Ingress
+	Ports             []Port
+	KubeconfigContent string
+}
+
 // EdgeClusterWithCursor implements the pair of the edge cluster with a cursor that determines the
 // location of the edge cluster in the repository.
 type EdgeClusterWithCursor struct {
-	EdgeClusterID string
-	EdgeCluster   EdgeCluster
-	Cursor        string
-	Ingress       []Ingress
-	Ports         []Port
+	EdgeClusterID    string
+	EdgeCluster      EdgeCluster
+	Cursor           string
+	ProvisionDetails ProvisionDetails
 }
