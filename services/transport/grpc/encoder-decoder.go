@@ -53,8 +53,9 @@ func encodeCreateEdgeClusterResponse(
 			EdgeCluster:   edgeCluster,
 			Cursor:        castedResponse.Cursor,
 			ProvisionDetail: &edgeClusterGRPCContract.EdgeClusterProvisionDetail{
-				Ingress: mapIngressToGrpc(castedResponse.Ingress),
-				Ports:   mapPortsToGrpc(castedResponse.Ports),
+				Ingress:           mapIngressToGrpc(castedResponse.ProvisionDetails.Ingress),
+				Ports:             mapPortsToGrpc(castedResponse.ProvisionDetails.Ports),
+				KubeConfigContent: castedResponse.ProvisionDetails.KubeconfigContent,
 			},
 		}, nil
 	}
@@ -98,8 +99,9 @@ func encodeReadEdgeClusterResponse(
 			Error:       edgeClusterGRPCContract.Error_NO_ERROR,
 			EdgeCluster: edgeCluster,
 			ProvisionDetail: &edgeClusterGRPCContract.EdgeClusterProvisionDetail{
-				Ingress: mapIngressToGrpc(castedResponse.Ingress),
-				Ports:   mapPortsToGrpc(castedResponse.Ports),
+				Ingress:           mapIngressToGrpc(castedResponse.ProvisionDetails.Ingress),
+				Ports:             mapPortsToGrpc(castedResponse.ProvisionDetails.Ports),
+				KubeConfigContent: castedResponse.ProvisionDetails.KubeconfigContent,
 			},
 		}, nil
 	}
@@ -150,8 +152,9 @@ func encodeUpdateEdgeClusterResponse(
 			EdgeCluster: edgeCluster,
 			Cursor:      castedResponse.Cursor,
 			ProvisionDetail: &edgeClusterGRPCContract.EdgeClusterProvisionDetail{
-				Ingress: mapIngressToGrpc(castedResponse.Ingress),
-				Ports:   mapPortsToGrpc(castedResponse.Ports),
+				Ingress:           mapIngressToGrpc(castedResponse.ProvisionDetails.Ingress),
+				Ports:             mapPortsToGrpc(castedResponse.ProvisionDetails.Ports),
+				KubeConfigContent: castedResponse.ProvisionDetails.KubeconfigContent,
 			},
 		}, nil
 	}
@@ -273,8 +276,9 @@ func encodeSearchResponse(
 					EdgeCluster:   mappedEdgeCluster,
 					Cursor:        edgeCluster.Cursor,
 					ProvisionDetail: &edgeClusterGRPCContract.EdgeClusterProvisionDetail{
-						Ingress: mapIngressToGrpc(edgeCluster.Ingress),
-						Ports:   mapPortsToGrpc(edgeCluster.Ports),
+						Ingress:           mapIngressToGrpc(edgeCluster.ProvisionDetails.Ingress),
+						Ports:             mapPortsToGrpc(edgeCluster.ProvisionDetails.Ports),
+						KubeConfigContent: edgeCluster.ProvisionDetails.KubeconfigContent,
 					},
 				}
 			}).([]*edgeClusterGRPCContract.EdgeClusterWithCursor),

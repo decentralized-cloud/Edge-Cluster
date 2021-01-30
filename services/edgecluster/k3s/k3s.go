@@ -2,9 +2,11 @@
 package k3s
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
@@ -18,21 +20,24 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/client-go/util/retry"
 )
 
 const (
-	containerName  = "k3sserver"
-	containerImage = "rancher/k3s:v1.20.0-k3s2"
-	k3sPort        = 6443
-	internalName   = "k3s"
+	containerName      = "k3sserver"
+	containerImage     = "rancher/k3s:v1.20.0-k3s2"
+	k3sPort            = 6443
+	internalName       = "k3s"
+	kubeconfigFilePath = "/output/kubeconfig.yaml"
 )
 
 var deploymentReplica int32 = 1
 
 type k3sProvisioner struct {
-	logger    *zap.Logger
-	clientset *kubernetes.Clientset
+	logger        *zap.Logger
+	clientset     *kubernetes.Clientset
+	k8sRestConfig *rest.Config
 }
 
 // NewK3SProvisioner creates new instance of the k3sProvisioner, setting up all dependencies and returns the instance
@@ -58,8 +63,9 @@ func NewK3SProvisioner(
 	}
 
 	return &k3sProvisioner{
-		logger:    logger,
-		clientset: clientset,
+		logger:        logger,
+		clientset:     clientset,
+		k8sRestConfig: k8sRestConfig,
 	}, nil
 }
 
@@ -176,31 +182,36 @@ func (service *k3sProvisioner) GetProvisionDetails(
 	request *types.GetProvisionDetailsRequest) (response *types.GetProvisionDetailsResponse, err error) {
 	namespace := getNamespace(request.EdgeClusterID)
 
-	var serviceInfo *v1.Service
-
-	if serviceInfo, err = service.clientset.CoreV1().Services(namespace).Get(ctx, internalName, metav1.GetOptions{}); err != nil {
-		service.logger.Error("Failed to fetch service info", zap.Error(err))
-
-		return nil, err
+	ingress, ports, err := service.getProvisionDetailsServiceDetails(ctx, namespace)
+	if err != nil {
+		return
 	}
 
-	response = &types.GetProvisionDetailsResponse{}
-
-	for _, ingress := range serviceInfo.Status.LoadBalancer.Ingress {
-		response.Ingress = append(
-			response.Ingress,
-			models.Ingress{
-				IP:       ingress.IP,
-				Hostname: ingress.Hostname})
+	kubeconfigContent, err := service.getProvisionDetailsKubeConfigContent(ctx, namespace)
+	if err != nil {
+		return
 	}
 
-	for _, port := range serviceInfo.Spec.Ports {
-		response.Ports = append(
-			response.Ports,
-			models.Port{
-				Protocol: port.Protocol,
-				Port:     port.Port})
+	for _, item := range ingress {
+		if item.IP != "" {
+			kubeconfigContent = strings.Replace(kubeconfigContent, "127.0.0.1", item.IP, -1)
+		} else if item.Hostname != "" {
+			kubeconfigContent = strings.Replace(kubeconfigContent, "127.0.0.1", item.Hostname, -1)
+		} else {
+			kubeconfigContent = strings.Replace(kubeconfigContent, "127.0.0.1", "BLANK", -1)
+		}
 	}
+
+	for _, item := range ports {
+		kubeconfigContent = strings.Replace(kubeconfigContent, fmt.Sprintf("%d", k3sPort), fmt.Sprintf("%d", item.Port), -1)
+	}
+
+	response = &types.GetProvisionDetailsResponse{
+		ProvisionDetails: models.ProvisionDetails{
+			Ingress:           ingress,
+			Ports:             ports,
+			KubeconfigContent: kubeconfigContent,
+		}}
 
 	return
 }
@@ -347,7 +358,7 @@ func getDeploymentSpec(k3SClusterSecret string) apiv1.PodSpec {
 				},
 				Env: []apiv1.EnvVar{
 					{Name: "K3S_CLUSTER_SECRET", Value: k3SClusterSecret},
-					{Name: "K3S_KUBECONFIG_OUTPUT", Value: "/output/kubeconfig.yaml"},
+					{Name: "K3S_KUBECONFIG_OUTPUT", Value: kubeconfigFilePath},
 					{Name: "K3S_KUBECONFIG_MODE", Value: "666"},
 				},
 				Ports: []apiv1.ContainerPort{
@@ -360,4 +371,69 @@ func getDeploymentSpec(k3SClusterSecret string) apiv1.PodSpec {
 		},
 	}
 
+}
+
+func (service *k3sProvisioner) getProvisionDetailsServiceDetails(
+	ctx context.Context,
+	namespace string) (ingress []models.Ingress, ports []models.Port, err error) {
+
+	var serviceInfo *v1.Service
+
+	if serviceInfo, err = service.clientset.CoreV1().Services(namespace).Get(ctx, internalName, metav1.GetOptions{}); err != nil {
+		service.logger.Error("Failed to fetch service info", zap.Error(err))
+
+		return
+	}
+
+	for _, item := range serviceInfo.Status.LoadBalancer.Ingress {
+		ingress = append(
+			ingress,
+			models.Ingress{
+				IP:       item.IP,
+				Hostname: item.Hostname})
+	}
+
+	for _, port := range serviceInfo.Spec.Ports {
+		ports = append(
+			ports,
+			models.Port{
+				Protocol: port.Protocol,
+				Port:     port.Port})
+	}
+
+	return
+}
+
+func (service *k3sProvisioner) getProvisionDetailsKubeConfigContent(
+	ctx context.Context,
+	namespace string) (kubeconfigContent string, err error) {
+	pods, err := service.clientset.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
+	execRequest := service.clientset.CoreV1().RESTClient().
+		Post().
+		Resource("pods").
+		Name(pods.Items[0].ObjectMeta.Name).
+		Namespace(pods.Items[0].ObjectMeta.Namespace).
+		SubResource("exec").
+		Param("stdout", "true").
+		Param("command", "cat").
+		Param("command", kubeconfigFilePath)
+
+	executor, err := remotecommand.NewSPDYExecutor(service.k8sRestConfig, http.MethodPost, execRequest.URL())
+	if err != nil {
+		err = types.NewUnknownErrorWithError("Failed to retrieve KubeConfig content.", err)
+
+		return
+	}
+
+	output := &bytes.Buffer{}
+
+	if err = executor.Stream(remotecommand.StreamOptions{Stdout: output}); err != nil {
+		err = types.NewUnknownErrorWithError("Failed to retrieve KubeConfig content", err)
+
+		return
+	}
+
+	kubeconfigContent = output.String()
+
+	return
 }

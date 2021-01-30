@@ -13,12 +13,11 @@ type CreateEdgeClusterRequest struct {
 
 // CreateEdgeClusterResponse contains the result of creating a new edge cluster
 type CreateEdgeClusterResponse struct {
-	Err           error
-	EdgeClusterID string
-	EdgeCluster   models.EdgeCluster
-	Cursor        string
-	Ingress       []models.Ingress
-	Ports         []models.Port
+	Err              error
+	EdgeClusterID    string
+	EdgeCluster      models.EdgeCluster
+	Cursor           string
+	ProvisionDetails models.ProvisionDetails
 }
 
 // ReadEdgeClusterRequest contains the request to read an existing edge cluster
@@ -28,10 +27,9 @@ type ReadEdgeClusterRequest struct {
 
 // ReadEdgeClusterResponse contains the result of reading an existing edge cluster
 type ReadEdgeClusterResponse struct {
-	Err         error
-	EdgeCluster models.EdgeCluster
-	Ingress     []models.Ingress
-	Ports       []models.Port
+	Err              error
+	EdgeCluster      models.EdgeCluster
+	ProvisionDetails models.ProvisionDetails
 }
 
 // UpdateEdgeClusterRequest contains the request to update an existing edge cluster
@@ -42,11 +40,10 @@ type UpdateEdgeClusterRequest struct {
 
 // UpdateEdgeClusterResponse contains the result of updating an existing edge cluster
 type UpdateEdgeClusterResponse struct {
-	Err         error
-	EdgeCluster models.EdgeCluster
-	Cursor      string
-	Ingress     []models.Ingress
-	Ports       []models.Port
+	Err              error
+	EdgeCluster      models.EdgeCluster
+	Cursor           string
+	ProvisionDetails models.ProvisionDetails
 }
 
 // DeleteEdgeClusterRequest contains the request to delete an existing edge cluster

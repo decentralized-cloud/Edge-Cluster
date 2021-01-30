@@ -1,9 +1,7 @@
 // Package types defines the contracts that are used to provision a supported edge cluster and managing them
 package types
 
-import (
-	"github.com/decentralized-cloud/edge-cluster/models"
-)
+import "github.com/decentralized-cloud/edge-cluster/models"
 
 // CreateProvisionRequest contains the request to provision a new supported edge cluser
 type CreateProvisionRequest struct {
@@ -41,6 +39,5 @@ type GetProvisionDetailsRequest struct {
 
 // GetProvisionDetailsResponse contains the result of retrieving an existing provision
 type GetProvisionDetailsResponse struct {
-	Ingress []models.Ingress
-	Ports   []models.Port
+	ProvisionDetails models.ProvisionDetails
 }
