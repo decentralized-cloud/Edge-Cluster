@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	commonErrors "github.com/micro-business/go-core/system/errors"
 	"go.uber.org/zap"
@@ -183,8 +184,22 @@ func (service *k3sProvisioner) GetProvisionDetails(
 		return nil, err
 	}
 
-	response = &types.GetProvisionDetailsResponse{
-		Ingress: serviceInfo.Status.LoadBalancer.Ingress,
+	response = &types.GetProvisionDetailsResponse{}
+
+	for _, ingress := range serviceInfo.Status.LoadBalancer.Ingress {
+		response.Ingress = append(
+			response.Ingress,
+			models.Ingress{
+				IP:       ingress.IP,
+				Hostname: ingress.Hostname})
+	}
+
+	for _, port := range serviceInfo.Spec.Ports {
+		response.Ports = append(
+			response.Ports,
+			models.Port{
+				Protocol: port.Protocol,
+				Port:     port.Port})
 	}
 
 	return

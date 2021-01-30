@@ -77,8 +77,9 @@ func (service *businessService) CreateEdgeCluster(
 
 	if provisionDetails, err := edgeClusterProvisioner.GetProvisionDetails(
 		ctx,
-		&edgeClusterTypes.GetProvisionDetailsRequest{EdgeClusterID: repositoryResponse.EdgeClusterID}); err != nil {
+		&edgeClusterTypes.GetProvisionDetailsRequest{EdgeClusterID: repositoryResponse.EdgeClusterID}); err == nil {
 		response.Ingress = provisionDetails.Ingress
+		response.Ports = provisionDetails.Ports
 	}
 
 	return response, nil
@@ -112,8 +113,9 @@ func (service *businessService) ReadEdgeCluster(
 
 	if provisionDetails, err := edgeClusterProvisioner.GetProvisionDetails(
 		ctx,
-		&edgeClusterTypes.GetProvisionDetailsRequest{EdgeClusterID: request.EdgeClusterID}); err != nil {
+		&edgeClusterTypes.GetProvisionDetailsRequest{EdgeClusterID: request.EdgeClusterID}); err == nil {
 		response.Ingress = provisionDetails.Ingress
+		response.Ports = provisionDetails.Ports
 	}
 
 	return response, nil
@@ -161,8 +163,9 @@ func (service *businessService) UpdateEdgeCluster(
 
 	if provisionDetails, err := edgeClusterProvisioner.GetProvisionDetails(
 		ctx,
-		&edgeClusterTypes.GetProvisionDetailsRequest{EdgeClusterID: request.EdgeClusterID}); err != nil {
+		&edgeClusterTypes.GetProvisionDetailsRequest{EdgeClusterID: request.EdgeClusterID}); err == nil {
 		response.Ingress = provisionDetails.Ingress
+		response.Ports = provisionDetails.Ports
 	}
 
 	return response, nil
@@ -224,7 +227,7 @@ func (service *businessService) Search(
 		}, nil
 	}
 
-	for _, edgeCluster := range result.EdgeClusters {
+	for idx, edgeCluster := range result.EdgeClusters {
 		edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeCluster.EdgeCluster.ClusterType)
 		if err != nil {
 			return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
@@ -232,8 +235,9 @@ func (service *businessService) Search(
 
 		if provisionDetails, err := edgeClusterProvisioner.GetProvisionDetails(
 			ctx,
-			&edgeClusterTypes.GetProvisionDetailsRequest{EdgeClusterID: edgeCluster.EdgeClusterID}); err != nil {
-			edgeCluster.Ingress = provisionDetails.Ingress
+			&edgeClusterTypes.GetProvisionDetailsRequest{EdgeClusterID: edgeCluster.EdgeClusterID}); err == nil {
+			result.EdgeClusters[idx].Ingress = provisionDetails.Ingress
+			result.EdgeClusters[idx].Ports = provisionDetails.Ports
 		}
 	}
 

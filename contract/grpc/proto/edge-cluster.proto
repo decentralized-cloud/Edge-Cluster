@@ -44,6 +44,20 @@ message EdgeCluster {
 }
 
 /**
+ * Ingress represents the status of a load-balancer ingress point
+ * traffic intended for the service should be sent to an ingress point.
+ */
+ message Ingress {
+  // IP is set for load-balancer ingress points that are IP based
+  // (typically GCE or OpenStack load-balancers)
+  string ip = 1;
+
+	// Hostname is set for load-balancer ingress points that are DNS based
+	// (typically AWS load-balancers)
+  string hostname = 2;
+}
+
+/**
  *  Protocol defines network protocols.
  */
  enum Protocol {
@@ -58,30 +72,14 @@ message EdgeCluster {
 }
 
 /**
- * Ingress represents the status of a load-balancer ingress point
- * traffic intended for the service should be sent to an ingress point.
+ * Port contains information on service's port.
  */
- message PortStatus {
-  // The port number of the edge-cluster master port of which status is recorded here
+ message Port {
+  // The port number of the edge-cluster master port
   int32 port = 1;
 
-  // The protocol of the edge-cluster master port of which status is recorded here
+  // The protocol of the edge-cluster master port
   Protocol protcol = 2;
-}
-
-/**
- * Ingress represents the status of a load-balancer ingress point
- * traffic intended for the service should be sent to an ingress point.
- */
- message Ingress {
-  // The edge cluster status
-  string ip = 1;
-
-  // The edge cluster public IP address to connect to
-  string hostname = 2;
-
-  // Ports is a list of records of edge-cluster master ports
-  repeated PortStatus ports = 3;
 }
 
 /**
@@ -92,8 +90,11 @@ message EdgeClusterProvisionDetail {
   // The ingress details of the edge cluster master node
   repeated Ingress ingress = 1;
 
+  // The ingress details of the edge cluster master node
+  repeated Port ports = 2;
+
   // The provisioned edge cluster kubeconfig content
-  string kubeConfigContent = 2;
+  string kubeConfigContent = 3;
 }
 
 /**
