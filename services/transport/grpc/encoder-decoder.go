@@ -11,7 +11,6 @@ import (
 	"github.com/micro-business/go-core/common"
 	commonErrors "github.com/micro-business/go-core/system/errors"
 	"github.com/thoas/go-funk"
-	v1 "k8s.io/api/core/v1"
 )
 
 // decodeCreateEdgeClusterRequest decodes CreateEdgeCluster request message from GRPC object to business object
@@ -55,6 +54,7 @@ func encodeCreateEdgeClusterResponse(
 			Cursor:        castedResponse.Cursor,
 			ProvisionDetail: &edgeClusterGRPCContract.EdgeClusterProvisionDetail{
 				Ingress: mapIngressToGrpc(castedResponse.Ingress),
+				Ports:   mapPortsToGrpc(castedResponse.Ports),
 			},
 		}, nil
 	}
@@ -99,6 +99,7 @@ func encodeReadEdgeClusterResponse(
 			EdgeCluster: edgeCluster,
 			ProvisionDetail: &edgeClusterGRPCContract.EdgeClusterProvisionDetail{
 				Ingress: mapIngressToGrpc(castedResponse.Ingress),
+				Ports:   mapPortsToGrpc(castedResponse.Ports),
 			},
 		}, nil
 	}
@@ -150,6 +151,7 @@ func encodeUpdateEdgeClusterResponse(
 			Cursor:      castedResponse.Cursor,
 			ProvisionDetail: &edgeClusterGRPCContract.EdgeClusterProvisionDetail{
 				Ingress: mapIngressToGrpc(castedResponse.Ingress),
+				Ports:   mapPortsToGrpc(castedResponse.Ports),
 			},
 		}, nil
 	}
@@ -272,6 +274,7 @@ func encodeSearchResponse(
 					Cursor:        edgeCluster.Cursor,
 					ProvisionDetail: &edgeClusterGRPCContract.EdgeClusterProvisionDetail{
 						Ingress: mapIngressToGrpc(edgeCluster.Ingress),
+						Ports:   mapPortsToGrpc(edgeCluster.Ports),
 					},
 				}
 			}).([]*edgeClusterGRPCContract.EdgeClusterWithCursor),
@@ -346,28 +349,27 @@ func mapEdgeClusterToGrpc(edgeCluster models.EdgeCluster) (grpcEdgeCluster *edge
 	return
 }
 
-func mapIngressToGrpc(ingress []v1.LoadBalancerIngress) (mappedIngress []*edgeClusterGRPCContract.Ingress) {
+func mapIngressToGrpc(ingress []models.Ingress) (mappedIngress []*edgeClusterGRPCContract.Ingress) {
 	mappedIngress = []*edgeClusterGRPCContract.Ingress{}
 
 	for _, item := range ingress {
-		ipPort := edgeClusterGRPCContract.Ingress{
+		mappedIngress = append(mappedIngress, &edgeClusterGRPCContract.Ingress{
 			Ip:       item.IP,
 			Hostname: item.Hostname,
-			Ports:    []*edgeClusterGRPCContract.PortStatus{},
-		}
+		})
+	}
 
-		ipPort.Ports = []*edgeClusterGRPCContract.PortStatus{}
+	return
+}
 
-		for _, port := range item.Ports {
-			ipPort.Ports = append(
-				ipPort.Ports,
-				&edgeClusterGRPCContract.PortStatus{
-					Port:    port.Port,
-					Protcol: edgeClusterGRPCContract.Protocol(edgeClusterGRPCContract.Protocol_value[string(port.Protocol)])},
-			)
-		}
+func mapPortsToGrpc(ports []models.Port) (mappedIngress []*edgeClusterGRPCContract.Port) {
+	mappedIngress = []*edgeClusterGRPCContract.Port{}
 
-		mappedIngress = append(mappedIngress, &ipPort)
+	for _, item := range ports {
+		mappedIngress = append(mappedIngress, &edgeClusterGRPCContract.Port{
+			Port:    item.Port,
+			Protcol: edgeClusterGRPCContract.Protocol(edgeClusterGRPCContract.Protocol_value[string(item.Protocol)]),
+		})
 	}
 
 	return

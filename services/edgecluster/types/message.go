@@ -1,7 +1,9 @@
 // Package types defines the contracts that are used to provision a supported edge cluster and managing them
 package types
 
-import v1 "k8s.io/api/core/v1"
+import (
+	"github.com/decentralized-cloud/edge-cluster/models"
+)
 
 // CreateProvisionRequest contains the request to provision a new supported edge cluser
 type CreateProvisionRequest struct {
@@ -39,5 +41,6 @@ type GetProvisionDetailsRequest struct {
 
 // GetProvisionDetailsResponse contains the result of retrieving an existing provision
 type GetProvisionDetailsResponse struct {
-	Ingress []v1.LoadBalancerIngress
+	Ingress []models.Ingress
+	Ports   []models.Port
 }

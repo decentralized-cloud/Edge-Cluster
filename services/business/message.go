@@ -4,7 +4,6 @@ package business
 import (
 	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/micro-business/go-core/common"
-	v1 "k8s.io/api/core/v1"
 )
 
 // CreateEdgeClusterRequest contains the request to create a new edge cluster
@@ -18,7 +17,8 @@ type CreateEdgeClusterResponse struct {
 	EdgeClusterID string
 	EdgeCluster   models.EdgeCluster
 	Cursor        string
-	Ingress       []v1.LoadBalancerIngress
+	Ingress       []models.Ingress
+	Ports         []models.Port
 }
 
 // ReadEdgeClusterRequest contains the request to read an existing edge cluster
@@ -30,7 +30,8 @@ type ReadEdgeClusterRequest struct {
 type ReadEdgeClusterResponse struct {
 	Err         error
 	EdgeCluster models.EdgeCluster
-	Ingress     []v1.LoadBalancerIngress
+	Ingress     []models.Ingress
+	Ports       []models.Port
 }
 
 // UpdateEdgeClusterRequest contains the request to update an existing edge cluster
@@ -44,7 +45,8 @@ type UpdateEdgeClusterResponse struct {
 	Err         error
 	EdgeCluster models.EdgeCluster
 	Cursor      string
-	Ingress     []v1.LoadBalancerIngress
+	Ingress     []models.Ingress
+	Ports       []models.Port
 }
 
 // DeleteEdgeClusterRequest contains the request to delete an existing edge cluster
