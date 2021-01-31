@@ -122,7 +122,7 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 			deployment, err := client.Get(ctx, internalName, metav1.GetOptions{})
 			if err != nil {
 				service.logger.Error(
-					"failed to update the edge cluster",
+					"Failed to update the edge cluster",
 					zap.Error(err))
 
 				return
@@ -132,7 +132,7 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 
 			if _, err = client.Update(ctx, deployment, metav1.UpdateOptions{}); err != nil {
 				service.logger.Error(
-					"failed to update the edge custer",
+					"Failed to update the edge custer",
 					zap.Error(err))
 
 				return
@@ -163,7 +163,7 @@ func (service *k3sProvisioner) DeleteProvision(
 		metav1.DeleteOptions{
 			PropagationPolicy: &deletePolicy,
 		}); err != nil {
-		service.logger.Error("failed to delete namespace", zap.Error(err))
+		service.logger.Error("Failed to delete namespace", zap.Error(err))
 
 		return
 	}
@@ -184,11 +184,15 @@ func (service *k3sProvisioner) GetProvisionDetails(
 
 	ingress, ports, err := service.getProvisionDetailsServiceDetails(ctx, namespace)
 	if err != nil {
+		service.logger.Error("Failed to get service details", zap.Error(err))
+
 		return
 	}
 
 	kubeconfigContent, err := service.getProvisionDetailsKubeConfigContent(ctx, namespace)
 	if err != nil {
+		service.logger.Error("Failed to get kubeconfig content", zap.Error(err))
+
 		return
 	}
 
@@ -217,14 +221,8 @@ func (service *k3sProvisioner) GetProvisionDetails(
 }
 
 func (service *k3sProvisioner) createProvisionNameSpace(ctx context.Context, namespace string) (err error) {
-	service.logger.Info("checking the namespace ", zap.String("ServiceName", namespace))
-
 	ns, err := service.clientset.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
 	if err != nil && strings.Contains(err.Error(), "not found") {
-		service.logger.Info(
-			"creating namespace",
-			zap.String("namespace", namespace))
-
 		namespaceConfig := &v1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: namespace,
@@ -233,7 +231,7 @@ func (service *k3sProvisioner) createProvisionNameSpace(ctx context.Context, nam
 
 		if _, err = service.clientset.CoreV1().Namespaces().Create(ctx, namespaceConfig, metav1.CreateOptions{}); err != nil {
 			service.logger.Error(
-				"failed to create namespace",
+				"Failed to create namespace",
 				zap.Error(err),
 				zap.String("namespace", namespace))
 
@@ -242,7 +240,7 @@ func (service *k3sProvisioner) createProvisionNameSpace(ctx context.Context, nam
 
 	} else if err != nil {
 		service.logger.Error(
-			"failed to validate the requested namespace",
+			"Failed to validate the requested namespace",
 			zap.Error(err),
 			zap.String("namespace", namespace))
 
@@ -289,15 +287,11 @@ func (service *k3sProvisioner) createDeployment(
 		},
 	}
 
-	if result, err := client.Create(ctx, deploymentConfig, metav1.CreateOptions{}); err != nil {
+	if _, err := client.Create(ctx, deploymentConfig, metav1.CreateOptions{}); err != nil {
 		service.logger.Error(
-			"failed to create edge cluster",
+			"Failed to create edge cluster",
 			zap.Error(err),
 			zap.Any("Config", deploymentConfig))
-	} else {
-		service.logger.Info(
-			"created a edge cluster",
-			zap.String("Edge cluster Name", result.GetObjectMeta().GetName()))
 	}
 
 	return
@@ -335,7 +329,7 @@ func (service *k3sProvisioner) createService(ctx context.Context, namespace stri
 	}
 
 	if _, err = serviceDeployment.Create(ctx, serviceConfig, metav1.CreateOptions{}); err != nil {
-		service.logger.Error("failed to create service", zap.Error(err), zap.Any("Config", serviceConfig))
+		service.logger.Error("Failed to create service", zap.Error(err), zap.Any("Config", serviceConfig))
 
 		return
 	}
