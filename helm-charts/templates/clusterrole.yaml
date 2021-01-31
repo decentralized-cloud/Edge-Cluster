@@ -4,10 +4,10 @@ kind: ClusterRole
 metadata:
   name: {{ template "edge-cluster.fullname" . }}-clusterrole
 rules:
-  - apiGroups: [""]
+  - apiGroups: ["", "k3s"]
     resources: ["deployments", "replicasets", "pods", "services", "namespaces"]
     verbs: ["create", "get", "delete", "update", "edit", "watch", "exec", "list"]
-  - apiGroups: [""]
+  - apiGroups: ["", "k3s"]
     resources: ["pods/exec"]
     verbs: ["create"]
 {{- end -}}

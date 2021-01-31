@@ -92,7 +92,6 @@ func (service *k3sProvisioner) CreateProvision(
 	if err = service.createDeployment(
 		ctx,
 		namespace,
-		internalName,
 		request.ClusterSecret); err != nil {
 		_, _ = service.DeleteProvision(ctx, &types.DeleteProvisionRequest{EdgeClusterID: request.EdgeClusterID})
 
@@ -255,7 +254,6 @@ func (service *k3sProvisioner) createProvisionNameSpace(ctx context.Context, nam
 func (service *k3sProvisioner) createDeployment(
 	ctx context.Context,
 	namespace string,
-	clusterName string,
 	k3SClusterSecret string) (err error) {
 	spec, err := service.getDeploymentSpec(ctx, namespace, k3SClusterSecret)
 	if err != nil {
@@ -265,20 +263,20 @@ func (service *k3sProvisioner) createDeployment(
 	client := service.clientset.AppsV1().Deployments(namespace)
 	deploymentConfig := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      clusterName,
+			Name:      internalName,
 			Namespace: namespace,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &deploymentReplica,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"app": clusterName,
+					internalName: internalName,
 				},
 			},
 			Template: apiv1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"app": clusterName,
+						internalName: internalName,
 					},
 				},
 				Spec: spec,
@@ -306,7 +304,7 @@ func (service *k3sProvisioner) createService(ctx context.Context, namespace stri
 	}
 
 	serviceSelector := map[string]string{
-		"app": internalName,
+		internalName: internalName,
 	}
 
 	serviceConfig := &apiv1.Service{
