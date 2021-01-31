@@ -402,6 +402,10 @@ func (service *k3sProvisioner) getProvisionDetailsKubeConfigContent(
 	ctx context.Context,
 	namespace string) (kubeconfigContent string, err error) {
 	pods, err := service.clientset.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return
+	}
+
 	execRequest := service.clientset.CoreV1().RESTClient().
 		Post().
 		Resource("pods").
