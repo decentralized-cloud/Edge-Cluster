@@ -29,10 +29,11 @@ const (
 	containerImage     = "rancher/k3s:v1.20.0-k3s2"
 	k3sPort            = 6443
 	internalName       = "k3s"
-	kubeconfigFilePath = "/output/kubeconfig.yaml"
+	kubeconfigFilePath = "/etc/rancher/k3s/k3s.yaml"
 )
 
 var deploymentReplica int32 = 1
+var waitForDeploymentToBeReadyTimeout int64 = 60
 
 type k3sProvisioner struct {
 	logger        *zap.Logger
@@ -82,18 +83,17 @@ func (service *k3sProvisioner) CreateProvision(
 		return
 	}
 
-	if err = service.createDeployment(
-		ctx,
-		namespace,
-		internalName,
-		request.ClusterSecret); err != nil {
-
+	if err = service.createService(ctx, namespace); err != nil {
 		_, _ = service.DeleteProvision(ctx, &types.DeleteProvisionRequest{EdgeClusterID: request.EdgeClusterID})
 
 		return
 	}
 
-	if err = service.createService(ctx, namespace); err != nil {
+	if err = service.createDeployment(
+		ctx,
+		namespace,
+		internalName,
+		request.ClusterSecret); err != nil {
 		_, _ = service.DeleteProvision(ctx, &types.DeleteProvisionRequest{EdgeClusterID: request.EdgeClusterID})
 
 		return
@@ -121,19 +121,18 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 
 			deployment, err := client.Get(ctx, internalName, metav1.GetOptions{})
 			if err != nil {
-				service.logger.Error(
-					"Failed to update the edge cluster",
-					zap.Error(err))
+				service.logger.Error("Failed to update the edge cluster", zap.Error(err))
 
 				return
 			}
 
-			deployment.Spec.Template.Spec = getDeploymentSpec(request.ClusterSecret)
+			deployment.Spec.Template.Spec, err = service.getDeploymentSpec(ctx, namespace, request.ClusterSecret)
+			if err != nil {
+				return err
+			}
 
 			if _, err = client.Update(ctx, deployment, metav1.UpdateOptions{}); err != nil {
-				service.logger.Error(
-					"Failed to update the edge custer",
-					zap.Error(err))
+				service.logger.Error("Failed to update the edge custer", zap.Error(err))
 
 				return
 			}
@@ -239,18 +238,13 @@ func (service *k3sProvisioner) createProvisionNameSpace(ctx context.Context, nam
 		}
 
 	} else if err != nil {
-		service.logger.Error(
-			"Failed to validate the requested namespace",
-			zap.Error(err),
-			zap.String("namespace", namespace))
+		service.logger.Error("Failed to validate the requested namespace", zap.Error(err), zap.String("namespace", namespace))
 
 		return
 	}
 
 	if ns != nil && ns.GetName() == namespace {
-		service.logger.Info(
-			"namespace already exists",
-			zap.String("namespace", namespace))
+		service.logger.Info("namespace already exists", zap.String("namespace", namespace))
 
 		return
 	}
@@ -263,6 +257,11 @@ func (service *k3sProvisioner) createDeployment(
 	namespace string,
 	clusterName string,
 	k3SClusterSecret string) (err error) {
+	spec, err := service.getDeploymentSpec(ctx, namespace, k3SClusterSecret)
+	if err != nil {
+		return err
+	}
+
 	client := service.clientset.AppsV1().Deployments(namespace)
 	deploymentConfig := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -282,16 +281,13 @@ func (service *k3sProvisioner) createDeployment(
 						"app": clusterName,
 					},
 				},
-				Spec: getDeploymentSpec(k3SClusterSecret),
+				Spec: spec,
 			},
 		},
 	}
 
 	if _, err := client.Create(ctx, deploymentConfig, metav1.CreateOptions{}); err != nil {
-		service.logger.Error(
-			"Failed to create edge cluster",
-			zap.Error(err),
-			zap.Any("Config", deploymentConfig))
+		service.logger.Error("Failed to create edge cluster", zap.Error(err), zap.Any("Config", deploymentConfig))
 	}
 
 	return
@@ -341,7 +337,12 @@ func getNamespace(edgeClusterID string) string {
 	return fmt.Sprintf("%x", sha256.Sum224([]byte(edgeClusterID)))
 }
 
-func getDeploymentSpec(k3SClusterSecret string) apiv1.PodSpec {
+func (service *k3sProvisioner) getDeploymentSpec(ctx context.Context, namespace string, k3SClusterSecret string) (apiv1.PodSpec, error) {
+	advertiseAddress, err := service.getAdvertiseAddress(ctx, namespace)
+	if err != nil {
+		return apiv1.PodSpec{}, err
+	}
+
 	return apiv1.PodSpec{
 		Containers: []apiv1.Container{
 			{
@@ -349,11 +350,10 @@ func getDeploymentSpec(k3SClusterSecret string) apiv1.PodSpec {
 				Image: containerImage,
 				Args: []string{
 					"server",
+					fmt.Sprintf("--advertise-address=%s", advertiseAddress),
 				},
 				Env: []apiv1.EnvVar{
 					{Name: "K3S_CLUSTER_SECRET", Value: k3SClusterSecret},
-					{Name: "K3S_KUBECONFIG_OUTPUT", Value: kubeconfigFilePath},
-					{Name: "K3S_KUBECONFIG_MODE", Value: "666"},
 				},
 				Ports: []apiv1.ContainerPort{
 					{
@@ -363,8 +363,7 @@ func getDeploymentSpec(k3SClusterSecret string) apiv1.PodSpec {
 				},
 			},
 		},
-	}
-
+	}, nil
 }
 
 func (service *k3sProvisioner) getProvisionDetailsServiceDetails(
@@ -406,6 +405,10 @@ func (service *k3sProvisioner) getProvisionDetailsKubeConfigContent(
 		return
 	}
 
+	if len(pods.Items) <= 0 {
+		return "", types.NewUnknownError("Pod is not ready yet")
+	}
+
 	execRequest := service.clientset.CoreV1().RESTClient().
 		Post().
 		Resource("pods").
@@ -434,4 +437,38 @@ func (service *k3sProvisioner) getProvisionDetailsKubeConfigContent(
 	kubeconfigContent = output.String()
 
 	return
+}
+
+func (service *k3sProvisioner) getAdvertiseAddress(
+	ctx context.Context,
+	namespace string) (string, error) {
+
+	watch, err := service.clientset.CoreV1().Services(namespace).Watch(ctx, metav1.ListOptions{
+		Watch:          true,
+		TimeoutSeconds: &waitForDeploymentToBeReadyTimeout,
+	})
+
+	if err != nil {
+		service.logger.Error("Failed to retrieve advertise address", zap.Error(err))
+
+		return "", err
+	}
+
+	for event := range watch.ResultChan() {
+		if service, ok := event.Object.(*v1.Service); ok {
+			for _, item := range service.Status.LoadBalancer.Ingress {
+				if item.IP != "" {
+					watch.Stop()
+
+					return item.IP, nil
+				} else if item.Hostname != "" {
+					watch.Stop()
+
+					return item.Hostname, nil
+				}
+			}
+		}
+	}
+
+	return "", types.NewUnknownError("Failed to retrieve advertise address")
 }
