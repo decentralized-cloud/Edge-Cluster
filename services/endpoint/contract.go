@@ -25,4 +25,8 @@ type EndpointCreatorContract interface {
 	// SearchEndpoint creates Search Edge Cluster endpoint
 	// Returns the Search Edge Cluster endpoint
 	SearchEndpoint() endpoint.Endpoint
+
+	// ListEdgeClusterNodesEndpoint creates List Edge Cluster Nodes endpoint
+	// Returns the List Edge Cluster Nodes endpoint
+	ListEdgeClusterNodesEndpoint() endpoint.Endpoint
 }

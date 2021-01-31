@@ -73,3 +73,14 @@ type SearchResponse struct {
 	TotalCount      int64
 	EdgeClusters    []models.EdgeClusterWithCursor
 }
+
+// ListEdgeClusterNodesRequest contains the request to list an existing edge cluster nodes details
+type ListEdgeClusterNodesRequest struct {
+	EdgeClusterID string
+}
+
+// ListEdgeClusterNodesResponse contains the result of listing an existing edge cluster nodes details
+type ListEdgeClusterNodesResponse struct {
+	Err   error
+	Nodes []models.EdgeClusterNodeStatus
+}

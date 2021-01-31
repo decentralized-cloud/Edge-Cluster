@@ -45,4 +45,12 @@ type BusinessContract interface {
 	Search(
 		ctx context.Context,
 		request *SearchRequest) (*SearchResponse, error)
+
+	// ListEdgeClusterNodes lists an existing edge cluster nodes details
+	// ctx: Mandatory The reference to the context
+	// request: Mandatory. The request to list an existing edge cluster nodes details
+	// Returns an existing edge cluster nodes details or error if something goes wrong.
+	ListEdgeClusterNodes(
+		ctx context.Context,
+		request *ListEdgeClusterNodesRequest) (*ListEdgeClusterNodesResponse, error)
 }

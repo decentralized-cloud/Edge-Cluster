@@ -19,15 +19,16 @@ import (
 )
 
 type transportService struct {
-	logger                    *zap.Logger
-	configurationService      configuration.ConfigurationContract
-	endpointCreatorService    endpoint.EndpointCreatorContract
-	middlewareProviderService middleware.MiddlewareProviderContract
-	createEdgeClusterHandler  gokitgrpc.Handler
-	readEdgeClusterHandler    gokitgrpc.Handler
-	updateEdgeClusterHandler  gokitgrpc.Handler
-	deleteEdgeClusterHandler  gokitgrpc.Handler
-	searchHandler             gokitgrpc.Handler
+	logger                      *zap.Logger
+	configurationService        configuration.ConfigurationContract
+	endpointCreatorService      endpoint.EndpointCreatorContract
+	middlewareProviderService   middleware.MiddlewareProviderContract
+	createEdgeClusterHandler    gokitgrpc.Handler
+	readEdgeClusterHandler      gokitgrpc.Handler
+	updateEdgeClusterHandler    gokitgrpc.Handler
+	deleteEdgeClusterHandler    gokitgrpc.Handler
+	searchHandler               gokitgrpc.Handler
+	listEdgeClusterNodesHandler gokitgrpc.Handler
 }
 
 var Live bool
@@ -170,6 +171,18 @@ func (service *transportService) setupHandlers() {
 			encodeSearchResponse,
 		)
 	}
+
+	var listEdgeClusterNodesEndpoint gokitEndpoint.Endpoint
+	{
+		listEdgeClusterNodesEndpoint = service.endpointCreatorService.ListEdgeClusterNodesEndpoint()
+		listEdgeClusterNodesEndpoint = service.middlewareProviderService.CreateLoggingMiddleware("ListEdgeClusterNodes")(listEdgeClusterNodesEndpoint)
+		service.listEdgeClusterNodesHandler = gokitgrpc.NewServer(
+			listEdgeClusterNodesEndpoint,
+			decodeListEdgeClusterNodesRequest,
+			encodeListEdgeClusterNodesResponse,
+		)
+	}
+
 }
 
 // CreateEdgeCluster creates a new edgeCluster
@@ -248,4 +261,19 @@ func (service *transportService) Search(
 	}
 
 	return response.(*edgeClusterGRPCContract.SearchResponse), nil
+}
+
+// Search returns the list  of edge clusters that matched the provided criteria
+// context: Mandatory. The reference to the context
+// request: Mandatory. The request contains the filter criteria to look for existing edge clusters
+// Returns the list of edge clusters that matched the provided criteria
+func (service *transportService) ListEdgeClusterNodes(
+	ctx context.Context,
+	request *edgeClusterGRPCContract.ListEdgeClusterNodesRequest) (*edgeClusterGRPCContract.ListEdgeClusterNodesResponse, error) {
+	_, response, err := service.searchHandler.ServeGRPC(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.(*edgeClusterGRPCContract.ListEdgeClusterNodesResponse), nil
 }

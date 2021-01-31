@@ -37,7 +37,7 @@ type EdgeClusterProvisionerContract interface {
 	// Returns either the result of updating an existing provision or error if something goes wrong.
 	UpdateProvisionWithRetry(
 		ctx context.Context,
-		request *UpdateProvisionRequest) (response *UpdateProvisionResponse, err error)
+		request *UpdateProvisionRequest) (*UpdateProvisionResponse, error)
 
 	// DeleteProvision deletes an existing provision.
 	// ctx: Mandatory The reference to the context
@@ -45,7 +45,7 @@ type EdgeClusterProvisionerContract interface {
 	// Returns either the result of deleting an existing provision or error if something goes wrong.
 	DeleteProvision(
 		ctx context.Context,
-		request *DeleteProvisionRequest) (response *DeleteProvisionResponse, err error)
+		request *DeleteProvisionRequest) (*DeleteProvisionResponse, error)
 
 	// GetProvisionDetails retrieves information on an existing provision.
 	// ctx: Mandatory The reference to the context
@@ -53,5 +53,13 @@ type EdgeClusterProvisionerContract interface {
 	// Returns either the result of retrieving information on an provision or error if something goes wrong.
 	GetProvisionDetails(
 		ctx context.Context,
-		request *GetProvisionDetailsRequest) (response *GetProvisionDetailsResponse, err error)
+		request *GetProvisionDetailsRequest) (*GetProvisionDetailsResponse, error)
+
+	// ListEdgeClusterNodes lists an existing edge cluster nodes details
+	// ctx: Mandatory The reference to the context
+	// request: Mandatory. The request to list an existing edge cluster nodes details
+	// Returns an existing edge cluster nodes details or error if something goes wrong.
+	ListEdgeClusterNodes(
+		ctx context.Context,
+		request *ListEdgeClusterNodesRequest) (*ListEdgeClusterNodesResponse, error)
 }

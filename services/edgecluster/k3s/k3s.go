@@ -6,7 +6,9 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
@@ -20,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/client-go/util/retry"
 )
@@ -218,6 +221,76 @@ func (service *k3sProvisioner) GetProvisionDetails(
 	return
 }
 
+// ListEdgeClusterNodes lists an existing edge cluster nodes details
+// ctx: Mandatory The reference to the context
+// request: Mandatory. The request to list an existing edge cluster nodes details
+// Returns an existing edge cluster nodes details or error if something goes wrong.
+func (service *k3sProvisioner) ListEdgeClusterNodes(
+	ctx context.Context,
+	request *types.ListEdgeClusterNodesRequest) (response *types.ListEdgeClusterNodesResponse, err error) {
+
+	getProvisionDetailsResponse, err := service.GetProvisionDetails(
+		ctx,
+		&types.GetProvisionDetailsRequest{
+			EdgeClusterID: request.EdgeClusterID,
+		})
+	if err != nil {
+		return
+	}
+
+	content := []byte(getProvisionDetailsResponse.ProvisionDetails.KubeconfigContent)
+	tmpfile, err := ioutil.TempFile("", "")
+	if err != nil {
+		service.logger.Error("Failed to create tempory file", zap.Error(err))
+
+		return
+	}
+
+	defer os.Remove(tmpfile.Name())
+
+	if _, err = tmpfile.Write(content); err != nil {
+		service.logger.Error("Failed to write into tempory file", zap.Error(err))
+
+		return
+	}
+
+	if err = tmpfile.Close(); err != nil {
+		service.logger.Error("Failed to close tempory file", zap.Error(err))
+
+		return
+	}
+
+	var restConfig *rest.Config
+	if restConfig, err = clientcmd.BuildConfigFromFlags("", tmpfile.Name()); err != nil {
+		service.logger.Error("Failed to close tempory file", zap.Error(err))
+
+		return
+	}
+
+	var clientset *kubernetes.Clientset
+	if clientset, err = kubernetes.NewForConfig(restConfig); err != nil {
+		return nil, types.NewUnknownErrorWithError("Failed to create client set", err)
+	}
+
+	var nodeList *v1.NodeList
+
+	if nodeList, err = clientset.CoreV1().Nodes().List(ctx, metav1.ListOptions{}); err != nil {
+		return nil, types.NewUnknownErrorWithError("Failed to retreive node list", err)
+	}
+
+	response = &types.ListEdgeClusterNodesResponse{Nodes: []models.EdgeClusterNodeStatus{}}
+
+	for _, node := range nodeList.Items {
+		response.Nodes = append(response.Nodes, models.EdgeClusterNodeStatus{
+			Conditions: node.Status.Conditions,
+			Addresses:  node.Status.Addresses,
+			NodeInfo:   node.Status.NodeInfo,
+		})
+	}
+
+	return
+}
+
 func (service *k3sProvisioner) createProvisionNameSpace(ctx context.Context, namespace string) (err error) {
 	ns, err := service.clientset.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
 	if err != nil && strings.Contains(err.Error(), "not found") {
@@ -366,7 +439,7 @@ func (service *k3sProvisioner) getDeploymentSpec(ctx context.Context, namespace 
 
 func (service *k3sProvisioner) getProvisionDetailsServiceDetails(
 	ctx context.Context,
-	namespace string) (ingress []models.Ingress, ports []models.Port, err error) {
+	namespace string) (ingress []v1.LoadBalancerIngress, ports []v1.ServicePort, err error) {
 
 	var serviceInfo *v1.Service
 
@@ -376,21 +449,8 @@ func (service *k3sProvisioner) getProvisionDetailsServiceDetails(
 		return
 	}
 
-	for _, item := range serviceInfo.Status.LoadBalancer.Ingress {
-		ingress = append(
-			ingress,
-			models.Ingress{
-				IP:       item.IP,
-				Hostname: item.Hostname})
-	}
-
-	for _, port := range serviceInfo.Spec.Ports {
-		ports = append(
-			ports,
-			models.Port{
-				Protocol: port.Protocol,
-				Port:     port.Port})
-	}
+	ingress = serviceInfo.Status.LoadBalancer.Ingress
+	ports = serviceInfo.Spec.Ports
 
 	return
 }

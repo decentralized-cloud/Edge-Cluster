@@ -245,6 +245,43 @@ func (service *businessService) Search(
 	}, nil
 }
 
+// ListEdgeClusterNodes lists an existing edge cluster nodes details
+// ctx: Mandatory The reference to the context
+// request: Mandatory. The request to list an existing edge cluster nodes details
+// Returns an existing edge cluster nodes details or error if something goes wrong.
+func (service *businessService) ListEdgeClusterNodes(
+	ctx context.Context,
+	request *ListEdgeClusterNodesRequest) (*ListEdgeClusterNodesResponse, error) {
+	repositoryResponse, err := service.repositoryService.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{
+		EdgeClusterID: request.EdgeClusterID,
+	})
+
+	if err != nil {
+		return &ListEdgeClusterNodesResponse{
+			Err: mapRepositoryError(err, request.EdgeClusterID),
+		}, nil
+	}
+
+	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, repositoryResponse.EdgeCluster.ClusterType)
+	if err != nil {
+		return nil, NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
+	}
+
+	response, err := edgeClusterProvisioner.ListEdgeClusterNodes(
+		ctx,
+		&edgeClusterTypes.ListEdgeClusterNodesRequest{EdgeClusterID: request.EdgeClusterID})
+
+	if err != nil {
+		return &ListEdgeClusterNodesResponse{
+			Err: mapRepositoryError(err, request.EdgeClusterID),
+		}, nil
+	}
+
+	return &ListEdgeClusterNodesResponse{
+		Nodes: response.Nodes,
+	}, nil
+}
+
 func mapRepositoryError(err error, edgeClusterID string) error {
 	if repository.IsEdgeClusterAlreadyExistsError(err) {
 		return NewEdgeClusterAlreadyExistsErrorWithError(err)
