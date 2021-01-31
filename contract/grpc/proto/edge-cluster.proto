@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package edgecluster;
 
+import "google/protobuf/timestamp.proto";
+
 /**
  * The different error types
  */
@@ -52,8 +54,8 @@ message EdgeCluster {
   // (typically GCE or OpenStack load-balancers)
   string ip = 1;
 
-	// Hostname is set for load-balancer ingress points that are DNS based
-	// (typically AWS load-balancers)
+  // Hostname is set for load-balancer ingress points that are DNS based
+  // (typically AWS load-balancers)
   string hostname = 2;
 }
 
@@ -308,6 +310,161 @@ message SearchResponse {
 }
 
 /**
+ * The valid conditions of node
+ */
+ enum EdgeClusterNodeConditionType {
+  // NodeReady means kubelet is healthy and ready to accept pods.
+  Ready = 0;
+
+  // NodeMemoryPressure means the kubelet is under pressure due to insufficient available memory.
+  MemoryPressure = 1;
+
+  // NodeDiskPressure means the kubelet is under pressure due to insufficient available disk.
+  DiskPressure = 3;
+
+  // NodePIDPressure means the kubelet is under pressure due to insufficient available PID.
+  PIDPressure = 4;
+
+  // NodeNetworkUnavailable means that network for the node is not correctly configured.
+  NetworkUnavailable = 5;
+}
+
+/**
+ * These are valid condition statuses. "ConditionTrue" means a resource is in the condition.
+ * "ConditionFalse" means a resource is not in the condition. "ConditionUnknown" means kubernetes
+ * can't decide if a resource is in the condition or not.
+ */
+ enum EdgeClusterNodeConditionStatus {
+  // True means a resource is in the condition
+  True = 0;
+
+  // False means a resource is not in the condition
+  False = 1;
+
+  // Unknown means kubernetes can't decide if a resource is in the condition or not
+  Unknown = 2;
+}
+
+/**
+ * EdgeClusterNodeCondition contains condition information for a node.
+ */
+ message EdgeClusterNodeCondition {
+  // Type of node condition.
+  EdgeClusterNodeConditionType type = 1;
+
+  // Status of the condition, one of True, False, Unknown.
+  EdgeClusterNodeConditionStatus status = 2;
+
+  // Last time we got an update on a given condition.
+  google.protobuf.Timestamp LastHeartbeatTime = 3;
+
+  // Last time the condition transit from one status to another.
+  google.protobuf.Timestamp LastTransitionTime = 4;
+
+  // (brief) reason for the condition's last transition.
+  string Reason = 5;
+
+  // Human readable message indicating details about last transition.
+  string Message = 6;
+}
+
+/**
+ * The valid address type of edge cluster node
+ */
+ enum EdgeClusterNodeAddressType {
+  Hostname = 0;
+  ExternalIP = 1;
+  InternalIP = 2;
+  ExternalDNS = 3;
+  InternalDNS = 4;
+}
+
+/**
+ * EdgeClusterNodeAddress contains information for the edge cluster node's address.
+ */
+ message EdgeClusterNodeAddress {
+  // Edge cluster node address type, one of Hostname, ExternalIP or InternalIP.
+  EdgeClusterNodeAddressType nodeAddressType = 1;
+
+  // The node address.
+  string address = 2;
+}
+
+/**
+ * EdgeClusterNodeSystemInfo contains a set of ids/uuids to uniquely identify the node.
+ */
+ message EdgeClusterNodeSystemInfo {
+  // MachineID reported by the node. For unique machine identification
+  // in the cluster this field is preferred.
+  string machineID = 1;
+
+  // SystemUUID reported by the node. For unique machine identification
+  // MachineID is preferred. This field is specific to Red Hat hosts
+  string systemUUID = 2;
+
+  // Boot ID reported by the node.
+  string bootID = 3;
+
+  // Kernel Version reported by the node from 'uname -r' (e.g. 3.16.0-0.bpo.4-amd64).
+  string kernelVersion = 4;
+
+  // OS Image reported by the node from /etc/os-release (e.g. Debian GNU/Linux 7 (wheezy)).
+  string osImage = 5;
+
+  // ContainerRuntime Version reported by the node through runtime remote API (e.g. docker://1.5.0).
+  string containerRuntimeVersion = 6;
+
+  // Kubelet Version reported by the node.
+  string kubeletVersion = 7;
+
+  // KubeProxy Version reported by the node.
+  string kubeProxyVersion = 8;
+
+  // The Operating System reported by the node
+  string operatingSystem = 9;
+
+  // The Architecture reported by the node
+  string architecture = 10;
+}
+
+/**
+ * EdgeClusterNodeStatus is information about the current status of a node.
+ */
+ message EdgeClusterNodeStatus {
+  // The unique tenant identifier that owns the edge cluster
+  repeated EdgeClusterNodeCondition conditions = 1;
+
+  // The unique tenant identifier that owns the edge cluster
+  repeated EdgeClusterNodeAddress addresses = 2;
+
+  // Set of ids/uuids to uniquely identify the node.
+  EdgeClusterNodeSystemInfo nodeInfo = 3;
+}
+
+
+/** 
+ * ListEdgeClusterNodesRequest to list an existing edge cluster nodes details
+ */
+ message ListEdgeClusterNodesRequest {
+  // The unique edge cluster identifier
+  string edgeClusterID = 1;
+}
+
+/**
+ * Response contains the result of listing an existing edge cluster nodes details
+ */
+message ListEdgeClusterNodesResponse {
+  // Indicate whether the operation has any error
+  Error error = 1;
+
+  // Contains error message if the operation was unsuccessful
+  string errorMessage = 2;
+
+  // The list of an existing edge cluster nodes
+  repeated EdgeClusterNodeStatus  nodes = 3;
+}
+
+/**
  * The edge cluster servcie that can create new edge cluster, read, update and delete existing edge cluster
  */
 service EdgeClusterService {
@@ -335,5 +492,9 @@ service EdgeClusterService {
   // request: The request contains the search criteria
   // Returns the list of edge clusters that matched the criteria
   rpc Search(SearchRequest) returns (SearchResponse);
-}
 
+  // ListEdgeClusterNodes lists an existing edge cluster nodes details
+  // request: The request to list an existing edge cluster nodes details
+  // Returns an existing edge cluster nodes details
+  rpc ListEdgeClusterNodes(ListEdgeClusterNodesRequest) returns (ListEdgeClusterNodesResponse);
+}

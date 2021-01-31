@@ -41,3 +41,13 @@ type GetProvisionDetailsRequest struct {
 type GetProvisionDetailsResponse struct {
 	ProvisionDetails models.ProvisionDetails
 }
+
+// ListEdgeClusterNodesRequest contains the request to list an existing edge cluster nodes details
+type ListEdgeClusterNodesRequest struct {
+	EdgeClusterID string
+}
+
+// ListEdgeClusterNodesResponse contains the result of listing an existing edge cluster nodes details
+type ListEdgeClusterNodesResponse struct {
+	Nodes []models.EdgeClusterNodeStatus
+}

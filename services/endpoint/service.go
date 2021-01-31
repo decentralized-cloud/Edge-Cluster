@@ -161,3 +161,30 @@ func (service *endpointCreatorService) SearchEndpoint() endpoint.Endpoint {
 		return service.businessService.Search(ctx, castedRequest)
 	}
 }
+
+// ListEdgeClusterNodesEndpoint creates List Edge Cluster Nodes endpoint
+// Returns the List Edge Cluster Nodes endpoint
+func (service *endpointCreatorService) ListEdgeClusterNodesEndpoint() endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		if ctx == nil {
+			return &business.ListEdgeClusterNodesResponse{
+				Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
+			}, nil
+		}
+
+		if request == nil {
+			return &business.ListEdgeClusterNodesResponse{
+				Err: commonErrors.NewArgumentNilError("request", "request is required"),
+			}, nil
+		}
+
+		castedRequest := request.(*business.ListEdgeClusterNodesRequest)
+		if err := castedRequest.Validate(); err != nil {
+			return &business.ListEdgeClusterNodesResponse{
+				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
+			}, nil
+		}
+
+		return service.businessService.ListEdgeClusterNodes(ctx, castedRequest)
+	}
+}
