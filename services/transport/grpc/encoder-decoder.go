@@ -438,7 +438,7 @@ func mapNodeStatusToGrpc(values []models.EdgeClusterNodeStatus) (mappedValues []
 
 		for _, address := range item.Addresses {
 			addresses = append(addresses, &edgeClusterGRPCContract.EdgeClusterNodeAddress{
-				NodeAddressType: edgeClusterGRPCContract.EdgeClusterNodeAddressType(edgeClusterGRPCContract.EdgeClusterNodeConditionType_value[string(address.Address)]),
+				NodeAddressType: edgeClusterGRPCContract.EdgeClusterNodeAddressType(edgeClusterGRPCContract.EdgeClusterNodeAddressType_value[string(address.Type)]),
 				Address:         address.Address,
 			})
 		}
