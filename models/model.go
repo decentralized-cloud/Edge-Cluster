@@ -39,12 +39,12 @@ type EdgeClusterWithCursor struct {
 
 // EdgeClusterNodeStatus is information about the current status of a node.
 type EdgeClusterNodeStatus struct {
-	// The unique tenant identifier that owns the edge cluster
+	// Conditions is an array of current observed node conditions.
 	Conditions []v1.NodeCondition
 
-	// The unique tenant identifier that owns the edge cluster
+	// Addresses is the list of addresses reachable to the node.
 	Addresses []v1.NodeAddress
 
-	// Set of ids/uuids to uniquely identify the node.
+	// NodeInfo is the set of ids/uuids to uniquely identify the node.
 	NodeInfo v1.NodeSystemInfo
 }

@@ -1916,11 +1916,11 @@ type EdgeClusterNodeStatus struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// The unique tenant identifier that owns the edge cluster
+	// Conditions is an array of current observed node conditions.
 	Conditions []*EdgeClusterNodeCondition `protobuf:"bytes,1,rep,name=conditions,proto3" json:"conditions,omitempty"`
-	// The unique tenant identifier that owns the edge cluster
+	// Addresses is the list of addresses reachable to the node.
 	Addresses []*EdgeClusterNodeAddress `protobuf:"bytes,2,rep,name=addresses,proto3" json:"addresses,omitempty"`
-	// Set of ids/uuids to uniquely identify the node.
+	// NodeInfo is the set of ids/uuids to uniquely identify the node.
 	NodeInfo *EdgeClusterNodeSystemInfo `protobuf:"bytes,3,opt,name=nodeInfo,proto3" json:"nodeInfo,omitempty"`
 }
 

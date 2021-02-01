@@ -270,7 +270,7 @@ func (service *transportService) Search(
 func (service *transportService) ListEdgeClusterNodes(
 	ctx context.Context,
 	request *edgeClusterGRPCContract.ListEdgeClusterNodesRequest) (*edgeClusterGRPCContract.ListEdgeClusterNodesResponse, error) {
-	_, response, err := service.searchHandler.ServeGRPC(ctx, request)
+	_, response, err := service.listEdgeClusterNodesHandler.ServeGRPC(ctx, request)
 	if err != nil {
 		return nil, err
 	}

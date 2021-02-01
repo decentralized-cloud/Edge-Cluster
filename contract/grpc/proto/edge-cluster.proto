@@ -431,13 +431,13 @@ message SearchResponse {
  * EdgeClusterNodeStatus is information about the current status of a node.
  */
  message EdgeClusterNodeStatus {
-  // The unique tenant identifier that owns the edge cluster
+  // Conditions is an array of current observed node conditions.
   repeated EdgeClusterNodeCondition conditions = 1;
 
-  // The unique tenant identifier that owns the edge cluster
+  // Addresses is the list of addresses reachable to the node.
   repeated EdgeClusterNodeAddress addresses = 2;
 
-  // Set of ids/uuids to uniquely identify the node.
+  // NodeInfo is the set of ids/uuids to uniquely identify the node.
   EdgeClusterNodeSystemInfo nodeInfo = 3;
 }
 
