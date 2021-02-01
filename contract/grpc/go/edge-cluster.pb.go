@@ -88,7 +88,7 @@ func (Error) EnumDescriptor() ([]byte, []int) {
 }
 
 //*
-// The different error types
+// The different cluster types
 type ClusterType int32
 
 const (
@@ -425,7 +425,7 @@ type EdgeCluster struct {
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	// Cluster secret value
 	ClusterSecret string `protobuf:"bytes,3,opt,name=clusterSecret,proto3" json:"clusterSecret,omitempty"`
-	// Cluster secret value
+	// Cluster type
 	ClusterType ClusterType `protobuf:"varint,4,opt,name=clusterType,proto3,enum=edgecluster.ClusterType" json:"clusterType,omitempty"`
 }
 
@@ -2038,7 +2038,7 @@ type ListEdgeClusterNodesResponse struct {
 	Error Error `protobuf:"varint,1,opt,name=error,proto3,enum=edgecluster.Error" json:"error,omitempty"`
 	// Contains error message if the operation was unsuccessful
 	ErrorMessage string `protobuf:"bytes,2,opt,name=errorMessage,proto3" json:"errorMessage,omitempty"`
-	// The list of an existing edge cluster nodes
+	// The list of an existing edge cluster nodes details
 	Nodes []*EdgeClusterNodeStatus `protobuf:"bytes,3,rep,name=nodes,proto3" json:"nodes,omitempty"`
 }
 
