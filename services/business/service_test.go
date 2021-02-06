@@ -126,7 +126,7 @@ var _ = Describe("Business Service Tests", func() {
 		BeforeEach(func() {
 			request = business.CreateEdgeClusterRequest{
 				EdgeCluster: models.EdgeCluster{
-					TenantID:      cuid.New(),
+					ProjectID:     cuid.New(),
 					Name:          cuid.New(),
 					ClusterSecret: cuid.New(),
 					ClusterType:   models.K3S,
@@ -186,7 +186,7 @@ var _ = Describe("Business Service Tests", func() {
 						expectedResponse := repository.CreateEdgeClusterResponse{
 							EdgeClusterID: cuid.New(),
 							EdgeCluster: models.EdgeCluster{
-								TenantID:      cuid.New(),
+								ProjectID:     cuid.New(),
 								Name:          cuid.New(),
 								ClusterSecret: cuid.New(),
 								ClusterType:   models.K3S,
@@ -237,7 +237,7 @@ var _ = Describe("Business Service Tests", func() {
 								return &repository.ReadEdgeClusterResponse{
 									EdgeCluster: models.EdgeCluster{
 										Name:          cuid.New(),
-										TenantID:      cuid.New(),
+										ProjectID:     cuid.New(),
 										ClusterSecret: cuid.New(),
 										ClusterType:   models.K3S,
 									}}, nil
@@ -307,7 +307,7 @@ var _ = Describe("Business Service Tests", func() {
 				EdgeClusterID: cuid.New(),
 				EdgeCluster: models.EdgeCluster{
 					Name:          cuid.New(),
-					TenantID:      cuid.New(),
+					ProjectID:     cuid.New(),
 					ClusterSecret: cuid.New(),
 					ClusterType:   models.K3S,
 				},
@@ -326,7 +326,7 @@ var _ = Describe("Business Service Tests", func() {
 								mappedRequest *repository.UpdateEdgeClusterRequest) (*repository.UpdateEdgeClusterResponse, error) {
 								Ω(mappedRequest.EdgeClusterID).Should(Equal(request.EdgeClusterID))
 								Ω(mappedRequest.EdgeCluster.Name).Should(Equal(request.EdgeCluster.Name))
-								Ω(mappedRequest.EdgeCluster.TenantID).Should(Equal(request.EdgeCluster.TenantID))
+								Ω(mappedRequest.EdgeCluster.ProjectID).Should(Equal(request.EdgeCluster.ProjectID))
 								Ω(mappedRequest.EdgeCluster.ClusterSecret).Should(Equal(request.EdgeCluster.ClusterSecret))
 								Ω(mappedRequest.EdgeCluster.ClusterType).Should(Equal(request.EdgeCluster.ClusterType))
 
@@ -372,7 +372,7 @@ var _ = Describe("Business Service Tests", func() {
 					expectedResponse := repository.UpdateEdgeClusterResponse{
 						EdgeCluster: models.EdgeCluster{
 							Name:          cuid.New(),
-							TenantID:      cuid.New(),
+							ProjectID:     cuid.New(),
 							ClusterSecret: cuid.New(),
 							ClusterType:   models.K3S,
 						},
@@ -470,7 +470,7 @@ var _ = Describe("Business Service Tests", func() {
 		var (
 			request        business.SearchRequest
 			edgeClusterIDs []string
-			tenantIDs      []string
+			projectIDs     []string
 		)
 
 		BeforeEach(func() {
@@ -479,9 +479,9 @@ var _ = Describe("Business Service Tests", func() {
 				edgeClusterIDs = append(edgeClusterIDs, cuid.New())
 			}
 
-			tenantIDs = []string{}
+			projectIDs = []string{}
 			for idx := 0; idx < rand.Intn(20)+1; idx++ {
-				tenantIDs = append(tenantIDs, cuid.New())
+				projectIDs = append(projectIDs, cuid.New())
 			}
 
 			request = business.SearchRequest{
@@ -502,7 +502,7 @@ var _ = Describe("Business Service Tests", func() {
 					},
 				},
 				EdgeClusterIDs: edgeClusterIDs,
-				TenantIDs:      tenantIDs,
+				ProjectIDs:     projectIDs,
 			}
 		})
 
@@ -519,7 +519,7 @@ var _ = Describe("Business Service Tests", func() {
 								Ω(mappedRequest.Pagination).Should(Equal(request.Pagination))
 								Ω(mappedRequest.SortingOptions).Should(Equal(request.SortingOptions))
 								Ω(mappedRequest.EdgeClusterIDs).Should(Equal(request.EdgeClusterIDs))
-								Ω(mappedRequest.TenantIDs).Should(Equal(request.TenantIDs))
+								Ω(mappedRequest.ProjectIDs).Should(Equal(request.ProjectIDs))
 
 								return &repository.SearchResponse{}, nil
 							})
@@ -552,7 +552,7 @@ var _ = Describe("Business Service Tests", func() {
 						edgeClusters = append(edgeClusters, models.EdgeClusterWithCursor{
 							EdgeClusterID: cuid.New(),
 							EdgeCluster: models.EdgeCluster{
-								TenantID:      cuid.New(),
+								ProjectID:     cuid.New(),
 								Name:          cuid.New(),
 								ClusterSecret: cuid.New(),
 								ClusterType:   models.K3S,
@@ -628,7 +628,7 @@ func assertEdgeClusterNotFoundError(expectedEdgeClusterID string, err error, nes
 
 func assertEdgeCluster(edgeCluster, expectedEdgeCluster models.EdgeCluster) {
 	Ω(edgeCluster).ShouldNot(BeNil())
-	Ω(edgeCluster.TenantID).Should(Equal(expectedEdgeCluster.TenantID))
+	Ω(edgeCluster.ProjectID).Should(Equal(expectedEdgeCluster.ProjectID))
 	Ω(edgeCluster.Name).Should(Equal(expectedEdgeCluster.Name))
 	Ω(edgeCluster.ClusterSecret).Should(Equal(expectedEdgeCluster.ClusterSecret))
 	Ω(edgeCluster.ClusterType).Should(Equal(expectedEdgeCluster.ClusterType))

@@ -62,7 +62,7 @@ type SearchRequest struct {
 	Pagination     common.Pagination
 	SortingOptions []common.SortingOptionPair
 	EdgeClusterIDs []string
-	TenantIDs      []string
+	ProjectIDs     []string
 }
 
 // SearchResponse contains the list of the edge clusters that matched the result

@@ -123,7 +123,7 @@ func (service *mongodbRepositoryService) UpdateEdgeCluster(
 	newEdgeCluster := bson.M{
 		"$set": bson.M{
 			"name":          request.EdgeCluster.Name,
-			"tenantID":      request.EdgeCluster.TenantID,
+			"projectID":     request.EdgeCluster.ProjectID,
 			"clusterSecret": request.EdgeCluster.ClusterSecret,
 		}}
 	response, err := collection.UpdateOne(ctx, filter, newEdgeCluster)
@@ -197,13 +197,13 @@ func (service *mongodbRepositoryService) Search(
 		filter["_id"] = bson.M{"$in": ids}
 	}
 
-	if len(request.TenantIDs) > 0 {
+	if len(request.ProjectIDs) > 0 {
 		if len(filter) > 0 {
 			filter["$and"] = []interface{}{
-				bson.M{"tenantID": bson.M{"$in": request.TenantIDs}},
+				bson.M{"projectID": bson.M{"$in": request.ProjectIDs}},
 			}
 		} else {
-			filter["tenantID"] = bson.M{"$in": request.TenantIDs}
+			filter["projectID"] = bson.M{"$in": request.ProjectIDs}
 		}
 	}
 
