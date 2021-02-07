@@ -54,7 +54,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 		ctx = context.Background()
 		createRequest = repository.CreateEdgeClusterRequest{
 			EdgeCluster: models.EdgeCluster{
-				TenantID:      cuid.New(),
+				ProjectID:     cuid.New(),
 				Name:          cuid.New(),
 				ClusterSecret: cuid.New(),
 				ClusterType:   models.K3S,
@@ -123,7 +123,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				updateRequest := repository.UpdateEdgeClusterRequest{
 					EdgeClusterID: edgeClusterID,
 					EdgeCluster: models.EdgeCluster{
-						TenantID:      cuid.New(),
+						ProjectID:     cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
 						ClusterType:   models.K3S,
@@ -175,7 +175,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				updateRequest := repository.UpdateEdgeClusterRequest{
 					EdgeClusterID: edgeClusterID,
 					EdgeCluster: models.EdgeCluster{
-						TenantID:      cuid.New(),
+						ProjectID:     cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
 						ClusterType:   models.K3S,
@@ -214,11 +214,11 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 	Context("edge clusters already exists", func() {
 		var (
 			edgeClusterIDs []string
-			tenantIDs      []string
+			projectIDs     []string
 		)
 
 		BeforeEach(func() {
-			tenantIDs = []string{}
+			projectIDs = []string{}
 			edgeClusterIDs = []string{}
 
 			for i := 0; i < 10; i++ {
@@ -229,16 +229,16 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				createRequest.EdgeCluster.ClusterType = models.K3S
 				response, _ := sut.CreateEdgeCluster(ctx, &createRequest)
 				edgeClusterIDs = append(edgeClusterIDs, response.EdgeClusterID)
-				tenantIDs = append(tenantIDs, response.EdgeCluster.TenantID)
+				projectIDs = append(projectIDs, response.EdgeCluster.ProjectID)
 			}
 		})
 
-		When("user searches for edge clusters with selected edge cluster Ids and first 10 tenants without providing tenant Id", func() {
+		When("user searches for edge clusters with selected edge cluster Ids and first 10 projects without providing project Id", func() {
 			It("should return first 10 edge clusters", func() {
 				first := 10
 				searchRequest := repository.SearchRequest{
 					EdgeClusterIDs: edgeClusterIDs,
-					TenantIDs:      []string{},
+					ProjectIDs:     []string{},
 					Pagination: common.Pagination{
 						After: nil,
 						First: &first,
@@ -255,17 +255,17 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					Ω(response.EdgeClusters[i].EdgeClusterID).Should(Equal(edgeClusterIDs[i]))
 					edgeClusterName := fmt.Sprintf("%s%d", "Name", i)
 					Ω(response.EdgeClusters[i].EdgeCluster.Name).Should(Equal(edgeClusterName))
-					Ω(response.EdgeClusters[i].EdgeCluster.TenantID).Should(Equal(tenantIDs[i]))
+					Ω(response.EdgeClusters[i].EdgeCluster.ProjectID).Should(Equal(projectIDs[i]))
 				}
 			})
 		})
 
-		When("user searches for edge clusters with selected edge cluster Ids and first 10 tenants", func() {
+		When("user searches for edge clusters with selected edge cluster Ids and first 10 projects", func() {
 			It("should return first 10 edge clusters", func() {
 				first := 10
 				searchRequest := repository.SearchRequest{
 					EdgeClusterIDs: edgeClusterIDs,
-					TenantIDs:      tenantIDs,
+					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
 						After: nil,
 						First: &first,
@@ -282,17 +282,17 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					Ω(response.EdgeClusters[i].EdgeClusterID).Should(Equal(edgeClusterIDs[i]))
 					edgeClusterName := fmt.Sprintf("%s%d", "Name", i)
 					Ω(response.EdgeClusters[i].EdgeCluster.Name).Should(Equal(edgeClusterName))
-					Ω(response.EdgeClusters[i].EdgeCluster.TenantID).Should(Equal(tenantIDs[i]))
+					Ω(response.EdgeClusters[i].EdgeCluster.ProjectID).Should(Equal(projectIDs[i]))
 				}
 			})
 		})
 
-		When("user searches for edge clusters with selected edge cluster Ids and first 5 tenants", func() {
+		When("user searches for edge clusters with selected edge cluster Ids and first 5 projects", func() {
 			It("should return first 5 edge clusters", func() {
 				first := 5
 				searchRequest := repository.SearchRequest{
 					EdgeClusterIDs: edgeClusterIDs,
-					TenantIDs:      tenantIDs,
+					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
 						After: nil,
 						First: &first,
@@ -309,7 +309,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					Ω(response.EdgeClusters[i].EdgeClusterID).Should(Equal(edgeClusterIDs[i]))
 					edgeClusterName := fmt.Sprintf("%s%d", "Name", i)
 					Ω(response.EdgeClusters[i].EdgeCluster.Name).Should(Equal(edgeClusterName))
-					Ω(response.EdgeClusters[i].EdgeCluster.TenantID).Should(Equal(tenantIDs[i]))
+					Ω(response.EdgeClusters[i].EdgeCluster.ProjectID).Should(Equal(projectIDs[i]))
 				}
 			})
 		})
@@ -319,7 +319,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				first := 9
 				searchRequest := repository.SearchRequest{
 					EdgeClusterIDs: edgeClusterIDs,
-					TenantIDs:      tenantIDs,
+					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
 						After: &edgeClusterIDs[0],
 						First: &first,
@@ -336,7 +336,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					Ω(response.EdgeClusters[i-1].EdgeClusterID).Should(Equal(edgeClusterIDs[i]))
 					edgeClusterName := fmt.Sprintf("%s%d", "Name", i)
 					Ω(response.EdgeClusters[i-1].EdgeCluster.Name).Should(Equal(edgeClusterName))
-					Ω(response.EdgeClusters[i-1].EdgeCluster.TenantID).Should(Equal(tenantIDs[i]))
+					Ω(response.EdgeClusters[i-1].EdgeCluster.ProjectID).Should(Equal(projectIDs[i]))
 				}
 			})
 		})
@@ -346,7 +346,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				last := 10
 				searchRequest := repository.SearchRequest{
 					EdgeClusterIDs: edgeClusterIDs,
-					TenantIDs:      tenantIDs,
+					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
 						Before: nil,
 						Last:   &last,
@@ -363,7 +363,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					Ω(response.EdgeClusters[i].EdgeClusterID).Should(Equal(edgeClusterIDs[i]))
 					edgeClusterName := fmt.Sprintf("%s%d", "Name", i)
 					Ω(response.EdgeClusters[i].EdgeCluster.Name).Should(Equal(edgeClusterName))
-					Ω(response.EdgeClusters[i].EdgeCluster.TenantID).Should(Equal(tenantIDs[i]))
+					Ω(response.EdgeClusters[i].EdgeCluster.ProjectID).Should(Equal(projectIDs[i]))
 				}
 			})
 		})
@@ -373,7 +373,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				last := 9
 				searchRequest := repository.SearchRequest{
 					EdgeClusterIDs: edgeClusterIDs,
-					TenantIDs:      tenantIDs,
+					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
 						Before: &edgeClusterIDs[9],
 						Last:   &last,
@@ -390,7 +390,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					Ω(response.EdgeClusters[i].EdgeClusterID).Should(Equal(edgeClusterIDs[i]))
 					edgeClusterName := fmt.Sprintf("%s%d", "Name", i)
 					Ω(response.EdgeClusters[i].EdgeCluster.Name).Should(Equal(edgeClusterName))
-					Ω(response.EdgeClusters[i].EdgeCluster.TenantID).Should(Equal(tenantIDs[i]))
+					Ω(response.EdgeClusters[i].EdgeCluster.ProjectID).Should(Equal(projectIDs[i]))
 				}
 			})
 		})
@@ -400,7 +400,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				first := 10
 				searchRequest := repository.SearchRequest{
 					EdgeClusterIDs: edgeClusterIDs,
-					TenantIDs:      tenantIDs,
+					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
 						After: nil,
 						First: &first,
@@ -419,7 +419,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					Ω(response.EdgeClusters[i].EdgeClusterID).Should(Equal(edgeClusterIDs[i]))
 					edgeClusterName := fmt.Sprintf("%s%d", "Name", i)
 					Ω(response.EdgeClusters[i].EdgeCluster.Name).Should(Equal(edgeClusterName))
-					Ω(response.EdgeClusters[i].EdgeCluster.TenantID).Should(Equal(tenantIDs[i]))
+					Ω(response.EdgeClusters[i].EdgeCluster.ProjectID).Should(Equal(projectIDs[i]))
 				}
 			})
 		})
@@ -429,7 +429,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				first := 10
 				searchRequest := repository.SearchRequest{
 					EdgeClusterIDs: edgeClusterIDs,
-					TenantIDs:      tenantIDs,
+					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
 						After: nil,
 						First: &first,
@@ -448,7 +448,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					Ω(response.EdgeClusters[i].EdgeClusterID).Should(Equal(edgeClusterIDs[9-i]))
 					edgeClusterName := fmt.Sprintf("%s%d", "Name", 9-i)
 					Ω(response.EdgeClusters[i].EdgeCluster.Name).Should(Equal(edgeClusterName))
-					Ω(response.EdgeClusters[i].EdgeCluster.TenantID).Should(Equal(tenantIDs[9-i]))
+					Ω(response.EdgeClusters[i].EdgeCluster.ProjectID).Should(Equal(projectIDs[9-i]))
 				}
 			})
 		})
@@ -460,7 +460,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 func assertEdgeCluster(edgeCluster, expectedEdgeCluster models.EdgeCluster) {
 	Ω(edgeCluster).ShouldNot(BeNil())
 	Ω(edgeCluster.Name).Should(Equal(expectedEdgeCluster.Name))
-	Ω(edgeCluster.TenantID).Should(Equal(expectedEdgeCluster.TenantID))
+	Ω(edgeCluster.ProjectID).Should(Equal(expectedEdgeCluster.ProjectID))
 	Ω(edgeCluster.ClusterSecret).Should(Equal(expectedEdgeCluster.ClusterSecret))
 	Ω(edgeCluster.ClusterType).Should(Equal(expectedEdgeCluster.ClusterType))
 }

@@ -251,7 +251,7 @@ func decodeSearchRequest(
 	return &business.SearchRequest{
 		Pagination:     pagination,
 		EdgeClusterIDs: castedRequest.EdgeClusterIDs,
-		TenantIDs:      castedRequest.TenantIDs,
+		ProjectIDs:     castedRequest.ProjectIDs,
 		SortingOptions: sortingOptions,
 	}, nil
 }
@@ -361,7 +361,7 @@ func mapEdgeClusterFromGrpc(grpcEdgeCluster *edgeClusterGRPCContract.EdgeCluster
 	}
 
 	edgeCluster = models.EdgeCluster{
-		TenantID:      grpcEdgeCluster.TenantID,
+		ProjectID:     grpcEdgeCluster.ProjectID,
 		Name:          grpcEdgeCluster.Name,
 		ClusterSecret: grpcEdgeCluster.ClusterSecret,
 		ClusterType:   clusterType,
@@ -382,7 +382,7 @@ func mapEdgeClusterToGrpc(edgeCluster models.EdgeCluster) (grpcEdgeCluster *edge
 	}
 
 	grpcEdgeCluster = &edgeClusterGRPCContract.EdgeCluster{
-		TenantID:      edgeCluster.TenantID,
+		ProjectID:     edgeCluster.ProjectID,
 		Name:          edgeCluster.Name,
 		ClusterSecret: edgeCluster.ClusterSecret,
 		ClusterType:   clusterType,

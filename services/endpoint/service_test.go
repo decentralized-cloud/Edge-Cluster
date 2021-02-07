@@ -84,7 +84,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				endpoint = sut.CreateEdgeClusterEndpoint()
 				request = business.CreateEdgeClusterRequest{
 					EdgeCluster: models.EdgeCluster{
-						TenantID:      cuid.New(),
+						ProjectID:     cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
 						ClusterType:   models.K3S,
@@ -94,7 +94,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				response = business.CreateEdgeClusterResponse{
 					EdgeClusterID: cuid.New(),
 					EdgeCluster: models.EdgeCluster{
-						TenantID:      cuid.New(),
+						ProjectID:     cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
 						ClusterType:   models.K3S,
@@ -217,7 +217,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 
 				response = business.ReadEdgeClusterResponse{
 					EdgeCluster: models.EdgeCluster{
-						TenantID:      cuid.New(),
+						ProjectID:     cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
 						ClusterType:   models.K3S,
@@ -335,7 +335,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				request = business.UpdateEdgeClusterRequest{
 					EdgeClusterID: cuid.New(),
 					EdgeCluster: models.EdgeCluster{
-						TenantID:      cuid.New(),
+						ProjectID:     cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
 						ClusterType:   models.K3S,
@@ -343,7 +343,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 
 				response = business.UpdateEdgeClusterResponse{
 					EdgeCluster: models.EdgeCluster{
-						TenantID:      cuid.New(),
+						ProjectID:     cuid.New(),
 						Name:          cuid.New(),
 						ClusterSecret: cuid.New(),
 						ClusterType:   models.K3S,
@@ -570,7 +570,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 			var (
 				endpoint       gokitendpoint.Endpoint
 				edgeClusterIDs []string
-				tenantIDs      []string
+				projectIDs     []string
 				request        business.SearchRequest
 				response       business.SearchResponse
 			)
@@ -582,9 +582,9 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 					edgeClusterIDs = append(edgeClusterIDs, cuid.New())
 				}
 
-				tenantIDs = []string{}
+				projectIDs = []string{}
 				for idx := 0; idx < rand.Intn(20)+1; idx++ {
-					tenantIDs = append(tenantIDs, cuid.New())
+					projectIDs = append(projectIDs, cuid.New())
 				}
 
 				request = business.SearchRequest{
@@ -605,7 +605,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						},
 					},
 					EdgeClusterIDs: edgeClusterIDs,
-					TenantIDs:      tenantIDs,
+					ProjectIDs:     projectIDs,
 				}
 
 				edgeClusters := []models.EdgeClusterWithCursor{}
@@ -615,7 +615,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						EdgeClusterID: cuid.New(),
 						EdgeCluster: models.EdgeCluster{
 							Name:          cuid.New(),
-							TenantID:      cuid.New(),
+							ProjectID:     cuid.New(),
 							ClusterSecret: cuid.New(),
 							ClusterType:   models.K3S,
 						},
@@ -666,7 +666,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 									Ω(mappedRequest.Pagination).Should(Equal(request.Pagination))
 									Ω(mappedRequest.SortingOptions).Should(Equal(request.SortingOptions))
 									Ω(mappedRequest.EdgeClusterIDs).Should(Equal(request.EdgeClusterIDs))
-									Ω(mappedRequest.TenantIDs).Should(Equal(request.TenantIDs))
+									Ω(mappedRequest.ProjectIDs).Should(Equal(request.ProjectIDs))
 
 									return &response, nil
 								})

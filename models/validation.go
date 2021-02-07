@@ -9,8 +9,8 @@ import (
 // Returns error if validation failes
 func (val EdgeCluster) Validate() error {
 	return validation.ValidateStruct(&val,
-		// TenantID cannot be empty
-		validation.Field(&val.TenantID, validation.Required),
+		// ProjectID cannot be empty
+		validation.Field(&val.ProjectID, validation.Required),
 		// Name cannot be empty
 		validation.Field(&val.Name, validation.Required),
 		// clusterSecret cannot be empty

@@ -49,15 +49,15 @@ type DeleteEdgeClusterRequest struct {
 type DeleteEdgeClusterResponse struct {
 }
 
-// SearchRequest contains the filter criteria to look for existing tenants
+// SearchRequest contains the filter criteria to look for existing projects
 type SearchRequest struct {
 	Pagination     common.Pagination
 	SortingOptions []common.SortingOptionPair
 	EdgeClusterIDs []string
-	TenantIDs      []string
+	ProjectIDs     []string
 }
 
-// SearchResponse contains the list of the tenants that matched the result
+// SearchResponse contains the list of the projects that matched the result
 type SearchResponse struct {
 	HasPreviousPage bool
 	HasNextPage     bool

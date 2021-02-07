@@ -22,7 +22,7 @@ type ProvisionDetails struct {
 
 // EdgeCluster defines the Edge Cluster object
 type EdgeCluster struct {
-	TenantID      string      `bson:"tenantID" json:"tenantID"`
+	ProjectID     string      `bson:"projectID" json:"projectID"`
 	Name          string      `bson:"name" json:"name"`
 	ClusterSecret string      `bson:"clusterSecret" json:"clusterSecret"`
 	ClusterType   ClusterType `bson:"clusterType" json:"clusterType"`

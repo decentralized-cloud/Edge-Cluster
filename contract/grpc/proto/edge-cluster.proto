@@ -32,8 +32,8 @@ enum ClusterType {
  * The edge cluster object
  */
 message EdgeCluster {
-  // The unique tenant identifier that owns the edge cluster
-  string tenantID = 1;
+  // The unique project identifier that owns the edge cluster
+  string projectID = 1;
 
   // The edge cluster name
   string name = 2;
@@ -263,8 +263,8 @@ message SearchRequest {
   // The unique edge cluster identifiers
   repeated string edgeClusterIDs = 3;
 
-  // The unique tenant identifiers
-  repeated string tenantIDs = 4;
+  // The unique project identifiers
+  repeated string projectIDs = 4;
 }
 
 /*

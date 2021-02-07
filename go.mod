@@ -10,17 +10,17 @@ require (
 	github.com/lucsky/cuid v1.0.2
 	github.com/micro-business/go-core v0.3.0
 	github.com/micro-business/gokit-core v0.3.0
-	github.com/onsi/ginkgo v1.14.2
-	github.com/onsi/gomega v1.10.4
+	github.com/onsi/ginkgo v1.15.0
+	github.com/onsi/gomega v1.10.5
 	github.com/prometheus/client_golang v1.9.0
 	github.com/savsgio/atreugo/v9 v9.0.1
 	github.com/savsgio/go-logger v1.0.0
 	github.com/spf13/cobra v1.1.1
 	github.com/thoas/go-funk v0.7.0
-	go.mongodb.org/mongo-driver v1.4.4
+	go.mongodb.org/mongo-driver v1.4.6
 	go.uber.org/zap v1.16.0
 	golang.org/x/tools v0.1.0 // indirect
-	google.golang.org/grpc v1.34.1
+	google.golang.org/grpc v1.35.0
 	google.golang.org/protobuf v1.25.0
 	k8s.io/api v0.20.1
 	k8s.io/apimachinery v0.20.1
