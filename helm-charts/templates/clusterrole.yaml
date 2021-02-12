@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Release.Namespace }}-{{ template "edge-cluster.fullname" . }}-clusterrolebinding
+  name: {{ .Release.Namespace }}-{{ template "edge-cluster.fullname" . }}-clusterrole
 rules:
   - apiGroups: ["", "apps"]
     resources: ["deployments", "replicasets", "pods", "services", "namespaces"]
