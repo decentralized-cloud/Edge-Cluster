@@ -475,17 +475,17 @@ service EdgeClusterService {
 
   // ReadEdgeCluster read an exsiting edge cluster
   // request: The request to read an esiting edge cluster
-  // Returns the result of reading an exiting edge cluster
+  // Returns the result of reading an existing edge cluster
   rpc ReadEdgeCluster(ReadEdgeClusterRequest) returns (ReadEdgeClusterResponse);
 
   // UpdateEdgeCluster update an exsiting edge cluster
   // request: The request to update an esiting edge cluster
-  // Returns the result of updateing an exiting edge cluster
+  // Returns the result of updateing an existing edge cluster
   rpc UpdateEdgeCluster(UpdateEdgeClusterRequest) returns (UpdateEdgeClusterResponse);
 
   // DeleteEdgeCluster delete an exsiting edge cluster
   // request: The request to delete an esiting edge cluster
-  // Returns the result of deleting an exiting edge cluster
+  // Returns the result of deleting an existing edge cluster
   rpc DeleteEdgeCluster(DeleteEdgeClusterRequest) returns (DeleteEdgeClusterResponse);
 
   // Search returns the list of edge clusters that matched the criteria
