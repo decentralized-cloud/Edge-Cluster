@@ -203,7 +203,7 @@ func (service *transportService) CreateEdgeCluster(
 // ReadEdgeCluster read an existing edgeCluster
 // context: Mandatory. The reference to the context
 // request: Mandatory. The request to read an existing edgeCluster
-// Returns the result of reading an exiting edgeCluster
+// Returns the result of reading an existing edgeCluster
 func (service *transportService) ReadEdgeCluster(
 	ctx context.Context,
 	request *edgeClusterGRPCContract.ReadEdgeClusterRequest) (*edgeClusterGRPCContract.ReadEdgeClusterResponse, error) {
@@ -219,7 +219,7 @@ func (service *transportService) ReadEdgeCluster(
 // UpdateEdgeCluster update an existing edgeCluster
 // context: Mandatory. The reference to the context
 // request: Mandatory. The request to update an existing edgeCluster
-// Returns the result of updateing an exiting edgeCluster
+// Returns the result of updateing an existing edgeCluster
 func (service *transportService) UpdateEdgeCluster(
 	ctx context.Context,
 	request *edgeClusterGRPCContract.UpdateEdgeClusterRequest) (*edgeClusterGRPCContract.UpdateEdgeClusterResponse, error) {
@@ -235,7 +235,7 @@ func (service *transportService) UpdateEdgeCluster(
 // DeleteEdgeCluster delete an existing edgeCluster
 // context: Mandatory. The reference to the context
 // request: Mandatory. The request to delete an existing edgeCluster
-// Returns the result of deleting an exiting edgeCluster
+// Returns the result of deleting an existing edgeCluster
 func (service *transportService) DeleteEdgeCluster(
 	ctx context.Context,
 	request *edgeClusterGRPCContract.DeleteEdgeClusterRequest) (*edgeClusterGRPCContract.DeleteEdgeClusterResponse, error) {

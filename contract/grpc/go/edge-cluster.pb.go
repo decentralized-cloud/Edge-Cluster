@@ -2857,15 +2857,15 @@ type EdgeClusterServiceClient interface {
 	CreateEdgeCluster(ctx context.Context, in *CreateEdgeClusterRequest, opts ...grpc.CallOption) (*CreateEdgeClusterResponse, error)
 	// ReadEdgeCluster read an exsiting edge cluster
 	// request: The request to read an esiting edge cluster
-	// Returns the result of reading an exiting edge cluster
+	// Returns the result of reading an existing edge cluster
 	ReadEdgeCluster(ctx context.Context, in *ReadEdgeClusterRequest, opts ...grpc.CallOption) (*ReadEdgeClusterResponse, error)
 	// UpdateEdgeCluster update an exsiting edge cluster
 	// request: The request to update an esiting edge cluster
-	// Returns the result of updateing an exiting edge cluster
+	// Returns the result of updateing an existing edge cluster
 	UpdateEdgeCluster(ctx context.Context, in *UpdateEdgeClusterRequest, opts ...grpc.CallOption) (*UpdateEdgeClusterResponse, error)
 	// DeleteEdgeCluster delete an exsiting edge cluster
 	// request: The request to delete an esiting edge cluster
-	// Returns the result of deleting an exiting edge cluster
+	// Returns the result of deleting an existing edge cluster
 	DeleteEdgeCluster(ctx context.Context, in *DeleteEdgeClusterRequest, opts ...grpc.CallOption) (*DeleteEdgeClusterResponse, error)
 	// Search returns the list of edge clusters that matched the criteria
 	// request: The request contains the search criteria
@@ -2947,15 +2947,15 @@ type EdgeClusterServiceServer interface {
 	CreateEdgeCluster(context.Context, *CreateEdgeClusterRequest) (*CreateEdgeClusterResponse, error)
 	// ReadEdgeCluster read an exsiting edge cluster
 	// request: The request to read an esiting edge cluster
-	// Returns the result of reading an exiting edge cluster
+	// Returns the result of reading an existing edge cluster
 	ReadEdgeCluster(context.Context, *ReadEdgeClusterRequest) (*ReadEdgeClusterResponse, error)
 	// UpdateEdgeCluster update an exsiting edge cluster
 	// request: The request to update an esiting edge cluster
-	// Returns the result of updateing an exiting edge cluster
+	// Returns the result of updateing an existing edge cluster
 	UpdateEdgeCluster(context.Context, *UpdateEdgeClusterRequest) (*UpdateEdgeClusterResponse, error)
 	// DeleteEdgeCluster delete an exsiting edge cluster
 	// request: The request to delete an esiting edge cluster
-	// Returns the result of deleting an exiting edge cluster
+	// Returns the result of deleting an existing edge cluster
 	DeleteEdgeCluster(context.Context, *DeleteEdgeClusterRequest) (*DeleteEdgeClusterResponse, error)
 	// Search returns the list of edge clusters that matched the criteria
 	// request: The request contains the search criteria
