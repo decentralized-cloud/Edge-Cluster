@@ -50,6 +50,11 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			GetDatabaseName().
 			Return("edge-clusters", nil)
 
+		mockConfigurationService.
+			EXPECT().
+			GetDatabaseCollectionName().
+			Return("edge-clusters", nil)
+
 		sut, _ = mongodb.NewMongodbRepositoryService(mockConfigurationService)
 		ctx = context.Background()
 		createRequest = repository.CreateEdgeClusterRequest{
@@ -79,6 +84,12 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					EXPECT().
 					GetDatabaseName().
 					Return(cuid.New(), nil)
+
+				mockConfigurationService.
+					EXPECT().
+					GetDatabaseCollectionName().
+					Return(cuid.New(), nil)
+
 				service, err := mongodb.NewMongodbRepositoryService(mockConfigurationService)
 				Ω(err).Should(BeNil())
 				Ω(service).ShouldNot(BeNil())

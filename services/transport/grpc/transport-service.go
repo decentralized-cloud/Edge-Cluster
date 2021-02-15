@@ -10,7 +10,6 @@ import (
 	"github.com/decentralized-cloud/edge-cluster/services/configuration"
 	"github.com/decentralized-cloud/edge-cluster/services/endpoint"
 	"github.com/decentralized-cloud/edge-cluster/services/transport"
-	gokitEndpoint "github.com/go-kit/kit/endpoint"
 	gokitgrpc "github.com/go-kit/kit/transport/grpc"
 	commonErrors "github.com/micro-business/go-core/system/errors"
 	"github.com/micro-business/gokit-core/middleware"
@@ -23,6 +22,7 @@ type transportService struct {
 	configurationService        configuration.ConfigurationContract
 	endpointCreatorService      endpoint.EndpointCreatorContract
 	middlewareProviderService   middleware.MiddlewareProviderContract
+	jwksURL                     string
 	createEdgeClusterHandler    gokitgrpc.Handler
 	readEdgeClusterHandler      gokitgrpc.Handler
 	updateEdgeClusterHandler    gokitgrpc.Handler
@@ -66,11 +66,17 @@ func NewTransportService(
 		return nil, commonErrors.NewArgumentNilError("middlewareProviderService", "middlewareProviderService is required")
 	}
 
+	jwksURL, err := configurationService.GetJwksURL()
+	if err != nil {
+		return nil, err
+	}
+
 	return &transportService{
 		logger:                    logger,
 		configurationService:      configurationService,
 		endpointCreatorService:    endpointCreatorService,
 		middlewareProviderService: middlewareProviderService,
+		jwksURL:                   jwksURL,
 	}, nil
 }
 
@@ -117,72 +123,59 @@ func (service *transportService) Stop() error {
 }
 
 func (service *transportService) setupHandlers() {
-	var createEdgeClusterEndpoint gokitEndpoint.Endpoint
-	{
-		createEdgeClusterEndpoint = service.endpointCreatorService.CreateEdgeClusterEndpoint()
-		createEdgeClusterEndpoint = service.middlewareProviderService.CreateLoggingMiddleware("CreateEdgeCluster")(createEdgeClusterEndpoint)
-		service.createEdgeClusterHandler = gokitgrpc.NewServer(
-			createEdgeClusterEndpoint,
-			decodeCreateEdgeClusterRequest,
-			encodeCreateEdgeClusterResponse,
-		)
-	}
+	endpoint := service.endpointCreatorService.CreateEdgeClusterEndpoint()
+	endpoint = service.middlewareProviderService.CreateLoggingMiddleware("CreateEdgeCluster")(endpoint)
+	endpoint = service.createAuthMiddleware()(endpoint)
+	service.createEdgeClusterHandler = gokitgrpc.NewServer(
+		endpoint,
+		decodeCreateEdgeClusterRequest,
+		encodeCreateEdgeClusterResponse,
+	)
 
-	var readEdgeClusterEndpoint gokitEndpoint.Endpoint
-	{
-		readEdgeClusterEndpoint = service.endpointCreatorService.ReadEdgeClusterEndpoint()
-		readEdgeClusterEndpoint = service.middlewareProviderService.CreateLoggingMiddleware("ReadEdgeCluster")(readEdgeClusterEndpoint)
-		service.readEdgeClusterHandler = gokitgrpc.NewServer(
-			readEdgeClusterEndpoint,
-			decodeReadEdgeClusterRequest,
-			encodeReadEdgeClusterResponse,
-		)
-	}
+	endpoint = service.endpointCreatorService.ReadEdgeClusterEndpoint()
+	endpoint = service.middlewareProviderService.CreateLoggingMiddleware("ReadEdgeCluster")(endpoint)
+	endpoint = service.createAuthMiddleware()(endpoint)
+	service.readEdgeClusterHandler = gokitgrpc.NewServer(
+		endpoint,
+		decodeReadEdgeClusterRequest,
+		encodeReadEdgeClusterResponse,
+	)
 
-	var updateEdgeClusterEndpoint gokitEndpoint.Endpoint
-	{
-		updateEdgeClusterEndpoint = service.endpointCreatorService.UpdateEdgeClusterEndpoint()
-		updateEdgeClusterEndpoint = service.middlewareProviderService.CreateLoggingMiddleware("UpdateEdgeCluster")(updateEdgeClusterEndpoint)
-		service.updateEdgeClusterHandler = gokitgrpc.NewServer(
-			updateEdgeClusterEndpoint,
-			decodeUpdateEdgeClusterRequest,
-			encodeUpdateEdgeClusterResponse,
-		)
-	}
+	endpoint = service.endpointCreatorService.UpdateEdgeClusterEndpoint()
+	endpoint = service.middlewareProviderService.CreateLoggingMiddleware("UpdateEdgeCluster")(endpoint)
+	endpoint = service.createAuthMiddleware()(endpoint)
+	service.updateEdgeClusterHandler = gokitgrpc.NewServer(
+		endpoint,
+		decodeUpdateEdgeClusterRequest,
+		encodeUpdateEdgeClusterResponse,
+	)
 
-	var deleteEdgeClusterEndpoint gokitEndpoint.Endpoint
-	{
-		deleteEdgeClusterEndpoint = service.endpointCreatorService.DeleteEdgeClusterEndpoint()
-		deleteEdgeClusterEndpoint = service.middlewareProviderService.CreateLoggingMiddleware("DeleteEdgeCluster")(deleteEdgeClusterEndpoint)
-		service.deleteEdgeClusterHandler = gokitgrpc.NewServer(
-			deleteEdgeClusterEndpoint,
-			decodeDeleteEdgeClusterRequest,
-			encodeDeleteEdgeClusterResponse,
-		)
-	}
+	endpoint = service.endpointCreatorService.DeleteEdgeClusterEndpoint()
+	endpoint = service.middlewareProviderService.CreateLoggingMiddleware("DeleteEdgeCluster")(endpoint)
+	endpoint = service.createAuthMiddleware()(endpoint)
+	service.deleteEdgeClusterHandler = gokitgrpc.NewServer(
+		endpoint,
+		decodeDeleteEdgeClusterRequest,
+		encodeDeleteEdgeClusterResponse,
+	)
 
-	var searchEndpoint gokitEndpoint.Endpoint
-	{
-		searchEndpoint = service.endpointCreatorService.SearchEndpoint()
-		searchEndpoint = service.middlewareProviderService.CreateLoggingMiddleware("Search")(searchEndpoint)
-		service.searchHandler = gokitgrpc.NewServer(
-			searchEndpoint,
-			decodeSearchRequest,
-			encodeSearchResponse,
-		)
-	}
+	endpoint = service.endpointCreatorService.SearchEndpoint()
+	endpoint = service.middlewareProviderService.CreateLoggingMiddleware("Search")(endpoint)
+	endpoint = service.createAuthMiddleware()(endpoint)
+	service.searchHandler = gokitgrpc.NewServer(
+		endpoint,
+		decodeSearchRequest,
+		encodeSearchResponse,
+	)
 
-	var listEdgeClusterNodesEndpoint gokitEndpoint.Endpoint
-	{
-		listEdgeClusterNodesEndpoint = service.endpointCreatorService.ListEdgeClusterNodesEndpoint()
-		listEdgeClusterNodesEndpoint = service.middlewareProviderService.CreateLoggingMiddleware("ListEdgeClusterNodes")(listEdgeClusterNodesEndpoint)
-		service.listEdgeClusterNodesHandler = gokitgrpc.NewServer(
-			listEdgeClusterNodesEndpoint,
-			decodeListEdgeClusterNodesRequest,
-			encodeListEdgeClusterNodesResponse,
-		)
-	}
-
+	endpoint = service.endpointCreatorService.ListEdgeClusterNodesEndpoint()
+	endpoint = service.middlewareProviderService.CreateLoggingMiddleware("ListEdgeClusterNodes")(endpoint)
+	endpoint = service.createAuthMiddleware()(endpoint)
+	service.listEdgeClusterNodesHandler = gokitgrpc.NewServer(
+		endpoint,
+		decodeListEdgeClusterNodesRequest,
+		encodeListEdgeClusterNodesResponse,
+	)
 }
 
 // CreateEdgeCluster creates a new edgeCluster

@@ -45,6 +45,9 @@ pod:
   database:
     connection_string: "mongodb://mongodb:27017"
     name: "edge-clusters"
+    collection: "edge-clusters"
+  idp:
+    jwksURL: ""
 
 service:
   type: ClusterIP
