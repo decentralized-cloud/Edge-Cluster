@@ -4,6 +4,7 @@ package endpoint
 import (
 	"context"
 
+	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/business"
 	"github.com/go-kit/kit/endpoint"
 	commonErrors "github.com/micro-business/go-core/system/errors"
@@ -44,6 +45,9 @@ func (service *endpointCreatorService) CreateEdgeClusterEndpoint() endpoint.Endp
 		}
 
 		castedRequest := request.(*business.CreateEdgeClusterRequest)
+		parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
+		castedRequest.UserEmail = parsedToken.Email
+
 		if err := castedRequest.Validate(); err != nil {
 			return &business.CreateEdgeClusterResponse{
 				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
@@ -71,6 +75,9 @@ func (service *endpointCreatorService) ReadEdgeClusterEndpoint() endpoint.Endpoi
 		}
 
 		castedRequest := request.(*business.ReadEdgeClusterRequest)
+		parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
+		castedRequest.UserEmail = parsedToken.Email
+
 		if err := castedRequest.Validate(); err != nil {
 			return &business.ReadEdgeClusterResponse{
 				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
@@ -98,6 +105,9 @@ func (service *endpointCreatorService) UpdateEdgeClusterEndpoint() endpoint.Endp
 		}
 
 		castedRequest := request.(*business.UpdateEdgeClusterRequest)
+		parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
+		castedRequest.UserEmail = parsedToken.Email
+
 		if err := castedRequest.Validate(); err != nil {
 			return &business.UpdateEdgeClusterResponse{
 				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
@@ -125,6 +135,9 @@ func (service *endpointCreatorService) DeleteEdgeClusterEndpoint() endpoint.Endp
 		}
 
 		castedRequest := request.(*business.DeleteEdgeClusterRequest)
+		parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
+		castedRequest.UserEmail = parsedToken.Email
+
 		if err := castedRequest.Validate(); err != nil {
 			return &business.DeleteEdgeClusterResponse{
 				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
@@ -152,6 +165,9 @@ func (service *endpointCreatorService) SearchEndpoint() endpoint.Endpoint {
 		}
 
 		castedRequest := request.(*business.SearchRequest)
+		parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
+		castedRequest.UserEmail = parsedToken.Email
+
 		if err := castedRequest.Validate(); err != nil {
 			return &business.SearchResponse{
 				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
@@ -179,6 +195,9 @@ func (service *endpointCreatorService) ListEdgeClusterNodesEndpoint() endpoint.E
 		}
 
 		castedRequest := request.(*business.ListEdgeClusterNodesRequest)
+		parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
+		castedRequest.UserEmail = parsedToken.Email
+
 		if err := castedRequest.Validate(); err != nil {
 			return &business.ListEdgeClusterNodesResponse{
 				Err: commonErrors.NewArgumentErrorWithError("request", "", err),

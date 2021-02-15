@@ -87,10 +87,10 @@ func (service *envConfigurationService) GetDatabaseName() (string, error) {
 // GetDatabaseCollectionName retrieves the database collection name
 // Returns the database collection name or error if something goes wrong
 func (service *envConfigurationService) GetDatabaseCollectionName() (string, error) {
-	databaseCollectionName := os.Getenv("USER_DATABASE_COLLECTION_NAME")
+	databaseCollectionName := os.Getenv("EDGE_CLUSTER_DATABASE_COLLECTION_NAME")
 
 	if strings.Trim(databaseCollectionName, " ") == "" {
-		return "", NewUnknownError("USER_DATABASE_COLLECTION_NAME is required")
+		return "", NewUnknownError("EDGE_CLUSTER_DATABASE_COLLECTION_NAME is required")
 	}
 
 	return databaseCollectionName, nil
