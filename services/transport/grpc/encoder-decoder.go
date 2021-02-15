@@ -22,6 +22,7 @@ import (
 func decodeCreateEdgeClusterRequest(
 	ctx context.Context,
 	request interface{}) (interface{}, error) {
+	parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
 	castedRequest := request.(*edgeClusterGRPCContract.CreateEdgeClusterRequest)
 
 	edgeCluster, err := mapEdgeClusterFromGrpc(castedRequest.EdgeCluster)
@@ -30,6 +31,7 @@ func decodeCreateEdgeClusterRequest(
 	}
 
 	return &business.CreateEdgeClusterRequest{
+		UserEmail:   parsedToken.Email,
 		EdgeCluster: edgeCluster,
 	}, nil
 }
@@ -75,9 +77,11 @@ func encodeCreateEdgeClusterResponse(
 func decodeReadEdgeClusterRequest(
 	ctx context.Context,
 	request interface{}) (interface{}, error) {
+	parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
 	castedRequest := request.(*edgeClusterGRPCContract.ReadEdgeClusterRequest)
 
 	return &business.ReadEdgeClusterRequest{
+		UserEmail:     parsedToken.Email,
 		EdgeClusterID: castedRequest.EdgeClusterID,
 	}, nil
 }
@@ -121,6 +125,7 @@ func encodeReadEdgeClusterResponse(
 func decodeUpdateEdgeClusterRequest(
 	ctx context.Context,
 	request interface{}) (interface{}, error) {
+	parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
 	castedRequest := request.(*edgeClusterGRPCContract.UpdateEdgeClusterRequest)
 
 	edgeCluster, err := mapEdgeClusterFromGrpc(castedRequest.EdgeCluster)
@@ -129,6 +134,7 @@ func decodeUpdateEdgeClusterRequest(
 	}
 
 	return &business.UpdateEdgeClusterRequest{
+		UserEmail:     parsedToken.Email,
 		EdgeClusterID: castedRequest.EdgeClusterID,
 		EdgeCluster:   edgeCluster,
 	}, nil
@@ -174,9 +180,11 @@ func encodeUpdateEdgeClusterResponse(
 func decodeDeleteEdgeClusterRequest(
 	ctx context.Context,
 	request interface{}) (interface{}, error) {
+	parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
 	castedRequest := request.(*edgeClusterGRPCContract.DeleteEdgeClusterRequest)
 
 	return &business.DeleteEdgeClusterRequest{
+		UserEmail:     parsedToken.Email,
 		EdgeClusterID: castedRequest.EdgeClusterID,
 	}, nil
 }
@@ -208,6 +216,7 @@ func encodeDeleteEdgeClusterResponse(
 func decodeSearchRequest(
 	ctx context.Context,
 	request interface{}) (interface{}, error) {
+	parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
 	castedRequest := request.(*edgeClusterGRPCContract.SearchRequest)
 	sortingOptions := []common.SortingOptionPair{}
 
@@ -249,6 +258,7 @@ func decodeSearchRequest(
 	}
 
 	return &business.SearchRequest{
+		UserEmail:      parsedToken.Email,
 		Pagination:     pagination,
 		EdgeClusterIDs: castedRequest.EdgeClusterIDs,
 		ProjectIDs:     castedRequest.ProjectIDs,
@@ -300,9 +310,11 @@ func encodeSearchResponse(
 func decodeListEdgeClusterNodesRequest(
 	ctx context.Context,
 	request interface{}) (interface{}, error) {
+	parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
 	castedRequest := request.(*edgeClusterGRPCContract.ListEdgeClusterNodesRequest)
 
 	return &business.ListEdgeClusterNodesRequest{
+		UserEmail:     parsedToken.Email,
 		EdgeClusterID: castedRequest.EdgeClusterID,
 	}, nil
 }

@@ -8,6 +8,7 @@ import (
 
 // CreateEdgeClusterRequest contains the request to create a new edge cluster
 type CreateEdgeClusterRequest struct {
+	UserEmail   string
 	EdgeCluster models.EdgeCluster
 }
 
@@ -20,6 +21,7 @@ type CreateEdgeClusterResponse struct {
 
 // ReadEdgeClusterRequest contains the request to read an existing edge cluster
 type ReadEdgeClusterRequest struct {
+	UserEmail     string
 	EdgeClusterID string
 }
 
@@ -30,6 +32,7 @@ type ReadEdgeClusterResponse struct {
 
 // UpdateEdgeClusterRequest contains the request to update an existing edge cluster
 type UpdateEdgeClusterRequest struct {
+	UserEmail     string
 	EdgeClusterID string
 	EdgeCluster   models.EdgeCluster
 }
@@ -42,6 +45,7 @@ type UpdateEdgeClusterResponse struct {
 
 // DeleteEdgeClusterRequest contains the request to delete an existing edge cluster
 type DeleteEdgeClusterRequest struct {
+	UserEmail     string
 	EdgeClusterID string
 }
 
@@ -51,6 +55,7 @@ type DeleteEdgeClusterResponse struct {
 
 // SearchRequest contains the filter criteria to look for existing projects
 type SearchRequest struct {
+	UserEmail      string
 	Pagination     common.Pagination
 	SortingOptions []common.SortingOptionPair
 	EdgeClusterIDs []string

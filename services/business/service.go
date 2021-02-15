@@ -45,6 +45,7 @@ func (service *businessService) CreateEdgeCluster(
 	request *CreateEdgeClusterRequest) (*CreateEdgeClusterResponse, error) {
 
 	repositoryResponse, err := service.repositoryService.CreateEdgeCluster(ctx, &repository.CreateEdgeClusterRequest{
+		UserEmail:   request.UserEmail,
 		EdgeCluster: request.EdgeCluster,
 	})
 
@@ -92,6 +93,7 @@ func (service *businessService) ReadEdgeCluster(
 	ctx context.Context,
 	request *ReadEdgeClusterRequest) (*ReadEdgeClusterResponse, error) {
 	repositoryResponse, err := service.repositoryService.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{
+		UserEmail:     request.UserEmail,
 		EdgeClusterID: request.EdgeClusterID,
 	})
 
@@ -128,6 +130,7 @@ func (service *businessService) UpdateEdgeCluster(
 	request *UpdateEdgeClusterRequest) (*UpdateEdgeClusterResponse, error) {
 
 	repositoryResponse, err := service.repositoryService.UpdateEdgeCluster(ctx, &repository.UpdateEdgeClusterRequest{
+		UserEmail:     request.UserEmail,
 		EdgeClusterID: request.EdgeClusterID,
 		EdgeCluster:   request.EdgeCluster,
 	})
@@ -177,6 +180,7 @@ func (service *businessService) DeleteEdgeCluster(
 	request *DeleteEdgeClusterRequest) (*DeleteEdgeClusterResponse, error) {
 
 	_, err := service.repositoryService.DeleteEdgeCluster(ctx, &repository.DeleteEdgeClusterRequest{
+		UserEmail:     request.UserEmail,
 		EdgeClusterID: request.EdgeClusterID,
 	})
 
@@ -212,6 +216,7 @@ func (service *businessService) Search(
 	ctx context.Context,
 	request *SearchRequest) (*SearchResponse, error) {
 	result, err := service.repositoryService.Search(ctx, &repository.SearchRequest{
+		UserEmail:      request.UserEmail,
 		Pagination:     request.Pagination,
 		SortingOptions: request.SortingOptions,
 		EdgeClusterIDs: request.EdgeClusterIDs,
@@ -253,6 +258,7 @@ func (service *businessService) ListEdgeClusterNodes(
 	ctx context.Context,
 	request *ListEdgeClusterNodesRequest) (*ListEdgeClusterNodesResponse, error) {
 	repositoryResponse, err := service.repositoryService.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{
+		UserEmail:     request.UserEmail,
 		EdgeClusterID: request.EdgeClusterID,
 	})
 

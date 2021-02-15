@@ -5,6 +5,22 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
+type contextKey string
+
+func (c contextKey) String() string {
+	return string(c)
+}
+
+var (
+	// ContextKeyParsedToken var
+	ContextKeyParsedToken = contextKey("ParsedToken")
+)
+
+// ParsedToken contains details that are encoded in the received JWT token
+type ParsedToken struct {
+	Email string
+}
+
 // ClusterType is the edge cluster type
 type ClusterType int
 

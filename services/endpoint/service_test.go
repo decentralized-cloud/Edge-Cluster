@@ -83,6 +83,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 			BeforeEach(func() {
 				endpoint = sut.CreateEdgeClusterEndpoint()
 				request = business.CreateEdgeClusterRequest{
+					UserEmail: cuid.New() + "@test.com",
 					EdgeCluster: models.EdgeCluster{
 						ProjectID:     cuid.New(),
 						Name:          cuid.New(),
@@ -212,6 +213,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 			BeforeEach(func() {
 				endpoint = sut.ReadEdgeClusterEndpoint()
 				request = business.ReadEdgeClusterRequest{
+					UserEmail:     cuid.New() + "@test.com",
 					EdgeClusterID: cuid.New(),
 				}
 
@@ -333,6 +335,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 			BeforeEach(func() {
 				endpoint = sut.UpdateEdgeClusterEndpoint()
 				request = business.UpdateEdgeClusterRequest{
+					UserEmail:     cuid.New() + "@test.com",
 					EdgeClusterID: cuid.New(),
 					EdgeCluster: models.EdgeCluster{
 						ProjectID:     cuid.New(),
@@ -462,6 +465,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 			BeforeEach(func() {
 				endpoint = sut.DeleteEdgeClusterEndpoint()
 				request = business.DeleteEdgeClusterRequest{
+					UserEmail:     cuid.New() + "@test.com",
 					EdgeClusterID: cuid.New(),
 				}
 
@@ -588,6 +592,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				}
 
 				request = business.SearchRequest{
+					UserEmail: cuid.New() + "@test.com",
 					Pagination: common.Pagination{
 						After:  convertStringToPointer(cuid.New()),
 						First:  convertIntToPointer(rand.Intn(1000)),
@@ -595,11 +600,11 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 						Last:   convertIntToPointer(rand.Intn(1000)),
 					},
 					SortingOptions: []common.SortingOptionPair{
-						common.SortingOptionPair{
+						{
 							Name:      cuid.New(),
 							Direction: common.Ascending,
 						},
-						common.SortingOptionPair{
+						{
 							Name:      cuid.New(),
 							Direction: common.Descending,
 						},
