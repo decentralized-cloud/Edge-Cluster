@@ -16,6 +16,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type edgeCluster struct {
+	UserEmail     string             `bson:"userEmail" json:"userEmail"`
+	ProjectID     string             `bson:"projectID" json:"projectID"`
+	Name          string             `bson:"name" json:"name"`
+	ClusterSecret string             `bson:"clusterSecret" json:"clusterSecret"`
+	ClusterType   models.ClusterType `bson:"clusterType" json:"clusterType"`
+}
+
 type mongodbRepositoryService struct {
 	connectionString       string
 	databaseName           string
@@ -66,7 +74,7 @@ func (service *mongodbRepositoryService) CreateEdgeCluster(
 
 	defer disconnect(ctx, client)
 
-	insertResult, err := collection.InsertOne(ctx, request.EdgeCluster)
+	insertResult, err := collection.InsertOne(ctx, mapToInternalEdgeCluster(request.UserEmail, request.EdgeCluster))
 	if err != nil {
 		return nil, repository.NewUnknownErrorWithError("Insert edge cluster failed.", err)
 	}
@@ -95,8 +103,8 @@ func (service *mongodbRepositoryService) ReadEdgeCluster(
 	defer disconnect(ctx, client)
 
 	ObjectID, _ := primitive.ObjectIDFromHex(request.EdgeClusterID)
-	filter := bson.D{{Key: "_id", Value: ObjectID}}
-	var edgeCluster models.EdgeCluster
+	filter := bson.D{{Key: "_id", Value: ObjectID}, {Key: "userEmail", Value: request.UserEmail}}
+	var edgeCluster edgeCluster
 
 	err = collection.FindOne(ctx, filter).Decode(&edgeCluster)
 	if err != nil {
@@ -104,7 +112,7 @@ func (service *mongodbRepositoryService) ReadEdgeCluster(
 	}
 
 	return &repository.ReadEdgeClusterResponse{
-		EdgeCluster: edgeCluster,
+		EdgeCluster: mapFromInternalEdgeCluster(edgeCluster),
 	}, nil
 }
 
@@ -123,7 +131,7 @@ func (service *mongodbRepositoryService) UpdateEdgeCluster(
 	defer disconnect(ctx, client)
 
 	ObjectID, _ := primitive.ObjectIDFromHex(request.EdgeClusterID)
-	filter := bson.D{{Key: "_id", Value: ObjectID}}
+	filter := bson.D{{Key: "_id", Value: ObjectID}, {Key: "userEmail", Value: request.UserEmail}}
 
 	newEdgeCluster := bson.M{
 		"$set": bson.M{
@@ -162,7 +170,7 @@ func (service *mongodbRepositoryService) DeleteEdgeCluster(
 	defer disconnect(ctx, client)
 
 	ObjectID, _ := primitive.ObjectIDFromHex(request.EdgeClusterID)
-	filter := bson.D{{Key: "_id", Value: ObjectID}}
+	filter := bson.D{{Key: "_id", Value: ObjectID}, {Key: "userEmail", Value: request.UserEmail}}
 	response, err := collection.DeleteOne(ctx, filter)
 	if err != nil {
 		return nil, repository.NewUnknownErrorWithError("Delete edge cluster failed.", err)
@@ -200,6 +208,10 @@ func (service *mongodbRepositoryService) Search(
 	filter := bson.M{}
 	if len(request.EdgeClusterIDs) > 0 {
 		filter["_id"] = bson.M{"$in": ids}
+	}
+
+	filter["$and"] = []interface{}{
+		bson.M{"userEmail": bson.M{"$eq": request.UserEmail}},
 	}
 
 	if len(request.ProjectIDs) > 0 {
@@ -298,8 +310,7 @@ func (service *mongodbRepositoryService) Search(
 
 	edgeClusters := []models.EdgeClusterWithCursor{}
 	for cursor.Next(ctx) {
-		var edgeCluster models.EdgeCluster
-		//TODO : below line need to be removed, if we pass 'ShowRecordID' in findOption, ObjectID will be available
+		var edgeCluster edgeCluster
 		var edgeClusterBson bson.M
 
 		err := cursor.Decode(&edgeCluster)
@@ -315,7 +326,7 @@ func (service *mongodbRepositoryService) Search(
 		edgeClusterID := edgeClusterBson["_id"].(primitive.ObjectID).Hex()
 		edgeClusterWithCursor := models.EdgeClusterWithCursor{
 			EdgeClusterID: edgeClusterID,
-			EdgeCluster:   edgeCluster,
+			EdgeCluster:   mapFromInternalEdgeCluster(edgeCluster),
 			Cursor:        edgeClusterID,
 		}
 
@@ -350,4 +361,23 @@ func (service *mongodbRepositoryService) createClientAndCollection(ctx context.C
 
 func disconnect(ctx context.Context, client *mongo.Client) {
 	_ = client.Disconnect(ctx)
+}
+
+func mapToInternalEdgeCluster(email string, from models.EdgeCluster) edgeCluster {
+	return edgeCluster{
+		UserEmail:     email,
+		ProjectID:     from.ProjectID,
+		Name:          from.Name,
+		ClusterSecret: from.ClusterSecret,
+		ClusterType:   from.ClusterType,
+	}
+}
+
+func mapFromInternalEdgeCluster(from edgeCluster) models.EdgeCluster {
+	return models.EdgeCluster{
+		ProjectID:     from.ProjectID,
+		Name:          from.Name,
+		ClusterSecret: from.ClusterSecret,
+		ClusterType:   from.ClusterType,
+	}
 }
