@@ -58,6 +58,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 		sut, _ = mongodb.NewMongodbRepositoryService(mockConfigurationService)
 		ctx = context.Background()
 		createRequest = repository.CreateEdgeClusterRequest{
+			UserEmail: cuid.New() + "@test.com",
 			EdgeCluster: models.EdgeCluster{
 				ProjectID:     cuid.New(),
 				Name:          cuid.New(),
@@ -123,7 +124,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 
 		When("user reads a edge cluster by Id", func() {
 			It("should return a edge cluster", func() {
-				response, err := sut.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+				response, err := sut.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{UserEmail: createRequest.UserEmail, EdgeClusterID: edgeClusterID})
 				Ω(err).Should(BeNil())
 				assertEdgeCluster(response.EdgeCluster, createRequest.EdgeCluster)
 			})
@@ -132,6 +133,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 		When("user updates the existing edge cluster", func() {
 			It("should update the edge cluster's information", func() {
 				updateRequest := repository.UpdateEdgeClusterRequest{
+					UserEmail:     createRequest.UserEmail,
 					EdgeClusterID: edgeClusterID,
 					EdgeCluster: models.EdgeCluster{
 						ProjectID:     cuid.New(),
@@ -146,7 +148,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				Ω(updateResponse.Cursor).Should(Equal(edgeClusterID))
 				assertEdgeCluster(updateResponse.EdgeCluster, updateRequest.EdgeCluster)
 
-				readResponse, err := sut.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+				readResponse, err := sut.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{UserEmail: createRequest.UserEmail, EdgeClusterID: edgeClusterID})
 				Ω(err).Should(BeNil())
 				assertEdgeCluster(readResponse.EdgeCluster, updateRequest.EdgeCluster)
 			})
@@ -154,10 +156,10 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 
 		When("user deletes the edge cluster", func() {
 			It("should delete the edge cluster", func() {
-				_, err := sut.DeleteEdgeCluster(ctx, &repository.DeleteEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+				_, err := sut.DeleteEdgeCluster(ctx, &repository.DeleteEdgeClusterRequest{UserEmail: createRequest.UserEmail, EdgeClusterID: edgeClusterID})
 				Ω(err).Should(BeNil())
 
-				response, err := sut.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+				response, err := sut.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{UserEmail: createRequest.UserEmail, EdgeClusterID: edgeClusterID})
 				Ω(err).Should(HaveOccurred())
 				Ω(response).Should(BeNil())
 			})
@@ -175,7 +177,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 
 		When("user reads the edge cluster", func() {
 			It("should return NotFoundError", func() {
-				response, err := sut.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+				response, err := sut.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{UserEmail: createRequest.UserEmail, EdgeClusterID: edgeClusterID})
 				Ω(err).Should(HaveOccurred())
 				Ω(response).Should(BeNil())
 			})
@@ -184,6 +186,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 		When("user tries to update the edge cluster", func() {
 			It("should return NotFoundError", func() {
 				updateRequest := repository.UpdateEdgeClusterRequest{
+					UserEmail:     createRequest.UserEmail,
 					EdgeClusterID: edgeClusterID,
 					EdgeCluster: models.EdgeCluster{
 						ProjectID:     cuid.New(),
@@ -208,7 +211,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 
 		When("user tries to delete the edge cluster", func() {
 			It("should return NotFoundError", func() {
-				response, err := sut.DeleteEdgeCluster(ctx, &repository.DeleteEdgeClusterRequest{EdgeClusterID: edgeClusterID})
+				response, err := sut.DeleteEdgeCluster(ctx, &repository.DeleteEdgeClusterRequest{UserEmail: createRequest.UserEmail, EdgeClusterID: edgeClusterID})
 				Ω(err).Should(HaveOccurred())
 				Ω(response).Should(BeNil())
 
@@ -248,6 +251,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			It("should return first 10 edge clusters", func() {
 				first := 10
 				searchRequest := repository.SearchRequest{
+					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     []string{},
 					Pagination: common.Pagination{
@@ -275,6 +279,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			It("should return first 10 edge clusters", func() {
 				first := 10
 				searchRequest := repository.SearchRequest{
+					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
@@ -302,6 +307,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			It("should return first 5 edge clusters", func() {
 				first := 5
 				searchRequest := repository.SearchRequest{
+					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
@@ -329,6 +335,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			It("should return first 9 edge clusters after provided edge clusters id", func() {
 				first := 9
 				searchRequest := repository.SearchRequest{
+					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
@@ -356,6 +363,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			It("should return last 10 edge clusters.", func() {
 				last := 10
 				searchRequest := repository.SearchRequest{
+					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
@@ -383,6 +391,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			It("should return first 9 edge clusters before provided edge cluster id", func() {
 				last := 9
 				searchRequest := repository.SearchRequest{
+					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
@@ -410,6 +419,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			It("should return first 10 edge clusters in adcending order on name field", func() {
 				first := 10
 				searchRequest := repository.SearchRequest{
+					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
@@ -439,6 +449,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			It("should return first 10 edge clusters in descending order on name field", func() {
 				first := 10
 				searchRequest := repository.SearchRequest{
+					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
 					Pagination: common.Pagination{
