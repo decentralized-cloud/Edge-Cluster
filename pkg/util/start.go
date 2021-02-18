@@ -14,7 +14,7 @@ import (
 	"github.com/decentralized-cloud/edge-cluster/services/repository/mongodb"
 	"github.com/decentralized-cloud/edge-cluster/services/transport/grpc"
 	"github.com/decentralized-cloud/edge-cluster/services/transport/https"
-	"github.com/micro-business/gokit-core/middleware"
+	"github.com/micro-business/go-core/gokit/middleware"
 	"go.uber.org/zap"
 )
 

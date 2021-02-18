@@ -1,6 +1,6 @@
 module github.com/decentralized-cloud/edge-cluster
 
-go 1.15
+go 1.16
 
 require (
 	github.com/go-kit/kit v0.10.0
@@ -8,8 +8,7 @@ require (
 	github.com/golang/mock v1.4.4
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/lucsky/cuid v1.0.2
-	github.com/micro-business/go-core v0.4.0
-	github.com/micro-business/gokit-core v0.4.0
+	github.com/micro-business/go-core v0.5.0
 	github.com/onsi/ginkgo v1.15.0
 	github.com/onsi/gomega v1.10.5
 	github.com/prometheus/client_golang v1.9.0
