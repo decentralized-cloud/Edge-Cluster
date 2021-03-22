@@ -151,3 +151,18 @@ func (mr *MockConfigurationContractMockRecorder) GetJwksURL() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetJwksURL", reflect.TypeOf((*MockConfigurationContract)(nil).GetJwksURL))
 }
+
+// GetK3SDockerImage mocks base method
+func (m *MockConfigurationContract) GetK3SDockerImage() (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetK3SDockerImage")
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetK3SDockerImage indicates an expected call of GetK3SDockerImage
+func (mr *MockConfigurationContractMockRecorder) GetK3SDockerImage() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetK3SDockerImage", reflect.TypeOf((*MockConfigurationContract)(nil).GetK3SDockerImage))
+}

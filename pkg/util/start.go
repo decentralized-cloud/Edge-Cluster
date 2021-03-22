@@ -97,7 +97,7 @@ func setupDependencies(logger *zap.Logger) (err error) {
 	}
 
 	var edgeClusterFactoryService edgeClusterTypes.EdgeClusterFactoryContract
-	if edgeClusterFactoryService, err = edgecluster.NewEdgeClusterFactoryService(logger); err != nil {
+	if edgeClusterFactoryService, err = edgecluster.NewEdgeClusterFactoryService(logger, configurationService); err != nil {
 		return
 	}
 

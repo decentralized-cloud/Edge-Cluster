@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
+	"github.com/decentralized-cloud/edge-cluster/services/configuration"
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/k3s"
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	commonErrors "github.com/micro-business/go-core/system/errors"
@@ -17,20 +18,28 @@ import (
 )
 
 type edgeClusterFactoryService struct {
-	logger        *zap.Logger
-	k8sRestConfig *rest.Config
+	logger               *zap.Logger
+	k8sRestConfig        *rest.Config
+	configurationService configuration.ConfigurationContract
 }
 
 // NewEdgeClusterFactoryService creates new instance of the edgeClusterFactoryService, setting up all dependencies and returns the instance
 // logger: Mandatory. Reference to the logger service
 // Returns the new service or error if something goes wrong
-func NewEdgeClusterFactoryService(logger *zap.Logger) (types.EdgeClusterFactoryContract, error) {
+func NewEdgeClusterFactoryService(
+	logger *zap.Logger,
+	configurationService configuration.ConfigurationContract) (types.EdgeClusterFactoryContract, error) {
 	if logger == nil {
 		return nil, commonErrors.NewArgumentNilError("logger", "logger is required")
 	}
 
+	if configurationService == nil {
+		return nil, commonErrors.NewArgumentNilError("configurationService", "configurationService is required")
+	}
+
 	service := edgeClusterFactoryService{
-		logger: logger,
+		logger:               logger,
+		configurationService: configurationService,
 	}
 
 	k8sRestConfig, err := service.getRestConfig()
@@ -54,7 +63,8 @@ func (service *edgeClusterFactoryService) Create(
 	if clusterType == models.K3S {
 		return k3s.NewK3SProvisioner(
 			service.logger,
-			service.k8sRestConfig)
+			service.k8sRestConfig,
+			service.configurationService)
 	}
 
 	return nil, types.NewEdgeClusterTypeNotSupportedError(clusterType)

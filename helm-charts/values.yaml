@@ -48,6 +48,8 @@ pod:
     collection: "edgecluster"
   idp:
     jwksURL: ""
+  k3s:
+    dockerImage: ""
 
 service:
   type: ClusterIP

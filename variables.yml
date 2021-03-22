@@ -6,6 +6,8 @@ parameters:
       - $(MONGODB_CONNECTION_STRING_DEV)
       - ",pod.idp.jwksURL="
       - $(JWKS_URL)
+      - ",pod.k3s.dockerImage="
+      - $(K3S_DOCKER_IMAGE)
 
   - name: testHelmOverrideValuesIndividuals
     type: object
@@ -14,6 +16,8 @@ parameters:
       - $(MONGODB_CONNECTION_STRING_TEST)
       - ",pod.idp.jwksURL="
       - $(JWKS_URL)
+      - ",pod.k3s.dockerImage="
+      - $(K3S_DOCKER_IMAGE)
 
   - name: prodHelmOverrideValuesIndividuals
     type: object
@@ -22,6 +26,8 @@ parameters:
       - $(MONGODB_CONNECTION_STRING_PROD)
       - ",pod.idp.jwksURL="
       - $(JWKS_URL)
+      - ",pod.k3s.dockerImage="
+      - $(K3S_DOCKER_IMAGE)
 
 variables:
   - name: artifactVersion
@@ -94,7 +100,7 @@ variables:
     value: "prod"
 
   - name: chartPath
-    value: "$(System.DefaultWorkingDirectory)/helm/edge-cluster-0.2.10.tgz"
+    value: "$(System.DefaultWorkingDirectory)/helm/edge-cluster-0.2.11.tgz"
 
   - name: releaseName
     value: "edge-cluster"
