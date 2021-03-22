@@ -46,6 +46,8 @@ spec:
               value: "{{ .Values.pod.database.collection }}"
             - name: JWKS_URL
               value: "{{ .Values.pod.idp.jwksURL }}"
+            - name: K3S_DOCKER_IMAGE
+              value: "{{ .Values.pod.k3s.dockerImage }}"
           ports:
             - name: grpc
               containerPort: {{ .Values.pod.grpcport }}

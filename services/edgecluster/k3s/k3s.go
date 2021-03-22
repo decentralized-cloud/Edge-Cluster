@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
+	"github.com/decentralized-cloud/edge-cluster/services/configuration"
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	commonErrors "github.com/micro-business/go-core/system/errors"
 	"go.uber.org/zap"
@@ -29,7 +30,6 @@ import (
 
 const (
 	containerName      = "k3sserver"
-	containerImage     = "rancher/k3s:v1.20.0-k3s2"
 	k3sPort            = 6443
 	internalName       = "k3s"
 	kubeconfigFilePath = "/etc/rancher/k3s/k3s.yaml"
@@ -39,9 +39,10 @@ var deploymentReplica int32 = 1
 var waitForDeploymentToBeReadyTimeout int64 = 60
 
 type k3sProvisioner struct {
-	logger        *zap.Logger
-	clientset     *kubernetes.Clientset
-	k8sRestConfig *rest.Config
+	logger         *zap.Logger
+	clientset      *kubernetes.Clientset
+	k8sRestConfig  *rest.Config
+	k3sDockerImage string
 }
 
 // NewK3SProvisioner creates new instance of the k3sProvisioner, setting up all dependencies and returns the instance
@@ -50,7 +51,8 @@ type k3sProvisioner struct {
 // Returns the new service or error if something goes wrong
 func NewK3SProvisioner(
 	logger *zap.Logger,
-	k8sRestConfig *rest.Config) (types.EdgeClusterProvisionerContract, error) {
+	k8sRestConfig *rest.Config,
+	configurationService configuration.ConfigurationContract) (types.EdgeClusterProvisionerContract, error) {
 	if logger == nil {
 		return nil, commonErrors.NewArgumentNilError("logger", "logger is required")
 	}
@@ -59,17 +61,25 @@ func NewK3SProvisioner(
 		return nil, commonErrors.NewArgumentNilError("k8sRestConfig", "k8sRestConfig is required")
 	}
 
-	var clientset *kubernetes.Clientset
-	var err error
+	if configurationService == nil {
+		return nil, commonErrors.NewArgumentNilError("configurationService", "configurationService is required")
+	}
 
+	k3sDockerImage, err := configurationService.GetK3SDockerImage()
+	if err != nil {
+		return nil, types.NewUnknownErrorWithError("Failed to get the database name", err)
+	}
+
+	var clientset *kubernetes.Clientset
 	if clientset, err = kubernetes.NewForConfig(k8sRestConfig); err != nil {
 		return nil, types.NewUnknownErrorWithError("Failed to create client set", err)
 	}
 
 	return &k3sProvisioner{
-		logger:        logger,
-		clientset:     clientset,
-		k8sRestConfig: k8sRestConfig,
+		logger:         logger,
+		clientset:      clientset,
+		k8sRestConfig:  k8sRestConfig,
+		k3sDockerImage: k3sDockerImage,
 	}, nil
 }
 
@@ -418,7 +428,7 @@ func (service *k3sProvisioner) getDeploymentSpec(ctx context.Context, namespace 
 		Containers: []apiv1.Container{
 			{
 				Name:  containerName,
-				Image: containerImage,
+				Image: service.k3sDockerImage,
 				Args: []string{
 					"server",
 					fmt.Sprintf("--advertise-address=%s", advertiseAddress),

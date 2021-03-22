@@ -3,35 +3,39 @@ package configuration
 
 // ConfigurationContract declares the service that provides configuration required by different Tenat modules
 type ConfigurationContract interface {
-	// GetGrpcHost retrieves gRPC host name
+	// GetGrpcHost returns gRPC host name
 	// Returns the gRPC host name or error if something goes wrong
 	GetGrpcHost() (string, error)
 
-	// GetGrpcPort retrieves gRPC port number
+	// GetGrpcPort returns gRPC port number
 	// Returns the gRPC port number or error if something goes wrong
 	GetGrpcPort() (int, error)
 
-	// GetHttpHost retrieves HTTP host name
+	// GetHttpHost returns HTTP host name
 	// Returns the HTTP host name or error if something goes wrong
 	GetHttpHost() (string, error)
 
-	// GetHttpPort retrieves HTTP port number
+	// GetHttpPort returns HTTP port number
 	// Returns the HTTP port number or error if something goes wrong
 	GetHttpPort() (int, error)
 
-	// GetDatabaseConnectionString retrieves the database connection string
+	// GetDatabaseConnectionString returns the database connection string
 	// Returns the database connection string or error if something goes wrong
 	GetDatabaseConnectionString() (string, error)
 
-	// GetDatabaseName retrieves the database name
+	// GetDatabaseName returns the database name
 	// Returns the database name or error if something goes wrong
 	GetDatabaseName() (string, error)
 
-	// GetDatabaseCollectionName retrieves the database collection name
+	// GetDatabaseCollectionName returns the database collection name
 	// Returns the database collection name or error if something goes wrong
 	GetDatabaseCollectionName() (string, error)
 
-	// GetJwksURL retrieves the JWKS URL
+	// GetJwksURL returns the JWKS URL
 	// Returns the JWKS URL or error if something goes wrong
 	GetJwksURL() (string, error)
+
+	// GetK3SDockerImage returns the K3S docker image to be used when creating edge cluster service of type K3S
+	// Returns the K3S docker image to be used when creating edge cluster service of type K3S or error if something goes wrong
+	GetK3SDockerImage() (string, error)
 }
