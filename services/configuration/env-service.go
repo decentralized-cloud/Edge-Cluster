@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	commonErrors "github.com/micro-business/go-core/system/errors"
 )
 
 type envConfigurationService struct {
@@ -27,12 +29,12 @@ func (service *envConfigurationService) GetGrpcHost() (string, error) {
 func (service *envConfigurationService) GetGrpcPort() (int, error) {
 	valueStr := os.Getenv("GRPC_PORT")
 	if strings.Trim(valueStr, " ") == "" {
-		return 0, NewUnknownError("GRPC_PORT is required")
+		return 0, commonErrors.NewUnknownError("GRPC_PORT is required")
 	}
 
 	value, err := strconv.Atoi(valueStr)
 	if err != nil {
-		return 0, NewUnknownErrorWithError("Failed to convert GRPC_PORT to integer", err)
+		return 0, commonErrors.NewUnknownErrorWithError("Failed to convert GRPC_PORT to integer", err)
 	}
 
 	return value, nil
@@ -49,12 +51,12 @@ func (service *envConfigurationService) GetHttpHost() (string, error) {
 func (service *envConfigurationService) GetHttpPort() (int, error) {
 	valueStr := os.Getenv("HTTP_PORT")
 	if strings.Trim(valueStr, " ") == "" {
-		return 0, NewUnknownError("HTTP_PORT is required")
+		return 0, commonErrors.NewUnknownError("HTTP_PORT is required")
 	}
 
 	value, err := strconv.Atoi(valueStr)
 	if err != nil {
-		return 0, NewUnknownErrorWithError("Failed to convert HTTP_PORT to integer", err)
+		return 0, commonErrors.NewUnknownErrorWithError("Failed to convert HTTP_PORT to integer", err)
 	}
 
 	return value, nil
@@ -66,7 +68,7 @@ func (service *envConfigurationService) GetDatabaseConnectionString() (string, e
 	value := os.Getenv("DATABASE_CONNECTION_STRING")
 
 	if strings.Trim(value, " ") == "" {
-		return "", NewUnknownError("DATABASE_CONNECTION_STRING is required")
+		return "", commonErrors.NewUnknownError("DATABASE_CONNECTION_STRING is required")
 	}
 
 	return value, nil
@@ -78,7 +80,7 @@ func (service *envConfigurationService) GetDatabaseName() (string, error) {
 	value := os.Getenv("EDGE_CLUSTER_DATABASE_NAME")
 
 	if strings.Trim(value, " ") == "" {
-		return "", NewUnknownError("EDGE_CLUSTER_DATABASE_NAME is required")
+		return "", commonErrors.NewUnknownError("EDGE_CLUSTER_DATABASE_NAME is required")
 	}
 
 	return value, nil
@@ -90,7 +92,7 @@ func (service *envConfigurationService) GetDatabaseCollectionName() (string, err
 	value := os.Getenv("EDGE_CLUSTER_DATABASE_COLLECTION_NAME")
 
 	if strings.Trim(value, " ") == "" {
-		return "", NewUnknownError("EDGE_CLUSTER_DATABASE_COLLECTION_NAME is required")
+		return "", commonErrors.NewUnknownError("EDGE_CLUSTER_DATABASE_COLLECTION_NAME is required")
 	}
 
 	return value, nil
@@ -102,7 +104,7 @@ func (service *envConfigurationService) GetJwksURL() (string, error) {
 	value := os.Getenv("JWKS_URL")
 
 	if strings.Trim(value, " ") == "" {
-		return "", NewUnknownError("JWKS_URL is required")
+		return "", commonErrors.NewUnknownError("JWKS_URL is required")
 	}
 
 	return value, nil
@@ -114,7 +116,7 @@ func (service *envConfigurationService) GetK3SDockerImage() (string, error) {
 	value := os.Getenv("K3S_DOCKER_IMAGE")
 
 	if strings.Trim(value, " ") == "" {
-		return "", NewUnknownError("K3S_DOCKER_IMAGE is required")
+		return "", commonErrors.NewUnknownError("K3S_DOCKER_IMAGE is required")
 	}
 
 	return value, nil

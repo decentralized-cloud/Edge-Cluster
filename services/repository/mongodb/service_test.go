@@ -15,6 +15,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/lucsky/cuid"
 	"github.com/micro-business/go-core/common"
+	commonErrors "github.com/micro-business/go-core/system/errors"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -200,12 +202,10 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				Ω(err).Should(HaveOccurred())
 				Ω(response).Should(BeNil())
 
-				Ω(repository.IsEdgeClusterNotFoundError(err)).Should(BeTrue())
+				Ω(commonErrors.IsNotFoundError(err)).Should(BeTrue())
 
-				var notFoundErr repository.EdgeClusterNotFoundError
+				var notFoundErr commonErrors.NotFoundError
 				_ = errors.As(err, &notFoundErr)
-
-				Ω(notFoundErr.EdgeClusterID).Should(Equal(edgeClusterID))
 			})
 		})
 
@@ -215,12 +215,10 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 				Ω(err).Should(HaveOccurred())
 				Ω(response).Should(BeNil())
 
-				Ω(repository.IsEdgeClusterNotFoundError(err)).Should(BeTrue())
+				Ω(commonErrors.IsNotFoundError(err)).Should(BeTrue())
 
-				var notFoundErr repository.EdgeClusterNotFoundError
+				var notFoundErr commonErrors.NotFoundError
 				_ = errors.As(err, &notFoundErr)
-
-				Ω(notFoundErr.EdgeClusterID).Should(Equal(edgeClusterID))
 			})
 		})
 	})

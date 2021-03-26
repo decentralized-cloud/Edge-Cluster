@@ -40,17 +40,17 @@ func NewMongodbRepositoryService(
 
 	connectionString, err := configurationService.GetDatabaseConnectionString()
 	if err != nil {
-		return nil, repository.NewUnknownErrorWithError("Failed to get connection string to mongodb", err)
+		return nil, commonErrors.NewUnknownErrorWithError("Failed to get connection string to mongodb", err)
 	}
 
 	databaseName, err := configurationService.GetDatabaseName()
 	if err != nil {
-		return nil, repository.NewUnknownErrorWithError("Failed to get the database name", err)
+		return nil, commonErrors.NewUnknownErrorWithError("Failed to get the database name", err)
 	}
 
 	databaseCollectionName, err := configurationService.GetDatabaseCollectionName()
 	if err != nil {
-		return nil, repository.NewUnknownErrorWithError("Failed to get the database collection name", err)
+		return nil, commonErrors.NewUnknownErrorWithError("Failed to get the database collection name", err)
 	}
 
 	return &mongodbRepositoryService{
@@ -76,7 +76,7 @@ func (service *mongodbRepositoryService) CreateEdgeCluster(
 
 	insertResult, err := collection.InsertOne(ctx, mapToInternalEdgeCluster(request.UserEmail, request.EdgeCluster))
 	if err != nil {
-		return nil, repository.NewUnknownErrorWithError("Insert edge cluster failed.", err)
+		return nil, commonErrors.NewUnknownErrorWithError("Insert edge cluster failed.", err)
 	}
 
 	edgeClusterID := insertResult.InsertedID.(primitive.ObjectID).Hex()
@@ -142,11 +142,11 @@ func (service *mongodbRepositoryService) UpdateEdgeCluster(
 	response, err := collection.UpdateOne(ctx, filter, newEdgeCluster)
 
 	if err != nil {
-		return nil, repository.NewUnknownErrorWithError("Update edge cluster failed.", err)
+		return nil, commonErrors.NewUnknownErrorWithError("Update edge cluster failed.", err)
 	}
 
 	if response.MatchedCount == 0 {
-		return nil, repository.NewEdgeClusterNotFoundError(request.EdgeClusterID)
+		return nil, commonErrors.NewNotFoundError()
 	}
 
 	return &repository.UpdateEdgeClusterResponse{
@@ -173,11 +173,11 @@ func (service *mongodbRepositoryService) DeleteEdgeCluster(
 	filter := bson.D{{Key: "_id", Value: ObjectID}, {Key: "userEmail", Value: request.UserEmail}}
 	response, err := collection.DeleteOne(ctx, filter)
 	if err != nil {
-		return nil, repository.NewUnknownErrorWithError("Delete edge cluster failed.", err)
+		return nil, commonErrors.NewUnknownErrorWithError("Delete edge cluster failed.", err)
 	}
 
 	if response.DeletedCount == 0 {
-		return nil, repository.NewEdgeClusterNotFoundError(request.EdgeClusterID)
+		return nil, commonErrors.NewNotFoundError()
 	}
 
 	return &repository.DeleteEdgeClusterResponse{}, nil
@@ -199,7 +199,7 @@ func (service *mongodbRepositoryService) Search(
 	for _, edgeClusterID := range request.EdgeClusterIDs {
 		objectID, err := primitive.ObjectIDFromHex(edgeClusterID)
 		if err != nil {
-			return nil, repository.NewUnknownErrorWithError(fmt.Sprintf("Failed to decode the edgeClusterID: %s.", edgeClusterID), err)
+			return nil, commonErrors.NewUnknownErrorWithError(fmt.Sprintf("Failed to decode the edgeClusterID: %s.", edgeClusterID), err)
 		}
 
 		ids = append(ids, objectID)
@@ -233,7 +233,7 @@ func (service *mongodbRepositoryService) Search(
 
 	response.TotalCount, err = collection.CountDocuments(ctx, filter)
 	if err != nil {
-		return nil, repository.NewUnknownErrorWithError("Failed to retrieve the number of edge clusters that match the filter criteria", err)
+		return nil, commonErrors.NewUnknownErrorWithError("Failed to retrieve the number of edge clusters that match the filter criteria", err)
 	}
 
 	if response.TotalCount == 0 {
@@ -245,7 +245,7 @@ func (service *mongodbRepositoryService) Search(
 		after := *request.Pagination.After
 		objectID, err := primitive.ObjectIDFromHex(after)
 		if err != nil {
-			return nil, repository.NewUnknownErrorWithError(fmt.Sprintf("Failed to decode the After: %s.", after), err)
+			return nil, commonErrors.NewUnknownErrorWithError(fmt.Sprintf("Failed to decode the After: %s.", after), err)
 		}
 
 		if len(filter) > 0 {
@@ -261,7 +261,7 @@ func (service *mongodbRepositoryService) Search(
 		before := *request.Pagination.Before
 		objectID, err := primitive.ObjectIDFromHex(before)
 		if err != nil {
-			return nil, repository.NewUnknownErrorWithError(fmt.Sprintf("Failed to decode the Before: %s.", before), err)
+			return nil, commonErrors.NewUnknownErrorWithError(fmt.Sprintf("Failed to decode the Before: %s.", before), err)
 		}
 
 		if len(filter) > 0 {
@@ -305,7 +305,7 @@ func (service *mongodbRepositoryService) Search(
 
 	cursor, err := collection.Find(ctx, filter, findOptions)
 	if err != nil {
-		return nil, repository.NewUnknownErrorWithError("Failed to call the Find function on the collection.", err)
+		return nil, commonErrors.NewUnknownErrorWithError("Failed to call the Find function on the collection.", err)
 	}
 
 	edgeClusters := []models.EdgeClusterWithCursor{}
@@ -315,12 +315,12 @@ func (service *mongodbRepositoryService) Search(
 
 		err := cursor.Decode(&edgeCluster)
 		if err != nil {
-			return nil, repository.NewUnknownErrorWithError("Failed to decode the edge cluster", err)
+			return nil, commonErrors.NewUnknownErrorWithError("Failed to decode the edge cluster", err)
 		}
 
 		err = cursor.Decode(&edgeClusterBson)
 		if err != nil {
-			return nil, repository.NewUnknownErrorWithError("Could not load the data.", err)
+			return nil, commonErrors.NewUnknownErrorWithError("Could not load the data.", err)
 		}
 
 		edgeClusterID := edgeClusterBson["_id"].(primitive.ObjectID).Hex()
@@ -353,7 +353,7 @@ func (service *mongodbRepositoryService) createClientAndCollection(ctx context.C
 	clientOptions := options.Client().ApplyURI(service.connectionString)
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		return nil, nil, repository.NewUnknownErrorWithError("Could not connect to mongodb database.", err)
+		return nil, nil, commonErrors.NewUnknownErrorWithError("Could not connect to mongodb database.", err)
 	}
 
 	return client, client.Database(service.databaseName).Collection(service.databaseCollectionName), nil
