@@ -153,22 +153,8 @@ var _ = Describe("Business Service Tests", func() {
 					Ω(response.Err).Should(BeNil())
 				})
 
-				When("edge cluster repository CreateEdgeCluster return EdgeClusterAlreadyExistError", func() {
-					It("should return EdgeClusterAlreadyExistsError", func() {
-						expectedError := repository.NewEdgeClusterAlreadyExistsError()
-						mockRepositoryService.
-							EXPECT().
-							CreateEdgeCluster(gomock.Any(), gomock.Any()).
-							Return(nil, expectedError)
-
-						response, err := sut.CreateEdgeCluster(ctx, &request)
-						Ω(err).Should(BeNil())
-						assertEdgeClusterAlreadyExistsError(response.Err, expectedError)
-					})
-				})
-
-				When("edge cluster repository CreateEdgeCluster return any other error", func() {
-					It("should return UnknownError", func() {
+				When("edge cluster repository CreateEdgeCluster returns error", func() {
+					It("should return the same error", func() {
 						expectedError := errors.New(cuid.New())
 						mockRepositoryService.
 							EXPECT().
@@ -177,7 +163,7 @@ var _ = Describe("Business Service Tests", func() {
 
 						response, err := sut.CreateEdgeCluster(ctx, &request)
 						Ω(err).Should(BeNil())
-						assertUnknowError(expectedError.Error(), response.Err, expectedError)
+						Ω(response.Err).Should(Equal(expectedError))
 					})
 				})
 
@@ -204,7 +190,7 @@ var _ = Describe("Business Service Tests", func() {
 						Ω(response.Err).Should(BeNil())
 						Ω(response.EdgeClusterID).ShouldNot(BeNil())
 						Ω(response.EdgeClusterID).Should(Equal(expectedResponse.EdgeClusterID))
-						assertEdgeCluster(response.EdgeCluster, expectedResponse.EdgeCluster)
+						Ω(response.EdgeCluster).Should(Equal(expectedResponse.EdgeCluster))
 					})
 				})
 			})
@@ -249,22 +235,8 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("edge cluster repository ReadEdgeCluster cannot find provided edge cluster", func() {
-				It("should return EdgeClusterNotFoundError", func() {
-					expectedError := repository.NewEdgeClusterNotFoundError(request.EdgeClusterID)
-					mockRepositoryService.
-						EXPECT().
-						ReadEdgeCluster(gomock.Any(), gomock.Any()).
-						Return(nil, expectedError)
-
-					response, err := sut.ReadEdgeCluster(ctx, &request)
-					Ω(err).Should(BeNil())
-					assertEdgeClusterNotFoundError(request.EdgeClusterID, response.Err, expectedError)
-				})
-			})
-
-			When("edge cluster repository ReadEdgeCluster return any other error", func() {
-				It("should return UnknownError", func() {
+			When("edge cluster repository ReadEdgeCluster returns error", func() {
+				It("should return the same error", func() {
 					expectedError := errors.New(cuid.New())
 					mockRepositoryService.
 						EXPECT().
@@ -273,7 +245,7 @@ var _ = Describe("Business Service Tests", func() {
 
 					response, err := sut.ReadEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
-					assertUnknowError(expectedError.Error(), response.Err, expectedError)
+					Ω(response.Err).Should(Equal(expectedError))
 				})
 			})
 
@@ -291,7 +263,7 @@ var _ = Describe("Business Service Tests", func() {
 					response, err := sut.ReadEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(BeNil())
-					assertEdgeCluster(response.EdgeCluster, expectedResponse.EdgeCluster)
+					Ω(response.EdgeCluster).Should(Equal(expectedResponse.EdgeCluster))
 				})
 			})
 		})
@@ -339,22 +311,8 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("edge cluster repository UpdateEdgeCluster cannot find provided edge cluster", func() {
-				It("should return EdgeClusterNotFoundError", func() {
-					expectedError := repository.NewEdgeClusterNotFoundError(request.EdgeClusterID)
-					mockRepositoryService.
-						EXPECT().
-						UpdateEdgeCluster(gomock.Any(), gomock.Any()).
-						Return(nil, expectedError)
-
-					response, err := sut.UpdateEdgeCluster(ctx, &request)
-					Ω(err).Should(BeNil())
-					assertEdgeClusterNotFoundError(request.EdgeClusterID, response.Err, expectedError)
-				})
-			})
-
-			When("edge cluster repository UpdateEdgeCluster return any other error", func() {
-				It("should return UnknownError", func() {
+			When("edge cluster repository UpdateEdgeCluster returns error", func() {
+				It("should return the same error", func() {
 					expectedError := errors.New(cuid.New())
 					mockRepositoryService.
 						EXPECT().
@@ -363,7 +321,7 @@ var _ = Describe("Business Service Tests", func() {
 
 					response, err := sut.UpdateEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
-					assertUnknowError(expectedError.Error(), response.Err, expectedError)
+					Ω(response.Err).Should(Equal(expectedError))
 				})
 			})
 
@@ -386,7 +344,7 @@ var _ = Describe("Business Service Tests", func() {
 					response, err := sut.UpdateEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(BeNil())
-					assertEdgeCluster(response.EdgeCluster, expectedResponse.EdgeCluster)
+					Ω(response.EdgeCluster).Should(Equal(expectedResponse.EdgeCluster))
 				})
 			})
 		})
@@ -423,22 +381,8 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("edge cluster repository DeleteEdgeCluster cannot find provided edge cluster", func() {
-				It("should return EdgeClusterNotFoundError", func() {
-					expectedError := repository.NewEdgeClusterNotFoundError(request.EdgeClusterID)
-					mockRepositoryService.
-						EXPECT().
-						DeleteEdgeCluster(gomock.Any(), gomock.Any()).
-						Return(nil, expectedError)
-
-					response, err := sut.DeleteEdgeCluster(ctx, &request)
-					Ω(err).Should(BeNil())
-					assertEdgeClusterNotFoundError(request.EdgeClusterID, response.Err, expectedError)
-				})
-			})
-
-			When("edge cluster repository DeleteEdgeCluster is faced with any other error", func() {
-				It("should return UnknownError", func() {
+			When("edge cluster repository DeleteEdgeCluster returns error", func() {
+				It("should return the same error", func() {
 					expectedError := errors.New(cuid.New())
 					mockRepositoryService.
 						EXPECT().
@@ -447,7 +391,7 @@ var _ = Describe("Business Service Tests", func() {
 
 					response, err := sut.DeleteEdgeCluster(ctx, &request)
 					Ω(err).Should(BeNil())
-					assertUnknowError(expectedError.Error(), response.Err, expectedError)
+					Ω(response.Err).Should(Equal(expectedError))
 				})
 			})
 
@@ -530,8 +474,8 @@ var _ = Describe("Business Service Tests", func() {
 				})
 			})
 
-			When("edge cluster repository Search is faced with any other error", func() {
-				It("should return UnknownError", func() {
+			When("edge cluster repository Search returns error", func() {
+				It("should return the same error", func() {
 					expectedError := errors.New(cuid.New())
 					mockRepositoryService.
 						EXPECT().
@@ -540,7 +484,7 @@ var _ = Describe("Business Service Tests", func() {
 
 					response, err := sut.Search(ctx, &request)
 					Ω(err).Should(BeNil())
-					assertUnknowError(expectedError.Error(), response.Err, expectedError)
+					Ω(response.Err).Should(Equal(expectedError))
 				})
 			})
 
@@ -600,40 +544,6 @@ func assertArgumentNilError(expectedArgumentName, expectedMessage string, err er
 		Ω(strings.Contains(argumentNilErr.Error(), expectedMessage)).Should(BeTrue())
 	}
 }
-
-func assertUnknowError(expectedMessage string, err error, nestedErr error) {
-	Ω(business.IsUnknownError(err)).Should(BeTrue())
-
-	var unknownErr business.UnknownError
-	_ = errors.As(err, &unknownErr)
-
-	Ω(strings.Contains(unknownErr.Error(), expectedMessage)).Should(BeTrue())
-	Ω(errors.Unwrap(err)).Should(Equal(nestedErr))
-}
-
-func assertEdgeClusterAlreadyExistsError(err error, nestedErr error) {
-	Ω(business.IsEdgeClusterAlreadyExistsError(err)).Should(BeTrue())
-	Ω(errors.Unwrap(err)).Should(Equal(nestedErr))
-}
-
-func assertEdgeClusterNotFoundError(expectedEdgeClusterID string, err error, nestedErr error) {
-	Ω(business.IsEdgeClusterNotFoundError(err)).Should(BeTrue())
-
-	var edgeClusterNotFoundErr business.EdgeClusterNotFoundError
-	_ = errors.As(err, &edgeClusterNotFoundErr)
-
-	Ω(edgeClusterNotFoundErr.EdgeClusterID).Should(Equal(expectedEdgeClusterID))
-	Ω(errors.Unwrap(err)).Should(Equal(nestedErr))
-}
-
-func assertEdgeCluster(edgeCluster, expectedEdgeCluster models.EdgeCluster) {
-	Ω(edgeCluster).ShouldNot(BeNil())
-	Ω(edgeCluster.ProjectID).Should(Equal(expectedEdgeCluster.ProjectID))
-	Ω(edgeCluster.Name).Should(Equal(expectedEdgeCluster.Name))
-	Ω(edgeCluster.ClusterSecret).Should(Equal(expectedEdgeCluster.ClusterSecret))
-	Ω(edgeCluster.ClusterType).Should(Equal(expectedEdgeCluster.ClusterType))
-}
-
 func convertStringToPointer(str string) *string {
 	return &str
 }

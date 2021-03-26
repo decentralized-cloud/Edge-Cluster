@@ -330,15 +330,15 @@ func encodeListEdgeClusterNodesResponse(
 }
 
 func mapError(err error) edgeClusterGRPCContract.Error {
-	if business.IsUnknownError(err) {
+	if commonErrors.IsUnknownError(err) {
 		return edgeClusterGRPCContract.Error_UNKNOWN
 	}
 
-	if business.IsEdgeClusterAlreadyExistsError(err) {
+	if commonErrors.IsAlreadyExistsError(err) {
 		return edgeClusterGRPCContract.Error_EDGE_CLUSTER_ALREADY_EXISTS
 	}
 
-	if business.IsEdgeClusterNotFoundError(err) {
+	if commonErrors.IsNotFoundError(err) {
 		return edgeClusterGRPCContract.Error_EDGE_CLUSTER_NOT_FOUND
 	}
 
