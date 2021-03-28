@@ -6,9 +6,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
@@ -248,31 +246,11 @@ func (service *k3sProvisioner) ListEdgeClusterNodes(
 		return
 	}
 
-	content := []byte(getProvisionDetailsResponse.ProvisionDetails.KubeconfigContent)
-	tmpfile, err := ioutil.TempFile("", "")
-	if err != nil {
-		service.logger.Error("Failed to create tempory file", zap.Error(err))
-
-		return
-	}
-
-	defer os.Remove(tmpfile.Name())
-
-	if _, err = tmpfile.Write(content); err != nil {
-		service.logger.Error("Failed to write into tempory file", zap.Error(err))
-
-		return
-	}
-
-	if err = tmpfile.Close(); err != nil {
-		service.logger.Error("Failed to close tempory file", zap.Error(err))
-
-		return
-	}
+	kubeconfigContent := []byte(getProvisionDetailsResponse.ProvisionDetails.KubeconfigContent)
 
 	var restConfig *rest.Config
-	if restConfig, err = clientcmd.BuildConfigFromFlags("", tmpfile.Name()); err != nil {
-		service.logger.Error("Failed to close tempory file", zap.Error(err))
+	if restConfig, err = clientcmd.RESTConfigFromKubeConfig(kubeconfigContent); err != nil {
+		service.logger.Error("Failed to create Rest config from the given kube config", zap.Error(err))
 
 		return
 	}
