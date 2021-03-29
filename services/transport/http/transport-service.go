@@ -1,5 +1,5 @@
-// Package https implements functions to expose edge-cluster service endpoint using HTTPS protocol.
-package https
+// Package http implements functions to expose edge-cluster service endpoint using HTTP protocol.
+package http
 
 import (
 	"fmt"
@@ -62,7 +62,7 @@ func (service *transportService) Start() error {
 	server.Path("GET", "/live", service.livenessCheckHandler)
 	server.Path("GET", "/ready", service.readinessCheckHandler)
 	server.NetHTTPPath("GET", "/metrics", promhttp.Handler())
-	service.logger.Info("HTTPS service started", zap.String("address", config.Addr))
+	service.logger.Info("HTTP service started", zap.String("address", config.Addr))
 
 	return server.ListenAndServe()
 }

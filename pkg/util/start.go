@@ -13,7 +13,7 @@ import (
 	"github.com/decentralized-cloud/edge-cluster/services/endpoint"
 	"github.com/decentralized-cloud/edge-cluster/services/repository/mongodb"
 	"github.com/decentralized-cloud/edge-cluster/services/transport/grpc"
-	"github.com/decentralized-cloud/edge-cluster/services/transport/https"
+	"github.com/decentralized-cloud/edge-cluster/services/transport/http"
 	"github.com/micro-business/go-core/gokit/middleware"
 	"go.uber.org/zap"
 )
@@ -47,11 +47,11 @@ func StartService() {
 		logger.Fatal("Failed to create gRPC transport service", zap.Error(err))
 	}
 
-	httpsTansportService, err := https.NewTransportService(
+	httpTansportService, err := http.NewTransportService(
 		logger,
 		configurationService)
 	if err != nil {
-		logger.Fatal("Failed to create HTTPS transport service", zap.Error(err))
+		logger.Fatal("Failed to create HTTP transport service", zap.Error(err))
 	}
 
 	signalChan := make(chan os.Signal, 1)
@@ -65,8 +65,8 @@ func StartService() {
 	}()
 
 	go func() {
-		if serviceErr := httpsTansportService.Start(); serviceErr != nil {
-			logger.Fatal("Failed to start HTTPS transport service", zap.Error(serviceErr))
+		if serviceErr := httpTansportService.Start(); serviceErr != nil {
+			logger.Fatal("Failed to start HTTP transport service", zap.Error(serviceErr))
 		}
 	}()
 
@@ -78,8 +78,8 @@ func StartService() {
 			logger.Error("Failed to stop gRPC transport service", zap.Error(err))
 		}
 
-		if err := httpsTansportService.Stop(); err != nil {
-			logger.Error("Failed to stop HTTPS transport service", zap.Error(err))
+		if err := httpTansportService.Stop(); err != nil {
+			logger.Error("Failed to stop HTTP transport service", zap.Error(err))
 		}
 
 		close(cleanupDone)
