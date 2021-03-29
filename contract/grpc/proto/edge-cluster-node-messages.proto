@@ -1,0 +1,156 @@
+syntax = "proto3";
+
+package edgecluster;
+
+import "commons.proto";
+import "google/protobuf/timestamp.proto";
+
+
+/**
+ * The valid conditions of node
+ */
+ enum EdgeClusterNodeConditionType {
+  // NodeReady means kubelet is healthy and ready to accept pods.
+  Ready = 0;
+
+  // NodeMemoryPressure means the kubelet is under pressure due to insufficient available memory.
+  MemoryPressure = 1;
+
+  // NodeDiskPressure means the kubelet is under pressure due to insufficient available disk.
+  DiskPressure = 3;
+
+  // NodePIDPressure means the kubelet is under pressure due to insufficient available PID.
+  PIDPressure = 4;
+
+  // NodeNetworkUnavailable means that network for the node is not correctly configured.
+  NetworkUnavailable = 5;
+}
+
+/**
+ * EdgeClusterNodeCondition contains condition information for a node.
+ */
+ message EdgeClusterNodeCondition {
+  // Type of node condition.
+  EdgeClusterNodeConditionType type = 1;
+
+  // Status of the condition, one of True, False, Unknown.
+  EdgeClusterConditionStatus status = 2;
+
+  // Last time we got an update on a given condition.
+  google.protobuf.Timestamp LastHeartbeatTime = 3;
+
+  // Last time the condition transit from one status to another.
+  google.protobuf.Timestamp LastTransitionTime = 4;
+
+  // (brief) reason for the condition's last transition.
+  string Reason = 5;
+
+  // Human readable message indicating details about last transition.
+  string Message = 6;
+}
+
+/**
+ * The valid address type of edge cluster node
+ */
+ enum EdgeClusterNodeAddressType {
+  Hostname = 0;
+  ExternalIP = 1;
+  InternalIP = 2;
+  ExternalDNS = 3;
+  InternalDNS = 4;
+}
+
+/**
+ * EdgeClusterNodeAddress contains information for the edge cluster node's address.
+ */
+ message EdgeClusterNodeAddress {
+  // Edge cluster node address type, one of Hostname, ExternalIP or InternalIP.
+  EdgeClusterNodeAddressType nodeAddressType = 1;
+
+  // The node address.
+  string address = 2;
+}
+
+/**
+ * EdgeClusterNodeSystemInfo contains a set of ids/uuids to uniquely identify the node.
+ */
+ message EdgeClusterNodeSystemInfo {
+  // MachineID reported by the node. For unique machine identification
+  // in the cluster this field is preferred.
+  string machineID = 1;
+
+  // SystemUUID reported by the node. For unique machine identification
+  // MachineID is preferred. This field is specific to Red Hat hosts
+  string systemUUID = 2;
+
+  // Boot ID reported by the node.
+  string bootID = 3;
+
+  // Kernel Version reported by the node from 'uname -r' (e.g. 3.16.0-0.bpo.4-amd64).
+  string kernelVersion = 4;
+
+  // OS Image reported by the node from /etc/os-release (e.g. Debian GNU/Linux 7 (wheezy)).
+  string osImage = 5;
+
+  // ContainerRuntime Version reported by the node through runtime remote API (e.g. docker://1.5.0).
+  string containerRuntimeVersion = 6;
+
+  // Kubelet Version reported by the node.
+  string kubeletVersion = 7;
+
+  // KubeProxy Version reported by the node.
+  string kubeProxyVersion = 8;
+
+  // The Operating System reported by the node
+  string operatingSystem = 9;
+
+  // The Architecture reported by the node
+  string architecture = 10;
+}
+
+/**
+ * EdgeClusterNodeStatus is information about the current status of a node.
+ */
+ message EdgeClusterNodeStatus {
+  // Conditions is an array of current observed node conditions.
+  repeated EdgeClusterNodeCondition conditions = 1;
+
+  // Addresses is the list of addresses reachable to the node.
+  repeated EdgeClusterNodeAddress addresses = 2;
+
+  // NodeInfo is the set of ids/uuids to uniquely identify the node.
+  EdgeClusterNodeSystemInfo nodeInfo = 3;
+}
+
+/**
+ * Declares the details of an existing edge cluster node
+ */
+ message EdgeClusterNode {
+  // The pod unique ID
+  EdgeClusterObjectMetadata metadata = 1;
+
+  // The most recently observed status of the node
+  EdgeClusterNodeStatus status = 2;
+}
+
+/** 
+ * ListEdgeClusterNodesRequest to list an existing edge cluster nodes details
+ */
+ message ListEdgeClusterNodesRequest {
+  // The unique edge cluster identifier
+  string edgeClusterID = 1;
+}
+
+/**
+ * Response contains the result of listing an existing edge cluster nodes details
+ */
+message ListEdgeClusterNodesResponse {
+  // Indicate whether the operation has any error
+  Error error = 1;
+
+  // Contains error message if the operation was unsuccessful
+  string errorMessage = 2;
+
+  // The list of an existing edge cluster nodes details
+  repeated EdgeClusterNode  nodes = 3;
+}

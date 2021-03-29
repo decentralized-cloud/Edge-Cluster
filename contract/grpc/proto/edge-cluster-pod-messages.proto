@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package edgecluster;
+
+import "commons.proto";
+import "google/protobuf/timestamp.proto";
+
+/**
+ * Declares the specification of the desired behavior of the existing edge cluster pod
+ */
+ message EdgeClusterPodSpec {
+  // The name of the node where the Pod is deployed into
+  string nodeName = 1;
+}
+
+/**
+ * The different error types
+ */
+ enum EdgeClusterPodConditionType {
+	// ContainersReady indicates whether all containers in the pod are ready.
+  ContainersReady = 0;
+
+  // PodInitialized means that all init containers in the pod have started successfully.
+  PodInitialized = 1;
+
+	// PodReady means the pod is able to service requests and should be added to the
+	// load balancing pools of all matching services.
+  PodReady = 2;
+
+  // PodScheduled represents status of the scheduling process for this pod.
+  PodScheduled = 3;
+}
+
+/**
+ * Declares the most recently observed status of the existing edge cluster pod
+ */
+ message EdgeClusterPodCondition {
+  // Type is the type of the condition.
+  EdgeClusterPodConditionType type = 1;
+
+  // Status is the status of the condition.
+  EdgeClusterConditionStatus status = 2;
+
+  // Last time we got an update on a given condition.
+  google.protobuf.Timestamp LastProbeTime = 3;
+
+  // Last time the condition transitioned from one status to another.
+  google.protobuf.Timestamp LastTransitionTime = 4;
+
+  // Unique, one-word, CamelCase reason for the condition's last transition.
+  string reason = 5;
+
+  // Human-readable message indicating details about last transition.
+  string message = 6;
+}
+
+/**
+ * Declares the most recently observed status of the existing edge cluster pod
+ */
+ message EdgeClusterPodStatus {
+  // IP address allocated to the pod. Routable at least within the cluster.
+  string hostIP = 1;
+
+  // IP address allocated to the pod. Routable at least within the cluster.
+  string podIP = 2;
+
+	// Current service state of pod.
+  repeated EdgeClusterPodCondition conditions = 3;
+}
+
+/**
+ * Declares the details of an existing edge cluster pod
+ */
+ message EdgeClusterPod {
+  // The pod unique ID
+  EdgeClusterObjectMetadata metadata = 1;
+
+  // The most recently observed status of the pod
+  EdgeClusterPodStatus status = 2;
+
+  // The specification of the desired behavior of the pod.
+  EdgeClusterPodSpec spec = 3;
+}
+
+/** 
+ * ListEdgeClusterNodePodsRequest to list an existing edge cluster pods details
+ */
+ message ListEdgeClusterPodsRequest {
+  // The unique edge cluster identifier
+  string edgeClusterID = 1;
+
+  // Optional, if provided, will be used to filter pods under the given namespace
+  string namespace = 2;
+
+  // Optional, if provided, will be used to filter pods deployed to the given node
+  string nodeName = 3;
+}
+
+/**
+ * Response contains the result of listing an existing edge cluster pods details
+ */
+message ListEdgeClusterPodsResponse {
+  // Indicate whether the operation has any error
+  Error error = 1;
+
+  // Contains error message if the operation was unsuccessful
+  string errorMessage = 2;
+
+  // The list of an existing edge cluster pods details
+  repeated EdgeClusterPod  pods = 3;
+}

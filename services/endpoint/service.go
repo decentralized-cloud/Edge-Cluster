@@ -207,3 +207,33 @@ func (service *endpointCreatorService) ListEdgeClusterNodesEndpoint() endpoint.E
 		return service.businessService.ListEdgeClusterNodes(ctx, castedRequest)
 	}
 }
+
+// ListEdgeClusterPodsEndpoint creates List Edge Cluster Pods endpoint
+// Returns the List Edge Cluster Pods endpoint
+func (service *endpointCreatorService) ListEdgeClusterPodsEndpoint() endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		if ctx == nil {
+			return &business.ListEdgeClusterPodsResponse{
+				Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
+			}, nil
+		}
+
+		if request == nil {
+			return &business.ListEdgeClusterPodsResponse{
+				Err: commonErrors.NewArgumentNilError("request", "request is required"),
+			}, nil
+		}
+
+		castedRequest := request.(*business.ListEdgeClusterPodsRequest)
+		parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
+		castedRequest.UserEmail = parsedToken.Email
+
+		if err := castedRequest.Validate(); err != nil {
+			return &business.ListEdgeClusterPodsResponse{
+				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
+			}, nil
+		}
+
+		return service.businessService.ListEdgeClusterPods(ctx, castedRequest)
+	}
+}

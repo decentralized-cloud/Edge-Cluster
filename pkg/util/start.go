@@ -92,7 +92,7 @@ func setupDependencies(logger *zap.Logger) (err error) {
 		return
 	}
 
-	if middlewareProviderService, err = middleware.NewMiddlewareProviderService(logger, true, ""); err != nil {
+	if middlewareProviderService, err = middleware.NewMiddlewareProviderService(logger, false, ""); err != nil {
 		return
 	}
 

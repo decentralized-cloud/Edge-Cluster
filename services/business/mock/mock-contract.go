@@ -123,3 +123,18 @@ func (mr *MockBusinessContractMockRecorder) ListEdgeClusterNodes(ctx, request in
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEdgeClusterNodes", reflect.TypeOf((*MockBusinessContract)(nil).ListEdgeClusterNodes), ctx, request)
 }
+
+// ListEdgeClusterPods mocks base method
+func (m *MockBusinessContract) ListEdgeClusterPods(ctx context.Context, request *business.ListEdgeClusterPodsRequest) (*business.ListEdgeClusterPodsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListEdgeClusterPods", ctx, request)
+	ret0, _ := ret[0].(*business.ListEdgeClusterPodsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListEdgeClusterPods indicates an expected call of ListEdgeClusterPods
+func (mr *MockBusinessContractMockRecorder) ListEdgeClusterPods(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEdgeClusterPods", reflect.TypeOf((*MockBusinessContract)(nil).ListEdgeClusterPods), ctx, request)
+}

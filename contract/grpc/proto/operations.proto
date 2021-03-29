@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package edgecluster;
+
+import "edge-cluster-messages.proto";
+import "edge-cluster-node-messages.proto";
+import "edge-cluster-pod-messages.proto";
+
+/**
+ * The edge cluster servcie that can create new edge cluster, read, update and delete existing edge cluster
+ */
+service EdgeClusterService {
+  // CreateEdgeCluster creates a new edge cluster
+  // request: The request to create a new edge cluster
+  // Returns the result of creating new edge cluster
+  rpc CreateEdgeCluster(CreateEdgeClusterRequest) returns (CreateEdgeClusterResponse);
+
+  // ReadEdgeCluster read an exsiting edge cluster
+  // request: The request to read an esiting edge cluster
+  // Returns the result of reading an existing edge cluster
+  rpc ReadEdgeCluster(ReadEdgeClusterRequest) returns (ReadEdgeClusterResponse);
+
+  // UpdateEdgeCluster update an exsiting edge cluster
+  // request: The request to update an esiting edge cluster
+  // Returns the result of updateing an existing edge cluster
+  rpc UpdateEdgeCluster(UpdateEdgeClusterRequest) returns (UpdateEdgeClusterResponse);
+
+  // DeleteEdgeCluster delete an exsiting edge cluster
+  // request: The request to delete an esiting edge cluster
+  // Returns the result of deleting an existing edge cluster
+  rpc DeleteEdgeCluster(DeleteEdgeClusterRequest) returns (DeleteEdgeClusterResponse);
+
+  // Search returns the list of edge clusters that matched the criteria
+  // request: The request contains the search criteria
+  // Returns the list of edge clusters that matched the criteria
+  rpc Search(SearchRequest) returns (SearchResponse);
+
+  // ListEdgeClusterNodes lists an existing edge cluster nodes details
+  // request: The request to list an existing edge cluster nodes details
+  // Returns an existing edge cluster nodes details
+  rpc ListEdgeClusterNodes(ListEdgeClusterNodesRequest) returns (ListEdgeClusterNodesResponse);
+
+  // ListEdgeClusterPods lists an existing edge cluster pods details
+  // request: The request to list an existing edge cluster pods details
+  // Returns an existing edge cluster pods details
+  rpc ListEdgeClusterPods(ListEdgeClusterPodsRequest) returns (ListEdgeClusterPodsResponse);
+}

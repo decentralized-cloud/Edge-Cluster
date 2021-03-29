@@ -55,11 +55,19 @@ type EdgeClusterProvisionerContract interface {
 		ctx context.Context,
 		request *GetProvisionDetailsRequest) (*GetProvisionDetailsResponse, error)
 
-	// ListEdgeClusterNodes lists an existing edge cluster nodes details
+	// ListNodes lists an existing edge cluster nodes details
 	// ctx: Mandatory The reference to the context
 	// request: Mandatory. The request to list an existing edge cluster nodes details
 	// Returns an existing edge cluster nodes details or error if something goes wrong.
-	ListEdgeClusterNodes(
+	ListNodes(
 		ctx context.Context,
-		request *ListEdgeClusterNodesRequest) (*ListEdgeClusterNodesResponse, error)
+		request *ListNodesRequest) (*ListNodesResponse, error)
+
+	// ListPods lists an existing edge cluster pods that matchs the given search criteria
+	// ctx: Mandatory The reference to the context
+	// request: Mandatory. The request that contains the search criteria to filter the pods
+	// Returns the list of running pods that matchs the given search criteria or error if something goes wrong.
+	ListPods(
+		ctx context.Context,
+		request *ListPodsRequest) (*ListPodsResponse, error)
 }

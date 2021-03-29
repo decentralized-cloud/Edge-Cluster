@@ -53,4 +53,12 @@ type BusinessContract interface {
 	ListEdgeClusterNodes(
 		ctx context.Context,
 		request *ListEdgeClusterNodesRequest) (*ListEdgeClusterNodesResponse, error)
+
+	// ListEdgeClusterPods lists an existing edge cluster pods details
+	// ctx: Mandatory The reference to the context
+	// request: Mandatory. The request to list an existing edge cluster pods details
+	// Returns an existing edge cluster pods details or error if something goes wrong.
+	ListEdgeClusterPods(
+		ctx context.Context,
+		request *ListEdgeClusterPodsRequest) (*ListEdgeClusterPodsResponse, error)
 }
