@@ -133,17 +133,32 @@ func (mr *MockEdgeClusterProvisionerContractMockRecorder) GetProvisionDetails(ct
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProvisionDetails", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).GetProvisionDetails), ctx, request)
 }
 
-// ListEdgeClusterNodes mocks base method
-func (m *MockEdgeClusterProvisionerContract) ListEdgeClusterNodes(ctx context.Context, request *types.ListEdgeClusterNodesRequest) (*types.ListEdgeClusterNodesResponse, error) {
+// ListNodes mocks base method
+func (m *MockEdgeClusterProvisionerContract) ListNodes(ctx context.Context, request *types.ListNodesRequest) (*types.ListNodesResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListEdgeClusterNodes", ctx, request)
-	ret0, _ := ret[0].(*types.ListEdgeClusterNodesResponse)
+	ret := m.ctrl.Call(m, "ListNodes", ctx, request)
+	ret0, _ := ret[0].(*types.ListNodesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ListEdgeClusterNodes indicates an expected call of ListEdgeClusterNodes
-func (mr *MockEdgeClusterProvisionerContractMockRecorder) ListEdgeClusterNodes(ctx, request interface{}) *gomock.Call {
+// ListNodes indicates an expected call of ListNodes
+func (mr *MockEdgeClusterProvisionerContractMockRecorder) ListNodes(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEdgeClusterNodes", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).ListEdgeClusterNodes), ctx, request)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListNodes", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).ListNodes), ctx, request)
+}
+
+// ListPods mocks base method
+func (m *MockEdgeClusterProvisionerContract) ListPods(ctx context.Context, request *types.ListPodsRequest) (*types.ListPodsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListPods", ctx, request)
+	ret0, _ := ret[0].(*types.ListPodsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListPods indicates an expected call of ListPods
+func (mr *MockEdgeClusterProvisionerContractMockRecorder) ListPods(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPods", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).ListPods), ctx, request)
 }

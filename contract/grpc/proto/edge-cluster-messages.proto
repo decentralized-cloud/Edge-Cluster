@@ -1,0 +1,249 @@
+syntax = "proto3";
+
+package edgecluster;
+
+import "commons.proto";
+/**
+ * The different cluster types
+ */
+ enum ClusterType {
+  // K3S cluster
+  K3S = 0;
+}
+
+/**
+ * The edge cluster object
+ */
+message EdgeCluster {
+  // The unique project identifier that owns the edge cluster
+  string projectID = 1;
+
+  // The edge cluster name
+  string name = 2;
+
+  // Cluster secret value
+  string clusterSecret = 3;
+
+  // Cluster type
+  ClusterType clusterType = 4;
+}
+
+/**
+ * Ingress represents the status of a load-balancer ingress point
+ * traffic intended for the service should be sent to an ingress point.
+ */
+ message Ingress {
+  // IP is set for load-balancer ingress points that are IP based
+  // (typically GCE or OpenStack load-balancers)
+  string ip = 1;
+
+  // Hostname is set for load-balancer ingress points that are DNS based
+  // (typically AWS load-balancers)
+  string hostname = 2;
+}
+
+/**
+ *  Protocol defines network protocols.
+ */
+ enum Protocol {
+  // TCP protocol
+  TCP = 0;
+
+  // UDP protocol
+  UDP = 1;
+
+  // SCTP protocol
+  SCTP = 2;
+}
+
+/**
+ * Port contains information on service's port.
+ */
+ message Port {
+  // The port number of the edge-cluster master port
+  int32 port = 1;
+
+  // The protocol of the edge-cluster master port
+  Protocol protcol = 2;
+}
+
+/**
+ * The edge cluster provision details contains details such as current status of the edge cluster
+ * as well as ingress address of the edge cluster to connect to
+ */
+message EdgeClusterProvisionDetail {
+  // The ingress details of the edge cluster master node
+  repeated Ingress ingress = 1;
+
+  // The ingress details of the edge cluster master node
+  repeated Port ports = 2;
+
+  // The provisioned edge cluster kubeconfig content
+  string kubeConfigContent = 3;
+}
+
+/**
+ * Request to create a new edge cluster
+ */
+message CreateEdgeClusterRequest {
+  // The edge cluster object
+  EdgeCluster edgeCluster = 1;
+}
+
+/**
+ * Response contains the result of creating a new edge cluster
+ */
+message CreateEdgeClusterResponse {
+  // Indicate whether the operation has any error
+  Error error = 1;
+
+  // Contains error message if the operation was unsuccessful
+  string errorMessage = 2;
+
+  // The unique edge cluster identifier
+  string edgeClusterID = 3;
+
+  // The created edge cluster object
+  EdgeCluster edgeCluster = 4;
+
+  // The cursor defines the position of the edge cluster in the repository that can be later
+  // referred to using pagination information
+  string cursor = 5;
+
+  // The edge cluster provision details
+  EdgeClusterProvisionDetail provisionDetail = 6;
+}
+
+/** Request to read an existing edge cluster
+ */
+message ReadEdgeClusterRequest {
+  // The unique edge cluster identifier
+  string edgeClusterID = 1;
+}
+
+/**
+ * Response contains the result of reading an existing edge cluster
+ */
+message ReadEdgeClusterResponse {
+  // Indicate whether the operation has any error
+  Error error = 1;
+
+  // Contains error message if the operation was unsuccessful
+  string errorMessage = 2;
+
+  // The edge cluster object
+  EdgeCluster edgeCluster = 3;
+
+  // The edge cluster provision details
+  EdgeClusterProvisionDetail provisionDetail = 6;
+}
+
+/**
+ * Request to update an existing edge cluster
+ */
+message UpdateEdgeClusterRequest {
+  // The unique edge cluster identifier
+  string edgeClusterID = 1;
+
+  // The edge cluster object contains the updated edge cluster details to update
+  EdgeCluster edgeCluster = 2;
+}
+
+/**
+ * Response contains the result of updating an existing edge cluster
+ */
+message UpdateEdgeClusterResponse {
+  // Indicate whether the operation has any error
+  Error error = 1;
+
+  // Contains error message if the operation was unsuccessful
+  string errorMessage = 2;
+
+  // The updated edge cluster object
+  EdgeCluster edgeCluster = 3;
+
+  // The cursor defines the position of the edge cluster in the repository that can be later
+  // referred to using pagination information
+  string cursor = 4;
+
+  // The edge cluster provision details
+  EdgeClusterProvisionDetail provisionDetail = 6;
+}
+
+/**
+ * Request to delete an existing edge cluster
+ */
+message DeleteEdgeClusterRequest {
+  // The unique edge cluster identifier
+  string edgeClusterID = 1;
+}
+
+/**
+ * Response contains the result of deleting an existing edge cluster
+ */
+message DeleteEdgeClusterResponse {
+  // Indicate whether the operation has any error
+  Error error = 1;
+
+  // Contains error message if the operation was unsuccessful
+  string errorMessage = 2;
+}
+
+/**
+ * Request to search for edge clusters
+ */
+message SearchRequest {
+  // The pagination information
+  Pagination pagination = 1;
+
+  // The collection of sorting option determines how the returned data must be sorted
+  repeated SortingOptionPair sortingOptions = 2;
+
+  // The unique edge cluster identifiers
+  repeated string edgeClusterIDs = 3;
+
+  // The unique project identifiers
+  repeated string projectIDs = 4;
+}
+
+/*
+ * The pair of edge cluster and a cursor that defines the position of the edge cluster in the repository
+ * that can later referred to using pagination information.
+ */
+message EdgeClusterWithCursor {
+  // The unique edge cluster identifier
+  string edgeClusterID = 1;
+
+  // The cursor defines the position of the edge cluster in the repository that can be later
+  // referred to using pagination information
+  string cursor = 2;
+
+  // The edge cluster object
+  EdgeCluster edgeCluster = 3;
+
+  // The edge cluster provision details
+  EdgeClusterProvisionDetail provisionDetail = 4;
+}
+
+/**
+ * Response contains the result of searching for edge clusters
+ */
+message SearchResponse {
+  // Indicate whether the operation has any error
+  Error error = 1;
+
+  // Contains error message if the operation was unsuccessful
+  string errorMessage = 2;
+
+  // Indicates whether more edges exist prior to the set defined by the clients arguments
+  bool hasPreviousPage = 3;
+
+  // Indicates whether more edges exist following the set defined by the clients arguments
+  bool hasNextPage = 4;
+
+  // Indicates the total count of the edge clusters that matched the provided filter criteria
+  int64 totalCount = 5;
+
+  // The list contains the edge clusters that matched the search criteria
+  repeated EdgeClusterWithCursor edgeClusters = 6;
+}

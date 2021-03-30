@@ -63,3 +63,9 @@ func (val SearchRequest) Validate() error {
 func (val ListEdgeClusterNodesRequest) Validate() error {
 	return nil
 }
+
+// Validate validates the ListEdgeClusterPodsRequest model and return error if the validation failes
+// Returns error if validation failes
+func (val ListEdgeClusterPodsRequest) Validate() error {
+	return nil
+}

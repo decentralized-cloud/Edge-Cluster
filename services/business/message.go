@@ -90,3 +90,17 @@ type ListEdgeClusterNodesResponse struct {
 	Err   error
 	Nodes []models.EdgeClusterNodeStatus
 }
+
+// ListEdgeClusterPodsRequest contains the request to list an existing edge cluster pods details
+type ListEdgeClusterPodsRequest struct {
+	UserEmail     string
+	EdgeClusterID string
+	Namespace     string
+	NodeName      string
+}
+
+// ListEdgeClusterPodsResponse contains the result of listing an existing edge cluster pods details
+type ListEdgeClusterPodsResponse struct {
+	Err  error
+	Pods []models.EdgeClusterPod
+}

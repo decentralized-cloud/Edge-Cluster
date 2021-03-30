@@ -55,12 +55,12 @@ type EdgeClusterWithCursor struct {
 
 // EdgeClusterNodeStatus is information about the current status of a node.
 type EdgeClusterNodeStatus struct {
-	// Conditions is an array of current observed node conditions.
-	Conditions []v1.NodeCondition
+	// Node contains information about an existing edge cluster node
+	Node v1.Node
+}
 
-	// Addresses is the list of addresses reachable to the node.
-	Addresses []v1.NodeAddress
-
-	// NodeInfo is the set of ids/uuids to uniquely identify the node.
-	NodeInfo v1.NodeSystemInfo
+// EdgeClusterPod is information about the current status of a pod.
+type EdgeClusterPod struct {
+	// Pod contains information about a deployed edge cluster node pod
+	Pod v1.Pod
 }

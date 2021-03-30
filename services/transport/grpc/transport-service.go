@@ -29,6 +29,7 @@ type transportService struct {
 	deleteEdgeClusterHandler    gokitgrpc.Handler
 	searchHandler               gokitgrpc.Handler
 	listEdgeClusterNodesHandler gokitgrpc.Handler
+	listEdgeClusterPodsHandler  gokitgrpc.Handler
 }
 
 var Live bool
@@ -176,6 +177,15 @@ func (service *transportService) setupHandlers() {
 		decodeListEdgeClusterNodesRequest,
 		encodeListEdgeClusterNodesResponse,
 	)
+
+	endpoint = service.endpointCreatorService.ListEdgeClusterPodsEndpoint()
+	endpoint = service.middlewareProviderService.CreateLoggingMiddleware("ListEdgeClusterPods")(endpoint)
+	endpoint = service.createAuthMiddleware()(endpoint)
+	service.listEdgeClusterPodsHandler = gokitgrpc.NewServer(
+		endpoint,
+		decodeListEdgeClusterPodsRequest,
+		encodeListEdgeClusterPodsResponse,
+	)
 }
 
 // CreateEdgeCluster creates a new edgeCluster
@@ -269,4 +279,19 @@ func (service *transportService) ListEdgeClusterNodes(
 	}
 
 	return response.(*edgeClusterGRPCContract.ListEdgeClusterNodesResponse), nil
+}
+
+// Search returns the list  of edge clusters that matched the provided criteria
+// context: Mandatory. The reference to the context
+// request: Mandatory. The request contains the filter criteria to look for existing edge clusters
+// Returns the list of edge clusters that matched the provided criteria
+func (service *transportService) ListEdgeClusterPods(
+	ctx context.Context,
+	request *edgeClusterGRPCContract.ListEdgeClusterPodsRequest) (*edgeClusterGRPCContract.ListEdgeClusterPodsResponse, error) {
+	_, response, err := service.listEdgeClusterPodsHandler.ServeGRPC(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.(*edgeClusterGRPCContract.ListEdgeClusterPodsResponse), nil
 }

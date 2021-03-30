@@ -29,4 +29,8 @@ type EndpointCreatorContract interface {
 	// ListEdgeClusterNodesEndpoint creates List Edge Cluster Nodes endpoint
 	// Returns the List Edge Cluster Nodes endpoint
 	ListEdgeClusterNodesEndpoint() endpoint.Endpoint
+
+	// ListEdgeClusterPodsEndpoint creates List Edge Cluster Pods endpoint
+	// Returns the List Edge Cluster Pods endpoint
+	ListEdgeClusterPodsEndpoint() endpoint.Endpoint
 }

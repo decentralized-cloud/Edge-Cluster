@@ -230,50 +230,54 @@ func (service *k3sProvisioner) GetProvisionDetails(
 	return
 }
 
-// ListEdgeClusterNodes lists an existing edge cluster nodes details
+// ListNodes lists an existing edge cluster nodes details
 // ctx: Mandatory The reference to the context
 // request: Mandatory. The request to list an existing edge cluster nodes details
 // Returns an existing edge cluster nodes details or error if something goes wrong.
-func (service *k3sProvisioner) ListEdgeClusterNodes(
+func (service *k3sProvisioner) ListNodes(
 	ctx context.Context,
-	request *types.ListEdgeClusterNodesRequest) (response *types.ListEdgeClusterNodesResponse, err error) {
-
-	getProvisionDetailsResponse, err := service.GetProvisionDetails(
-		ctx,
-		&types.GetProvisionDetailsRequest{
-			EdgeClusterID: request.EdgeClusterID,
-		})
+	request *types.ListNodesRequest) (response *types.ListNodesResponse, err error) {
+	clientset, err := service.createClientsetForEdgeCluster(ctx, request.EdgeClusterID)
 	if err != nil {
-		return
-	}
-
-	kubeconfigContent := []byte(getProvisionDetailsResponse.ProvisionDetails.KubeconfigContent)
-
-	var restConfig *rest.Config
-	if restConfig, err = clientcmd.RESTConfigFromKubeConfig(kubeconfigContent); err != nil {
-		service.logger.Error("Failed to create Rest config from the given kube config", zap.Error(err))
-
-		return
-	}
-
-	var clientset *kubernetes.Clientset
-	if clientset, err = kubernetes.NewForConfig(restConfig); err != nil {
-		return nil, types.NewUnknownErrorWithError("Failed to create client set", err)
+		return nil, err
 	}
 
 	var nodeList *v1.NodeList
-
 	if nodeList, err = clientset.CoreV1().Nodes().List(ctx, metav1.ListOptions{}); err != nil {
 		return nil, types.NewUnknownErrorWithError("Failed to retreive node list", err)
 	}
 
-	response = &types.ListEdgeClusterNodesResponse{Nodes: []models.EdgeClusterNodeStatus{}}
-
+	response = &types.ListNodesResponse{Nodes: []models.EdgeClusterNodeStatus{}}
 	for _, node := range nodeList.Items {
 		response.Nodes = append(response.Nodes, models.EdgeClusterNodeStatus{
-			Conditions: node.Status.Conditions,
-			Addresses:  node.Status.Addresses,
-			NodeInfo:   node.Status.NodeInfo,
+			Node: node,
+		})
+	}
+
+	return
+}
+
+// ListPods lists an existing edge cluster pods that matchs the given search criteria
+// ctx: Mandatory The reference to the context
+// request: Mandatory. The request that contains the search criteria to filter the pods
+// Returns the list of running pods that matchs the given search criteria or error if something goes wrong.
+func (service *k3sProvisioner) ListPods(
+	ctx context.Context,
+	request *types.ListPodsRequest) (response *types.ListPodsResponse, err error) {
+	clientset, err := service.createClientsetForEdgeCluster(ctx, request.EdgeClusterID)
+	if err != nil {
+		return nil, err
+	}
+
+	var pods *v1.PodList
+	if pods, err = clientset.CoreV1().Pods(request.Namespace).List(ctx, metav1.ListOptions{}); err != nil {
+		return nil, types.NewUnknownErrorWithError("Failed to retreive pod list", err)
+	}
+
+	response = &types.ListPodsResponse{Pods: []models.EdgeClusterPod{}}
+	for _, pod := range pods.Items {
+		response.Pods = append(response.Pods, models.EdgeClusterPod{
+			Pod: pod,
 		})
 	}
 
@@ -518,4 +522,34 @@ func (service *k3sProvisioner) getAdvertiseAddress(
 	}
 
 	return "", types.NewUnknownError("Failed to retrieve advertise address")
+}
+
+func (service *k3sProvisioner) createClientsetForEdgeCluster(
+	ctx context.Context,
+	edgeClusterID string) (clientset *kubernetes.Clientset, err error) {
+
+	getProvisionDetailsResponse, err := service.GetProvisionDetails(
+		ctx,
+		&types.GetProvisionDetailsRequest{
+			EdgeClusterID: edgeClusterID,
+		})
+	if err != nil {
+		return
+	}
+
+	var restConfig *rest.Config
+	if restConfig, err = clientcmd.RESTConfigFromKubeConfig(
+		[]byte(getProvisionDetailsResponse.ProvisionDetails.KubeconfigContent)); err != nil {
+		service.logger.Error("Failed to create Rest config from the given kube config", zap.Error(err))
+
+		return
+	}
+
+	if clientset, err = kubernetes.NewForConfig(restConfig); err != nil {
+		service.logger.Error("Failed to create client set", zap.Error(err))
+
+		return
+	}
+
+	return
 }
