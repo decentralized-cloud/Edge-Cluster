@@ -305,7 +305,7 @@ type EdgeClusterPod struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// The pod unique ID
+	// The pod metadata
 	Metadata *EdgeClusterObjectMetadata `protobuf:"bytes,1,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	// The most recently observed status of the pod
 	Status *EdgeClusterPodStatus `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`

@@ -72,7 +72,7 @@ import "google/protobuf/timestamp.proto";
  * Declares the details of an existing edge cluster pod
  */
  message EdgeClusterPod {
-  // The pod unique ID
+  // The pod metadata
   EdgeClusterObjectMetadata metadata = 1;
 
   // The most recently observed status of the pod
