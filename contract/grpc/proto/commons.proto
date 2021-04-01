@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package edgecluster;
 
+import "google/protobuf/timestamp.proto";
+
 /**
  * The different error types
  */
@@ -68,7 +70,7 @@ message SortingOptionPair {
  * can't decide if a resource is in the condition or not. In the future, we could add other
  * intermediate conditions, e.g. ConditionDegraded.
  */
- enum EdgeClusterConditionStatus {
+ enum ConditionStatus {
   ConditionTrue = 0;
   ConditionFalse = 1;
   ConditionUnknown = 2;
@@ -77,7 +79,7 @@ message SortingOptionPair {
 /**
  * Standard edge cluster object's metadata.
  */
- message EdgeClusterObjectMetadata {
+ message ObjectMeta {
   // The unique ID
   string id = 1;
 
@@ -86,4 +88,71 @@ message SortingOptionPair {
 
   // The namespace
   string namespace = 3;
+}
+
+/**
+ *  Protocol defines network protocols.
+ */
+ enum Protocol {
+  // TCP protocol
+  TCP = 0;
+
+  // UDP protocol
+  UDP = 1;
+
+  // SCTP protocol
+  SCTP = 2;
+}
+
+// PortStatus represents the error condition of a service port
+message PortStatus {
+	// Port is the port number of the service port of which status is recorded here
+  int32 port = 1;
+
+	// Protocol is the protocol of the service port of which status is recorded here
+  Protocol protocol = 2;
+
+  // Error is to record the problem with the service port
+  string error = 3;
+}
+
+// LoadBalancerIngress represents the status of a load-balancer ingress point:
+// traffic intended for the service should be sent to an ingress point.
+message LoadBalancerIngress {
+	// IP is set for load-balancer ingress points that are IP based
+  string ip = 1;
+
+	// Hostname is set for load-balancer ingress points that are DNS based
+  string hostname = 2;
+
+	// Ports is a list of records of service ports
+	// If used, every port defined in the service should have an entry in it
+  repeated PortStatus portStatus = 3; 
+}
+
+// LoadBalancerStatus represents the status of a load-balancer.
+message LoadBalancerStatus {
+	// Ingress is a list containing ingress points for the load-balancer.
+	// Traffic intended for the service should be sent to these ingress points.
+	repeated LoadBalancerIngress Ingress = 1;
+}
+
+/**
+ * Declares the most recently observed status of the service
+ */
+ message ServiceCondition {
+  // Type is the type of the condition.
+  string type = 1;
+
+  // Status is the status of the condition.
+  ConditionStatus status = 2;
+
+  // Last time the condition transitioned from one status to another.
+  google.protobuf.Timestamp LastTransitionTime = 3;
+
+  // Unique, one-word, CamelCase reason for the condition's last transition.
+  string reason = 4;
+
+  // Human-readable message indicating details about last transition.
+  string message = 5;
 }

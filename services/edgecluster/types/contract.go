@@ -70,4 +70,12 @@ type EdgeClusterProvisionerContract interface {
 	ListPods(
 		ctx context.Context,
 		request *ListPodsRequest) (*ListPodsResponse, error)
+
+	// ListServices lists an existing edge cluster services that matchs the given search criteria
+	// ctx: Mandatory The reference to the context
+	// request: Mandatory. The request that contains the search criteria to filter services
+	// Returns the list of services that matchs the given search criteria or error if something goes wrong.
+	ListServices(
+		ctx context.Context,
+		request *ListServicesRequest) (*ListServicesResponse, error)
 }

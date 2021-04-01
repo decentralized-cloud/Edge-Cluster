@@ -53,8 +53,8 @@ type DeleteEdgeClusterRequest struct {
 type DeleteEdgeClusterResponse struct {
 }
 
-// SearchRequest contains the filter criteria to look for existing projects
-type SearchRequest struct {
+// ListEdgeClustersRequest contains the filter criteria to look for existing projects
+type ListEdgeClustersRequest struct {
 	UserEmail      string
 	Pagination     common.Pagination
 	SortingOptions []common.SortingOptionPair
@@ -62,8 +62,8 @@ type SearchRequest struct {
 	ProjectIDs     []string
 }
 
-// SearchResponse contains the list of the projects that matched the result
-type SearchResponse struct {
+// ListEdgeClustersResponse contains the list of the projects that matched the result
+type ListEdgeClustersResponse struct {
 	HasPreviousPage bool
 	HasNextPage     bool
 	TotalCount      int64

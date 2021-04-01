@@ -52,20 +52,44 @@ func (val DeleteEdgeClusterRequest) Validate() error {
 	)
 }
 
-// Validate validates the SearchRequest model and return error if the validation failes
+// Validate validates the ListEdgeClustersRequest model and return error if the validation failes
 // Returns error if validation failes
-func (val SearchRequest) Validate() error {
-	return nil
+func (val ListEdgeClustersRequest) Validate() error {
+	return validation.ValidateStruct(&val,
+		// Email must be provided
+		validation.Field(&val.UserEmail, validation.Required, is.Email),
+	)
 }
 
 // Validate validates the ListEdgeClusterNodesRequest model and return error if the validation failes
 // Returns error if validation failes
 func (val ListEdgeClusterNodesRequest) Validate() error {
-	return nil
+	return validation.ValidateStruct(&val,
+		// Email must be provided
+		validation.Field(&val.UserEmail, validation.Required, is.Email),
+		// EdgeClusterID cannot be empty
+		validation.Field(&val.EdgeClusterID, validation.Required),
+	)
 }
 
 // Validate validates the ListEdgeClusterPodsRequest model and return error if the validation failes
 // Returns error if validation failes
 func (val ListEdgeClusterPodsRequest) Validate() error {
-	return nil
+	return validation.ValidateStruct(&val,
+		// Email must be provided
+		validation.Field(&val.UserEmail, validation.Required, is.Email),
+		// EdgeClusterID cannot be empty
+		validation.Field(&val.EdgeClusterID, validation.Required),
+	)
+}
+
+// Validate validates the ListEdgeClusterServicesRequest model and return error if the validation failes
+// Returns error if validation failes
+func (val ListEdgeClusterServicesRequest) Validate() error {
+	return validation.ValidateStruct(&val,
+		// Email must be provided
+		validation.Field(&val.UserEmail, validation.Required, is.Email),
+		// EdgeClusterID cannot be empty
+		validation.Field(&val.EdgeClusterID, validation.Required),
+	)
 }

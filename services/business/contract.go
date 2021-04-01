@@ -38,13 +38,13 @@ type BusinessContract interface {
 		ctx context.Context,
 		request *DeleteEdgeClusterRequest) (*DeleteEdgeClusterResponse, error)
 
-	// Search returns the list of edge clusters that matched the criteria
+	// ListEdgeClusters returns the list of edge clusters that matched the criteria
 	// ctx: Mandatory The reference to the context
-	// request: Mandatory. The request contains the search criteria
+	// request: Mandatory. The request contains the ListEdgeClusters criteria
 	// Returns the list of edge clusters that matched the criteria
-	Search(
+	ListEdgeClusters(
 		ctx context.Context,
-		request *SearchRequest) (*SearchResponse, error)
+		request *ListEdgeClustersRequest) (*ListEdgeClustersResponse, error)
 
 	// ListEdgeClusterNodes lists an existing edge cluster nodes details
 	// ctx: Mandatory The reference to the context
@@ -61,4 +61,12 @@ type BusinessContract interface {
 	ListEdgeClusterPods(
 		ctx context.Context,
 		request *ListEdgeClusterPodsRequest) (*ListEdgeClusterPodsResponse, error)
+
+	// ListEdgeClusterServices lists an existing edge cluster services details
+	// ctx: Mandatory The reference to the context
+	// request: Mandatory. The request to list an existing edge cluster services details
+	// Returns an existing edge cluster services details or error if something goes wrong.
+	ListEdgeClusterServices(
+		ctx context.Context,
+		request *ListEdgeClusterServicesRequest) (*ListEdgeClusterServicesResponse, error)
 }

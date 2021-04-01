@@ -148,33 +148,33 @@ func (service *endpointCreatorService) DeleteEdgeClusterEndpoint() endpoint.Endp
 	}
 }
 
-// SearchEndpoint creates Search Edge Cluster endpoint
-// Returns the Search Edge Cluster endpoint
-func (service *endpointCreatorService) SearchEndpoint() endpoint.Endpoint {
+// ListEdgeClustersEndpoint creates ListEdgeClusters Edge Cluster endpoint
+// Returns the ListEdgeClusters Edge Cluster endpoint
+func (service *endpointCreatorService) ListEdgeClustersEndpoint() endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		if ctx == nil {
-			return &business.SearchResponse{
+			return &business.ListEdgeClustersResponse{
 				Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
 			}, nil
 		}
 
 		if request == nil {
-			return &business.SearchResponse{
+			return &business.ListEdgeClustersResponse{
 				Err: commonErrors.NewArgumentNilError("request", "request is required"),
 			}, nil
 		}
 
-		castedRequest := request.(*business.SearchRequest)
+		castedRequest := request.(*business.ListEdgeClustersRequest)
 		parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
 		castedRequest.UserEmail = parsedToken.Email
 
 		if err := castedRequest.Validate(); err != nil {
-			return &business.SearchResponse{
+			return &business.ListEdgeClustersResponse{
 				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
 			}, nil
 		}
 
-		return service.businessService.Search(ctx, castedRequest)
+		return service.businessService.ListEdgeClusters(ctx, castedRequest)
 	}
 }
 
@@ -235,5 +235,35 @@ func (service *endpointCreatorService) ListEdgeClusterPodsEndpoint() endpoint.En
 		}
 
 		return service.businessService.ListEdgeClusterPods(ctx, castedRequest)
+	}
+}
+
+// ListEdgeClusterServicesEndpoint creates List Edge Cluster Services endpoint
+// Returns the List Edge Cluster Services endpoint
+func (service *endpointCreatorService) ListEdgeClusterServicesEndpoint() endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		if ctx == nil {
+			return &business.ListEdgeClusterServicesResponse{
+				Err: commonErrors.NewArgumentNilError("ctx", "ctx is required"),
+			}, nil
+		}
+
+		if request == nil {
+			return &business.ListEdgeClusterServicesResponse{
+				Err: commonErrors.NewArgumentNilError("request", "request is required"),
+			}, nil
+		}
+
+		castedRequest := request.(*business.ListEdgeClusterServicesRequest)
+		parsedToken := ctx.Value(models.ContextKeyParsedToken).(models.ParsedToken)
+		castedRequest.UserEmail = parsedToken.Email
+
+		if err := castedRequest.Validate(); err != nil {
+			return &business.ListEdgeClusterServicesResponse{
+				Err: commonErrors.NewArgumentErrorWithError("request", "", err),
+			}, nil
+		}
+
+		return service.businessService.ListEdgeClusterServices(ctx, castedRequest)
 	}
 }

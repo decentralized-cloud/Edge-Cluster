@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package edgecluster;
+
+import "commons.proto";
+
+/**
+ * ServicePort contains information on service's port.
+ */
+ message ServicePort {
+  // The name of this port within the service
+  string name = 1;
+
+  // The IP protocol for this port
+  Protocol protcol = 2;
+
+  // The port that will be exposed by this service.
+  int32 port = 3;
+
+  // Number or name of the port to access on the pods targeted by the service.
+  string targetPort = 4;
+
+  // The port on each node on which this service is exposed when type is
+	// NodePort or LoadBalancer
+  int32 nodePort = 5;
+}
+
+/**
+ *  ServiceType string describes ingress methods for a service
+ */
+ enum ServiceType {
+	// ServiceTypeClusterIP means a service will only be accessible inside the
+	// cluster, via the cluster IP.
+	ServiceTypeClusterIP = 0;
+
+	// ServiceTypeNodePort means a service will be exposed on one port of
+	// every node, in addition to 'ClusterIP' type.
+	ServiceTypeNodePort = 1;
+
+	// ServiceTypeLoadBalancer means a service will be exposed via an
+	// external load balancer (if the cloud provider supports it), in addition
+	// to 'NodePort' type.
+	ServiceTypeLoadBalancer = 2;
+
+	// ServiceTypeExternalName means a service consists of only a reference to
+	// an external name that kubedns or equivalent will return as a CNAME
+	// record, with no exposing or proxying of any pods involved.
+	ServiceTypeExternalName = 3;
+
+}
+
+/**
+ * Declares the specification of the desired behavior of the existing edge cluster service
+ */
+ message ServiceSpec {
+  // The list of ports that are exposed by this service.
+  repeated ServicePort ports = 1;
+
+  // clusterIPs is a list of IP addresses assigned to this service
+  repeated string clusterIPs = 2;
+
+  // type determines how the Service is exposed.
+  ServiceType type = 3;
+
+  // externalIPs is a list of IP addresses for which nodes in the cluster
+	// will also accept traffic for this service.
+  repeated string externalIPs = 4;
+
+  // externalName is the external reference that discovery mechanisms will
+	// return as an alias for this service (e.g. a DNS CNAME record).
+  string externalName = 5;
+}
+
+/**
+ * Declares the most recently observed status of the existing edge cluster service
+ */
+ message ServiceStatus {
+	// LoadBalancer contains the current status of the load-balancer,
+	// if one is present.
+  LoadBalancerStatus loadBalancer  = 1;
+
+	// Current service state of service.
+  repeated ServiceCondition conditions = 2;
+}
+
+/**
+ * Declares the details of an existing edge cluster service
+ */
+ message EdgeClusterService {
+  // The service metadata
+  ObjectMeta metadata = 1;
+
+  // The most recently observed status of the service
+  ServiceStatus status = 2;
+
+  // The specification of the desired behavior of the service.
+  ServiceSpec spec = 3;
+}
+
+/** 
+ * ListEdgeClusterNodeServicesRequest to list an existing edge cluster services details
+ */
+ message ListEdgeClusterServicesRequest {
+  // The unique edge cluster identifier
+  string edgeClusterID = 1;
+
+  // Optional, if provided, will be used to filter services under the given namespace
+  string namespace = 2;
+
+  // Optional, if provided, will be used to filter services deployed to the given node
+  string nodeName = 3;
+}
+
+/**
+ * Response contains the result of listing an existing edge cluster services details
+ */
+message ListEdgeClusterServicesResponse {
+  // Indicate whether the operation has any error
+  Error error = 1;
+
+  // Contains error message if the operation was unsuccessful
+  string errorMessage = 2;
+
+  // The list of an existing edge cluster services details
+  repeated EdgeClusterService  services = 3;
+}

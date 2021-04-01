@@ -49,7 +49,7 @@ type ListNodesRequest struct {
 
 // ListNodesResponse contains the result of listing an existing edge cluster nodes details
 type ListNodesResponse struct {
-	Nodes []models.EdgeClusterNodeStatus
+	Nodes []models.EdgeClusterNode
 }
 
 // ListPodsRequest contains the request to list an existing edge cluster pods
@@ -62,4 +62,15 @@ type ListPodsRequest struct {
 // ListPodsResponse contains the result of listing an existing edge cluster pods
 type ListPodsResponse struct {
 	Pods []models.EdgeClusterPod
+}
+
+// ListServicesRequest contains the request to list an existing edge cluster services
+type ListServicesRequest struct {
+	EdgeClusterID string
+	Namespace     string
+}
+
+// ListServicesResponse contains the result of listing an existing edge cluster services
+type ListServicesResponse struct {
+	Services []models.EdgeClusterService
 }

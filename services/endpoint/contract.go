@@ -22,9 +22,9 @@ type EndpointCreatorContract interface {
 	// Returns the Delete Edge Cluster endpoint
 	DeleteEdgeClusterEndpoint() endpoint.Endpoint
 
-	// SearchEndpoint creates Search Edge Cluster endpoint
-	// Returns the Search Edge Cluster endpoint
-	SearchEndpoint() endpoint.Endpoint
+	// ListEdgeClustersEndpoint creates ListEdgeClusters Edge Cluster endpoint
+	// Returns the ListEdgeClusters Edge Cluster endpoint
+	ListEdgeClustersEndpoint() endpoint.Endpoint
 
 	// ListEdgeClusterNodesEndpoint creates List Edge Cluster Nodes endpoint
 	// Returns the List Edge Cluster Nodes endpoint
@@ -33,4 +33,8 @@ type EndpointCreatorContract interface {
 	// ListEdgeClusterPodsEndpoint creates List Edge Cluster Pods endpoint
 	// Returns the List Edge Cluster Pods endpoint
 	ListEdgeClusterPodsEndpoint() endpoint.Endpoint
+
+	// ListEdgeClusterServicesEndpoint creates List Edge Cluster Services endpoint
+	// Returns the List Edge Cluster Services endpoint
+	ListEdgeClusterServicesEndpoint() endpoint.Endpoint
 }

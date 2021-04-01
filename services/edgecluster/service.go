@@ -44,7 +44,7 @@ func NewEdgeClusterFactoryService(
 
 	k8sRestConfig, err := service.getRestConfig()
 	if err != nil {
-		return nil, types.NewUnknownErrorWithError("Failed to retrieve rest config", err)
+		return nil, types.NewUnknownErrorWithError("failed to retrieve rest config", err)
 	}
 
 	service.k8sRestConfig = k8sRestConfig

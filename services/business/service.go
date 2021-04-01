@@ -57,7 +57,7 @@ func (service *businessService) CreateEdgeCluster(
 
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, request.EdgeCluster.ClusterType)
 	if err != nil {
-		return nil, commonErrors.NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
+		return nil, commonErrors.NewUnknownErrorWithError("failed to create egde cluster provisioner", err)
 	}
 
 	if _, err = edgeClusterProvisioner.CreateProvision(
@@ -67,7 +67,7 @@ func (service *businessService) CreateEdgeCluster(
 			ClusterSecret: request.EdgeCluster.ClusterSecret,
 		}); err != nil {
 
-		return nil, commonErrors.NewUnknownErrorWithError("Failed to provision egde cluster", err)
+		return nil, commonErrors.NewUnknownErrorWithError("failed to provision egde cluster", err)
 	}
 
 	response := &CreateEdgeClusterResponse{
@@ -105,7 +105,7 @@ func (service *businessService) ReadEdgeCluster(
 
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, repositoryResponse.EdgeCluster.ClusterType)
 	if err != nil {
-		return nil, commonErrors.NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
+		return nil, commonErrors.NewUnknownErrorWithError("failed to create egde cluster provisioner", err)
 	}
 
 	response := &ReadEdgeClusterResponse{
@@ -143,7 +143,7 @@ func (service *businessService) UpdateEdgeCluster(
 
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, request.EdgeCluster.ClusterType)
 	if err != nil {
-		return nil, commonErrors.NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
+		return nil, commonErrors.NewUnknownErrorWithError("failed to create egde cluster provisioner", err)
 	}
 
 	_, err = edgeClusterProvisioner.UpdateProvisionWithRetry(
@@ -154,7 +154,7 @@ func (service *businessService) UpdateEdgeCluster(
 		})
 
 	if err != nil {
-		return nil, commonErrors.NewUnknownErrorWithError("Failed to update the existing edge cluster provision", err)
+		return nil, commonErrors.NewUnknownErrorWithError("failed to update the existing edge cluster provision", err)
 	}
 
 	response := &UpdateEdgeClusterResponse{
@@ -192,7 +192,7 @@ func (service *businessService) DeleteEdgeCluster(
 
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, request.EdgeCluster.ClusterType)
 	if err != nil {
-		return nil, commonErrors.NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
+		return nil, commonErrors.NewUnknownErrorWithError("failed to create egde cluster provisioner", err)
 	}
 
 	_, err = edgeClusterProvisioner.DeleteProvision(
@@ -202,20 +202,20 @@ func (service *businessService) DeleteEdgeCluster(
 		})
 
 	if err != nil {
-		return nil, commonErrors.NewUnknownErrorWithError("Failed to delete the existing edge cluster provision", err)
+		return nil, commonErrors.NewUnknownErrorWithError("failed to delete the existing edge cluster provision", err)
 	}
 
 	return &DeleteEdgeClusterResponse{}, nil
 }
 
-// Search returns the list of edge clusters that matched the criteria
+// ListEdgeClusters returns the list of edge clusters that matched the criteria
 // ctx: Mandatory The reference to the context
-// request: Mandatory. The request contains the search criteria
+// request: Mandatory. The request contains the ListEdgeClusters criteria
 // Returns the list of edge clusters that matched the criteria
-func (service *businessService) Search(
+func (service *businessService) ListEdgeClusters(
 	ctx context.Context,
-	request *SearchRequest) (*SearchResponse, error) {
-	result, err := service.repositoryService.Search(ctx, &repository.SearchRequest{
+	request *ListEdgeClustersRequest) (*ListEdgeClustersResponse, error) {
+	result, err := service.repositoryService.ListEdgeClusters(ctx, &repository.ListEdgeClustersRequest{
 		UserEmail:      request.UserEmail,
 		Pagination:     request.Pagination,
 		SortingOptions: request.SortingOptions,
@@ -224,7 +224,7 @@ func (service *businessService) Search(
 	})
 
 	if err != nil {
-		return &SearchResponse{
+		return &ListEdgeClustersResponse{
 			Err: err,
 		}, nil
 	}
@@ -232,7 +232,7 @@ func (service *businessService) Search(
 	for idx, edgeCluster := range result.EdgeClusters {
 		edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, edgeCluster.EdgeCluster.ClusterType)
 		if err != nil {
-			return nil, commonErrors.NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
+			return nil, commonErrors.NewUnknownErrorWithError("failed to create egde cluster provisioner", err)
 		}
 
 		if provisionDetailsReponse, err := edgeClusterProvisioner.GetProvisionDetails(
@@ -242,7 +242,7 @@ func (service *businessService) Search(
 		}
 	}
 
-	return &SearchResponse{
+	return &ListEdgeClustersResponse{
 		HasPreviousPage: result.HasPreviousPage,
 		HasNextPage:     result.HasNextPage,
 		TotalCount:      result.TotalCount,
@@ -270,7 +270,7 @@ func (service *businessService) ListEdgeClusterNodes(
 
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, repositoryResponse.EdgeCluster.ClusterType)
 	if err != nil {
-		return nil, commonErrors.NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
+		return nil, commonErrors.NewUnknownErrorWithError("failed to create egde cluster provisioner", err)
 	}
 
 	response, err := edgeClusterProvisioner.ListNodes(
@@ -308,12 +308,16 @@ func (service *businessService) ListEdgeClusterPods(
 
 	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, repositoryResponse.EdgeCluster.ClusterType)
 	if err != nil {
-		return nil, commonErrors.NewUnknownErrorWithError("Failed to create egde cluster provisioner", err)
+		return nil, commonErrors.NewUnknownErrorWithError("failed to create egde cluster provisioner", err)
 	}
 
 	response, err := edgeClusterProvisioner.ListPods(
 		ctx,
-		&edgeClusterTypes.ListPodsRequest{EdgeClusterID: request.EdgeClusterID})
+		&edgeClusterTypes.ListPodsRequest{
+			EdgeClusterID: request.EdgeClusterID,
+			Namespace:     request.Namespace,
+			NodeName:      request.NodeName,
+		})
 
 	if err != nil {
 		return &ListEdgeClusterPodsResponse{
@@ -323,5 +327,46 @@ func (service *businessService) ListEdgeClusterPods(
 
 	return &ListEdgeClusterPodsResponse{
 		Pods: response.Pods,
+	}, nil
+}
+
+// ListEdgeClusterServices lists an existing edge cluster services details
+// ctx: Mandatory The reference to the context
+// request: Mandatory. The request to list an existing edge cluster services details
+// Returns an existing edge cluster services details or error if something goes wrong.
+func (service *businessService) ListEdgeClusterServices(
+	ctx context.Context,
+	request *ListEdgeClusterServicesRequest) (*ListEdgeClusterServicesResponse, error) {
+	repositoryResponse, err := service.repositoryService.ReadEdgeCluster(ctx, &repository.ReadEdgeClusterRequest{
+		UserEmail:     request.UserEmail,
+		EdgeClusterID: request.EdgeClusterID,
+	})
+
+	if err != nil {
+		return &ListEdgeClusterServicesResponse{
+			Err: err,
+		}, nil
+	}
+
+	edgeClusterProvisioner, err := service.edgeClusterFactoryService.Create(ctx, repositoryResponse.EdgeCluster.ClusterType)
+	if err != nil {
+		return nil, commonErrors.NewUnknownErrorWithError("failed to create egde cluster provisioner", err)
+	}
+
+	response, err := edgeClusterProvisioner.ListServices(
+		ctx,
+		&edgeClusterTypes.ListServicesRequest{
+			EdgeClusterID: request.EdgeClusterID,
+			Namespace:     request.Namespace,
+		})
+
+	if err != nil {
+		return &ListEdgeClusterServicesResponse{
+			Err: err,
+		}, nil
+	}
+
+	return &ListEdgeClusterServicesResponse{
+		Services: response.Services,
 	}, nil
 }

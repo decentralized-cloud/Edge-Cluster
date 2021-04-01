@@ -31,8 +31,7 @@ const (
 
 // ProvisionDetails represents the provision detail of an edge cluster
 type ProvisionDetails struct {
-	Ingress           []v1.LoadBalancerIngress
-	Ports             []v1.ServicePort
+	Service           *v1.Service
 	KubeconfigContent string
 }
 
@@ -53,8 +52,8 @@ type EdgeClusterWithCursor struct {
 	ProvisionDetails ProvisionDetails
 }
 
-// EdgeClusterNodeStatus is information about the current status of a node.
-type EdgeClusterNodeStatus struct {
+// EdgeClusterNode is information about the current status of a node.
+type EdgeClusterNode struct {
 	// Node contains information about an existing edge cluster node
 	Node v1.Node
 }
@@ -63,4 +62,10 @@ type EdgeClusterNodeStatus struct {
 type EdgeClusterPod struct {
 	// Pod contains information about a deployed edge cluster node pod
 	Pod v1.Pod
+}
+
+// EdgeClusterService is information about the current status of a service.
+type EdgeClusterService struct {
+	// Service contains information about a deployed edge cluster node service
+	Service v1.Service
 }

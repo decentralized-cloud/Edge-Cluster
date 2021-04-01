@@ -66,12 +66,12 @@ func NewK3SProvisioner(
 
 	k3sDockerImage, err := configurationService.GetK3SDockerImage()
 	if err != nil {
-		return nil, types.NewUnknownErrorWithError("Failed to get the database name", err)
+		return nil, types.NewUnknownErrorWithError("failed to get the database name", err)
 	}
 
 	var clientset *kubernetes.Clientset
 	if clientset, err = kubernetes.NewForConfig(k8sRestConfig); err != nil {
-		return nil, types.NewUnknownErrorWithError("Failed to create client set", err)
+		return nil, types.NewUnknownErrorWithError("failed to create client set", err)
 	}
 
 	return &k3sProvisioner{
@@ -132,7 +132,7 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 
 			deployment, err := client.Get(ctx, internalName, metav1.GetOptions{})
 			if err != nil {
-				service.logger.Error("Failed to update the edge cluster", zap.Error(err))
+				service.logger.Error("failed to update the edge cluster", zap.Error(err))
 
 				return
 			}
@@ -143,7 +143,7 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 			}
 
 			if _, err = client.Update(ctx, deployment, metav1.UpdateOptions{}); err != nil {
-				service.logger.Error("Failed to update the edge custer", zap.Error(err))
+				service.logger.Error("failed to update the edge custer", zap.Error(err))
 
 				return
 			}
@@ -173,7 +173,7 @@ func (service *k3sProvisioner) DeleteProvision(
 		metav1.DeleteOptions{
 			PropagationPolicy: &deletePolicy,
 		}); err != nil {
-		service.logger.Error("Failed to delete namespace", zap.Error(err))
+		service.logger.Error("failed to delete namespace", zap.Error(err))
 
 		return
 	}
@@ -192,21 +192,21 @@ func (service *k3sProvisioner) GetProvisionDetails(
 	request *types.GetProvisionDetailsRequest) (response *types.GetProvisionDetailsResponse, err error) {
 	namespace := getNamespace(request.EdgeClusterID)
 
-	ingress, ports, err := service.getProvisionDetailsServiceDetails(ctx, namespace)
+	serviceDetails, err := service.getProvvisionedServiceDetails(ctx, namespace)
 	if err != nil {
-		service.logger.Error("Failed to get service details", zap.Error(err))
+		service.logger.Error("failed to get service details", zap.Error(err))
 
 		return
 	}
 
 	kubeconfigContent, err := service.getProvisionDetailsKubeConfigContent(ctx, namespace)
 	if err != nil {
-		service.logger.Error("Failed to get kubeconfig content", zap.Error(err))
+		service.logger.Error("failed to get kubeconfig content", zap.Error(err))
 
 		return
 	}
 
-	for _, item := range ingress {
+	for _, item := range serviceDetails.Status.LoadBalancer.Ingress {
 		if item.IP != "" {
 			kubeconfigContent = strings.Replace(kubeconfigContent, "127.0.0.1", item.IP, -1)
 		} else if item.Hostname != "" {
@@ -216,14 +216,13 @@ func (service *k3sProvisioner) GetProvisionDetails(
 		}
 	}
 
-	for _, item := range ports {
+	for _, item := range serviceDetails.Spec.Ports {
 		kubeconfigContent = strings.Replace(kubeconfigContent, fmt.Sprintf("%d", k3sPort), fmt.Sprintf("%d", item.Port), -1)
 	}
 
 	response = &types.GetProvisionDetailsResponse{
 		ProvisionDetails: models.ProvisionDetails{
-			Ingress:           ingress,
-			Ports:             ports,
+			Service:           serviceDetails,
 			KubeconfigContent: kubeconfigContent,
 		}}
 
@@ -244,12 +243,12 @@ func (service *k3sProvisioner) ListNodes(
 
 	var nodeList *v1.NodeList
 	if nodeList, err = clientset.CoreV1().Nodes().List(ctx, metav1.ListOptions{}); err != nil {
-		return nil, types.NewUnknownErrorWithError("Failed to retreive node list", err)
+		return nil, types.NewUnknownErrorWithError("failed to retreive node list", err)
 	}
 
-	response = &types.ListNodesResponse{Nodes: []models.EdgeClusterNodeStatus{}}
+	response = &types.ListNodesResponse{Nodes: []models.EdgeClusterNode{}}
 	for _, node := range nodeList.Items {
-		response.Nodes = append(response.Nodes, models.EdgeClusterNodeStatus{
+		response.Nodes = append(response.Nodes, models.EdgeClusterNode{
 			Node: node,
 		})
 	}
@@ -271,13 +270,40 @@ func (service *k3sProvisioner) ListPods(
 
 	var pods *v1.PodList
 	if pods, err = clientset.CoreV1().Pods(request.Namespace).List(ctx, metav1.ListOptions{}); err != nil {
-		return nil, types.NewUnknownErrorWithError("Failed to retreive pod list", err)
+		return nil, types.NewUnknownErrorWithError("failed to retreive pod list", err)
 	}
 
 	response = &types.ListPodsResponse{Pods: []models.EdgeClusterPod{}}
 	for _, pod := range pods.Items {
 		response.Pods = append(response.Pods, models.EdgeClusterPod{
 			Pod: pod,
+		})
+	}
+
+	return
+}
+
+// ListServices lists an existing edge cluster services that matchs the given search criteria
+// ctx: Mandatory The reference to the context
+// request: Mandatory. The request that contains the search criteria to filter the services
+// Returns the list of services that matches the given search criteria or error if something goes wrong.
+func (service *k3sProvisioner) ListServices(
+	ctx context.Context,
+	request *types.ListServicesRequest) (response *types.ListServicesResponse, err error) {
+	clientset, err := service.createClientsetForEdgeCluster(ctx, request.EdgeClusterID)
+	if err != nil {
+		return nil, err
+	}
+
+	var services *v1.ServiceList
+	if services, err = clientset.CoreV1().Services(request.Namespace).List(ctx, metav1.ListOptions{}); err != nil {
+		return nil, types.NewUnknownErrorWithError("failed to retreive service list", err)
+	}
+
+	response = &types.ListServicesResponse{Services: []models.EdgeClusterService{}}
+	for _, service := range services.Items {
+		response.Services = append(response.Services, models.EdgeClusterService{
+			Service: service,
 		})
 	}
 
@@ -303,7 +329,7 @@ func (service *k3sProvisioner) createProvisionNameSpace(ctx context.Context, nam
 		}
 
 	} else if err != nil {
-		service.logger.Error("Failed to validate the requested namespace", zap.Error(err), zap.String("namespace", namespace))
+		service.logger.Error("failed to validate the requested namespace", zap.Error(err), zap.String("namespace", namespace))
 
 		return
 	}
@@ -351,7 +377,7 @@ func (service *k3sProvisioner) createDeployment(
 	}
 
 	if _, err := client.Create(ctx, deploymentConfig, metav1.CreateOptions{}); err != nil {
-		service.logger.Error("Failed to create edge cluster", zap.Error(err), zap.Any("Config", deploymentConfig))
+		service.logger.Error("failed to create edge cluster", zap.Error(err), zap.Any("Config", deploymentConfig))
 	}
 
 	return
@@ -389,7 +415,7 @@ func (service *k3sProvisioner) createService(ctx context.Context, namespace stri
 	}
 
 	if _, err = serviceDeployment.Create(ctx, serviceConfig, metav1.CreateOptions{}); err != nil {
-		service.logger.Error("Failed to create service", zap.Error(err), zap.Any("Config", serviceConfig))
+		service.logger.Error("failed to create service", zap.Error(err), zap.Any("Config", serviceConfig))
 
 		return
 	}
@@ -430,22 +456,19 @@ func (service *k3sProvisioner) getDeploymentSpec(ctx context.Context, namespace 
 	}, nil
 }
 
-func (service *k3sProvisioner) getProvisionDetailsServiceDetails(
+func (service *k3sProvisioner) getProvvisionedServiceDetails(
 	ctx context.Context,
-	namespace string) (ingress []v1.LoadBalancerIngress, ports []v1.ServicePort, err error) {
+	namespace string) (*v1.Service, error) {
 
 	var serviceInfo *v1.Service
-
+	var err error
 	if serviceInfo, err = service.clientset.CoreV1().Services(namespace).Get(ctx, internalName, metav1.GetOptions{}); err != nil {
-		service.logger.Error("Failed to fetch service info", zap.Error(err))
+		service.logger.Error("failed to fetch service info", zap.Error(err))
 
-		return
+		return nil, err
 	}
 
-	ingress = serviceInfo.Status.LoadBalancer.Ingress
-	ports = serviceInfo.Spec.Ports
-
-	return
+	return serviceInfo, nil
 }
 
 func (service *k3sProvisioner) getProvisionDetailsKubeConfigContent(
@@ -472,7 +495,7 @@ func (service *k3sProvisioner) getProvisionDetailsKubeConfigContent(
 
 	executor, err := remotecommand.NewSPDYExecutor(service.k8sRestConfig, http.MethodPost, execRequest.URL())
 	if err != nil {
-		err = types.NewUnknownErrorWithError("Failed to retrieve KubeConfig content.", err)
+		err = types.NewUnknownErrorWithError("failed to retrieve KubeConfig content.", err)
 
 		return
 	}
@@ -480,7 +503,7 @@ func (service *k3sProvisioner) getProvisionDetailsKubeConfigContent(
 	output := &bytes.Buffer{}
 
 	if err = executor.Stream(remotecommand.StreamOptions{Stdout: output}); err != nil {
-		err = types.NewUnknownErrorWithError("Failed to retrieve KubeConfig content", err)
+		err = types.NewUnknownErrorWithError("failed to retrieve KubeConfig content", err)
 
 		return
 	}
@@ -500,7 +523,7 @@ func (service *k3sProvisioner) getAdvertiseAddress(
 	})
 
 	if err != nil {
-		service.logger.Error("Failed to retrieve advertise address", zap.Error(err))
+		service.logger.Error("failed to retrieve advertise address", zap.Error(err))
 
 		return "", err
 	}
@@ -521,7 +544,7 @@ func (service *k3sProvisioner) getAdvertiseAddress(
 		}
 	}
 
-	return "", types.NewUnknownError("Failed to retrieve advertise address")
+	return "", types.NewUnknownError("failed to retrieve advertise address")
 }
 
 func (service *k3sProvisioner) createClientsetForEdgeCluster(
@@ -540,13 +563,13 @@ func (service *k3sProvisioner) createClientsetForEdgeCluster(
 	var restConfig *rest.Config
 	if restConfig, err = clientcmd.RESTConfigFromKubeConfig(
 		[]byte(getProvisionDetailsResponse.ProvisionDetails.KubeconfigContent)); err != nil {
-		service.logger.Error("Failed to create Rest config from the given kube config", zap.Error(err))
+		service.logger.Error("failed to create Rest config from the given kube config", zap.Error(err))
 
 		return
 	}
 
 	if clientset, err = kubernetes.NewForConfig(restConfig); err != nil {
-		service.logger.Error("Failed to create client set", zap.Error(err))
+		service.logger.Error("failed to create client set", zap.Error(err))
 
 		return
 	}

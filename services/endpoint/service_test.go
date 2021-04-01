@@ -565,9 +565,9 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 	})
 
 	Context("EndpointCreatorService is instantiated", func() {
-		When("SearchEndpoint is called", func() {
+		When("ListEdgeClustersEndpoint is called", func() {
 			It("should return valid function", func() {
-				endpoint := sut.SearchEndpoint()
+				endpoint := sut.ListEdgeClustersEndpoint()
 				Ω(endpoint).ShouldNot(BeNil())
 			})
 
@@ -575,12 +575,12 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				endpoint       gokitendpoint.Endpoint
 				edgeClusterIDs []string
 				projectIDs     []string
-				request        business.SearchRequest
-				response       business.SearchResponse
+				request        business.ListEdgeClustersRequest
+				response       business.ListEdgeClustersResponse
 			)
 
 			BeforeEach(func() {
-				endpoint = sut.SearchEndpoint()
+				endpoint = sut.ListEdgeClustersEndpoint()
 				edgeClusterIDs = []string{}
 				for idx := 0; idx < rand.Intn(20)+1; idx++ {
 					edgeClusterIDs = append(edgeClusterIDs, cuid.New())
@@ -591,7 +591,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 					projectIDs = append(projectIDs, cuid.New())
 				}
 
-				request = business.SearchRequest{
+				request = business.ListEdgeClustersRequest{
 					UserEmail: cuid.New() + "@test.com",
 					Pagination: common.Pagination{
 						After:  convertStringToPointer(cuid.New()),
@@ -628,7 +628,7 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 					})
 				}
 
-				response = business.SearchResponse{
+				response = business.ListEdgeClustersResponse{
 					HasPreviousPage: (rand.Intn(10) % 2) == 0,
 					HasNextPage:     (rand.Intn(10) % 2) == 0,
 					TotalCount:      rand.Int63n(1000),
@@ -636,14 +636,14 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 				}
 			})
 
-			Context("SearchEndpoint function is returned", func() {
+			Context("ListEdgeClustersEndpoint function is returned", func() {
 				When("endpoint is called with nil context", func() {
 					It("should return ArgumentNilError", func() {
 						returnedResponse, err := endpoint(nil, &request)
 
 						Ω(err).Should(BeNil())
 						Ω(returnedResponse).ShouldNot(BeNil())
-						castedResponse := returnedResponse.(*business.SearchResponse)
+						castedResponse := returnedResponse.(*business.ListEdgeClustersResponse)
 						assertArgumentNilError("ctx", "", castedResponse.Err)
 					})
 				})
@@ -654,20 +654,20 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 
 						Ω(err).Should(BeNil())
 						Ω(returnedResponse).ShouldNot(BeNil())
-						castedResponse := returnedResponse.(*business.SearchResponse)
+						castedResponse := returnedResponse.(*business.ListEdgeClustersResponse)
 						assertArgumentNilError("request", "", castedResponse.Err)
 					})
 				})
 
 				When("endpoint is called with valid request", func() {
-					It("should call business service Search method", func() {
+					It("should call business service ListEdgeClusters method", func() {
 						mockBusinessService.
 							EXPECT().
-							Search(ctx, gomock.Any()).
+							ListEdgeClusters(ctx, gomock.Any()).
 							DoAndReturn(
 								func(
 									_ context.Context,
-									mappedRequest *business.SearchRequest) (*business.SearchResponse, error) {
+									mappedRequest *business.ListEdgeClustersRequest) (*business.ListEdgeClustersResponse, error) {
 									Ω(mappedRequest.Pagination).Should(Equal(request.Pagination))
 									Ω(mappedRequest.SortingOptions).Should(Equal(request.SortingOptions))
 									Ω(mappedRequest.EdgeClusterIDs).Should(Equal(request.EdgeClusterIDs))
@@ -680,17 +680,17 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 
 						Ω(err).Should(BeNil())
 						Ω(response).ShouldNot(BeNil())
-						castedResponse := returnedResponse.(*business.SearchResponse)
+						castedResponse := returnedResponse.(*business.ListEdgeClustersResponse)
 						Ω(castedResponse.Err).Should(BeNil())
 					})
 				})
 
-				When("business service Search returns error", func() {
+				When("business service ListEdgeClusters returns error", func() {
 					It("should return the same error", func() {
 						expectedErr := errors.New(cuid.New())
 						mockBusinessService.
 							EXPECT().
-							Search(gomock.Any(), gomock.Any()).
+							ListEdgeClusters(gomock.Any(), gomock.Any()).
 							Return(nil, expectedErr)
 
 						_, err := endpoint(ctx, &request)
@@ -699,11 +699,11 @@ var _ = Describe("Endpoint Creator Service Tests", func() {
 					})
 				})
 
-				When("business service Search returns response", func() {
+				When("business service ListEdgeClusters returns response", func() {
 					It("should return the same response", func() {
 						mockBusinessService.
 							EXPECT().
-							Search(gomock.Any(), gomock.Any()).
+							ListEdgeClusters(gomock.Any(), gomock.Any()).
 							Return(&response, nil)
 
 						returnedResponse, err := endpoint(ctx, &request)

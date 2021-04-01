@@ -61,8 +61,8 @@ type DeleteEdgeClusterResponse struct {
 	Err error
 }
 
-// SearchRequest contains the filter criteria to look for existing edge clusters
-type SearchRequest struct {
+// ListEdgeClustersRequest contains the filter criteria to look for existing edge clusters
+type ListEdgeClustersRequest struct {
 	UserEmail      string
 	Pagination     common.Pagination
 	SortingOptions []common.SortingOptionPair
@@ -70,8 +70,8 @@ type SearchRequest struct {
 	ProjectIDs     []string
 }
 
-// SearchResponse contains the list of the edge clusters that matched the result
-type SearchResponse struct {
+// ListEdgeClustersResponse contains the list of the edge clusters that matched the result
+type ListEdgeClustersResponse struct {
 	Err             error
 	HasPreviousPage bool
 	HasNextPage     bool
@@ -88,7 +88,7 @@ type ListEdgeClusterNodesRequest struct {
 // ListEdgeClusterNodesResponse contains the result of listing an existing edge cluster nodes details
 type ListEdgeClusterNodesResponse struct {
 	Err   error
-	Nodes []models.EdgeClusterNodeStatus
+	Nodes []models.EdgeClusterNode
 }
 
 // ListEdgeClusterPodsRequest contains the request to list an existing edge cluster pods details
@@ -103,4 +103,17 @@ type ListEdgeClusterPodsRequest struct {
 type ListEdgeClusterPodsResponse struct {
 	Err  error
 	Pods []models.EdgeClusterPod
+}
+
+// ListEdgeClusterServicesRequest contains the request to list an existing edge cluster services details
+type ListEdgeClusterServicesRequest struct {
+	UserEmail     string
+	EdgeClusterID string
+	Namespace     string
+}
+
+// ListEdgeClusterServicesResponse contains the result of listing an existing edge cluster services details
+type ListEdgeClusterServicesResponse struct {
+	Err      error
+	Services []models.EdgeClusterService
 }

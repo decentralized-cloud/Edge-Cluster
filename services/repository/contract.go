@@ -38,11 +38,11 @@ type RepositoryContract interface {
 		ctx context.Context,
 		request *DeleteEdgeClusterRequest) (*DeleteEdgeClusterResponse, error)
 
-	// Search returns the list of edge clusters that matched the criteria
+	// ListEdgeClusters returns the list of edge clusters that matched the criteria
 	// ctx: Mandatory The reference to the context
-	// request: Mandatory. The request contains the search criteria
+	// request: Mandatory. The request contains the ListEdgeClusters criteria
 	// Returns the list of edge clusters that matched the criteria
-	Search(
+	ListEdgeClusters(
 		ctx context.Context,
-		request *SearchRequest) (*SearchResponse, error)
+		request *ListEdgeClustersRequest) (*ListEdgeClustersResponse, error)
 }
