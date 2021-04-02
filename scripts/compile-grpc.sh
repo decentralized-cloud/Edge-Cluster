@@ -4,7 +4,7 @@ set -e
 set -x
 
 cleanup() {
-	docker rm extract-edge-cluster-contract-grpc-builder
+	docker rm extract-contract-grpc-builder
 }
 
 trap 'cleanup' EXIT
@@ -17,6 +17,6 @@ fi
 
 cd "$current_directory"/..
 
-docker build -f docker/Dockerfile.buildGrpcContract -t edge-cluster-contract-grpc-builder .
-docker create --name extract-edge-cluster-contract-grpc-builder edge-cluster-contract-grpc-builder
-docker cp extract-edge-cluster-contract-grpc-builder:/src/contract/grpc/go ./contract/grpc/
+docker build -f docker/Dockerfile.buildGrpcContract -t contract-grpc-builder .
+docker create --name extract-contract-grpc-builder contract-grpc-builder
+docker cp extract-contract-grpc-builder:/src/contract/grpc/go ./contract/grpc/
