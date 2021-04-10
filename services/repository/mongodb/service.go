@@ -186,7 +186,7 @@ func (service *mongodbRepositoryService) DeleteEdgeCluster(
 
 // ListEdgeClusters returns the list of edge clusters that matched the criteria
 // ctx: Mandatory The reference to the context
-// request: Mandatory. The request contains the ListEdgeClusters criteria
+// request: Mandatory. The request contains the search criteria
 // Returns the list of edge clusters that matched the criteria
 func (service *mongodbRepositoryService) ListEdgeClusters(
 	ctx context.Context,
