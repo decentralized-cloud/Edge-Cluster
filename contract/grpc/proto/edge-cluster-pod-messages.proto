@@ -8,7 +8,7 @@ import "google/protobuf/timestamp.proto";
 /**
  * Declares the specification of the desired behavior of the existing edge cluster pod
  */
- message EdgeClusterPodSpec {
+ message PodSpec {
   // The name of the node where the Pod is deployed into
   string nodeName = 1;
 }
@@ -16,7 +16,7 @@ import "google/protobuf/timestamp.proto";
 /**
  * The different error types
  */
- enum EdgeClusterPodConditionType {
+ enum PodConditionType {
 	// ContainersReady indicates whether all containers in the pod are ready.
   ContainersReady = 0;
 
@@ -34,12 +34,12 @@ import "google/protobuf/timestamp.proto";
 /**
  * Declares the most recently observed status of the existing edge cluster pod
  */
- message EdgeClusterPodCondition {
+ message PodCondition {
   // Type is the type of the condition.
-  EdgeClusterPodConditionType type = 1;
+  PodConditionType type = 1;
 
   // Status is the status of the condition.
-  EdgeClusterConditionStatus status = 2;
+  ConditionStatus status = 2;
 
   // Last time we got an update on a given condition.
   google.protobuf.Timestamp LastProbeTime = 3;
@@ -57,7 +57,7 @@ import "google/protobuf/timestamp.proto";
 /**
  * Declares the most recently observed status of the existing edge cluster pod
  */
- message EdgeClusterPodStatus {
+ message PodStatus {
   // IP address allocated to the pod. Routable at least within the cluster.
   string hostIP = 1;
 
@@ -65,7 +65,7 @@ import "google/protobuf/timestamp.proto";
   string podIP = 2;
 
 	// Current service state of pod.
-  repeated EdgeClusterPodCondition conditions = 3;
+  repeated PodCondition conditions = 3;
 }
 
 /**
@@ -73,13 +73,13 @@ import "google/protobuf/timestamp.proto";
  */
  message EdgeClusterPod {
   // The pod metadata
-  EdgeClusterObjectMetadata metadata = 1;
+  ObjectMeta metadata = 1;
 
   // The most recently observed status of the pod
-  EdgeClusterPodStatus status = 2;
+  PodStatus status = 2;
 
   // The specification of the desired behavior of the pod.
-  EdgeClusterPodSpec spec = 3;
+  PodSpec spec = 3;
 }
 
 /** 

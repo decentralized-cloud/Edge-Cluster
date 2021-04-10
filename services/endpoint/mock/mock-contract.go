@@ -90,6 +90,34 @@ func (mr *MockEndpointCreatorContractMockRecorder) ListEdgeClusterPodsEndpoint()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEdgeClusterPodsEndpoint", reflect.TypeOf((*MockEndpointCreatorContract)(nil).ListEdgeClusterPodsEndpoint))
 }
 
+// ListEdgeClusterServicesEndpoint mocks base method.
+func (m *MockEndpointCreatorContract) ListEdgeClusterServicesEndpoint() endpoint.Endpoint {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListEdgeClusterServicesEndpoint")
+	ret0, _ := ret[0].(endpoint.Endpoint)
+	return ret0
+}
+
+// ListEdgeClusterServicesEndpoint indicates an expected call of ListEdgeClusterServicesEndpoint.
+func (mr *MockEndpointCreatorContractMockRecorder) ListEdgeClusterServicesEndpoint() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEdgeClusterServicesEndpoint", reflect.TypeOf((*MockEndpointCreatorContract)(nil).ListEdgeClusterServicesEndpoint))
+}
+
+// ListEdgeClustersEndpoint mocks base method.
+func (m *MockEndpointCreatorContract) ListEdgeClustersEndpoint() endpoint.Endpoint {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListEdgeClustersEndpoint")
+	ret0, _ := ret[0].(endpoint.Endpoint)
+	return ret0
+}
+
+// ListEdgeClustersEndpoint indicates an expected call of ListEdgeClustersEndpoint.
+func (mr *MockEndpointCreatorContractMockRecorder) ListEdgeClustersEndpoint() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEdgeClustersEndpoint", reflect.TypeOf((*MockEndpointCreatorContract)(nil).ListEdgeClustersEndpoint))
+}
+
 // ReadEdgeClusterEndpoint mocks base method.
 func (m *MockEndpointCreatorContract) ReadEdgeClusterEndpoint() endpoint.Endpoint {
 	m.ctrl.T.Helper()
@@ -102,20 +130,6 @@ func (m *MockEndpointCreatorContract) ReadEdgeClusterEndpoint() endpoint.Endpoin
 func (mr *MockEndpointCreatorContractMockRecorder) ReadEdgeClusterEndpoint() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadEdgeClusterEndpoint", reflect.TypeOf((*MockEndpointCreatorContract)(nil).ReadEdgeClusterEndpoint))
-}
-
-// SearchEndpoint mocks base method.
-func (m *MockEndpointCreatorContract) SearchEndpoint() endpoint.Endpoint {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchEndpoint")
-	ret0, _ := ret[0].(endpoint.Endpoint)
-	return ret0
-}
-
-// SearchEndpoint indicates an expected call of SearchEndpoint.
-func (mr *MockEndpointCreatorContractMockRecorder) SearchEndpoint() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchEndpoint", reflect.TypeOf((*MockEndpointCreatorContract)(nil).SearchEndpoint))
 }
 
 // UpdateEdgeClusterEndpoint mocks base method.

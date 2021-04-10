@@ -410,9 +410,9 @@ var _ = Describe("Business Service Tests", func() {
 		})
 	})
 
-	Describe("Search is called", func() {
+	Describe("ListEdgeClusters is called", func() {
 		var (
-			request        business.SearchRequest
+			request        business.ListEdgeClustersRequest
 			edgeClusterIDs []string
 			projectIDs     []string
 		)
@@ -428,7 +428,7 @@ var _ = Describe("Business Service Tests", func() {
 				projectIDs = append(projectIDs, cuid.New())
 			}
 
-			request = business.SearchRequest{
+			request = business.ListEdgeClustersRequest{
 				Pagination: common.Pagination{
 					After:  convertStringToPointer(cuid.New()),
 					First:  convertIntToPointer(rand.Intn(1000)),
@@ -451,44 +451,44 @@ var _ = Describe("Business Service Tests", func() {
 		})
 
 		Context("edge cluster service is instantiated", func() {
-			When("Search is called", func() {
-				It("should call edge cluster repository Search method", func() {
+			When("ListEdgeClusters is called", func() {
+				It("should call edge cluster repository ListEdgeClusters method", func() {
 					mockRepositoryService.
 						EXPECT().
-						Search(ctx, gomock.Any()).
+						ListEdgeClusters(ctx, gomock.Any()).
 						DoAndReturn(
 							func(
 								_ context.Context,
-								mappedRequest *repository.SearchRequest) (*repository.SearchResponse, error) {
+								mappedRequest *repository.ListEdgeClustersRequest) (*repository.ListEdgeClustersResponse, error) {
 								Ω(mappedRequest.Pagination).Should(Equal(request.Pagination))
 								Ω(mappedRequest.SortingOptions).Should(Equal(request.SortingOptions))
 								Ω(mappedRequest.EdgeClusterIDs).Should(Equal(request.EdgeClusterIDs))
 								Ω(mappedRequest.ProjectIDs).Should(Equal(request.ProjectIDs))
 
-								return &repository.SearchResponse{}, nil
+								return &repository.ListEdgeClustersResponse{}, nil
 							})
 
-					response, err := sut.Search(ctx, &request)
+					response, err := sut.ListEdgeClusters(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(BeNil())
 				})
 			})
 
-			When("edge cluster repository Search returns error", func() {
+			When("edge cluster repository ListEdgeClusters returns error", func() {
 				It("should return the same error", func() {
 					expectedError := errors.New(cuid.New())
 					mockRepositoryService.
 						EXPECT().
-						Search(gomock.Any(), gomock.Any()).
+						ListEdgeClusters(gomock.Any(), gomock.Any()).
 						Return(nil, expectedError)
 
-					response, err := sut.Search(ctx, &request)
+					response, err := sut.ListEdgeClusters(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(Equal(expectedError))
 				})
 			})
 
-			When("edge cluster repository Search completes successfully", func() {
+			When("edge cluster repository ListEdgeClusters completes successfully", func() {
 				It("should return the list of matched edgeClusterIDs", func() {
 					edgeClusters := []models.EdgeClusterWithCursor{}
 
@@ -505,7 +505,7 @@ var _ = Describe("Business Service Tests", func() {
 						})
 					}
 
-					expectedResponse := repository.SearchResponse{
+					expectedResponse := repository.ListEdgeClustersResponse{
 						HasPreviousPage: (rand.Intn(10) % 2) == 0,
 						HasNextPage:     (rand.Intn(10) % 2) == 0,
 						TotalCount:      rand.Int63n(1000),
@@ -514,10 +514,10 @@ var _ = Describe("Business Service Tests", func() {
 
 					mockRepositoryService.
 						EXPECT().
-						Search(gomock.Any(), gomock.Any()).
+						ListEdgeClusters(gomock.Any(), gomock.Any()).
 						Return(&expectedResponse, nil)
 
-					response, err := sut.Search(ctx, &request)
+					response, err := sut.ListEdgeClusters(ctx, &request)
 					Ω(err).Should(BeNil())
 					Ω(response.Err).Should(BeNil())
 					Ω(response.HasPreviousPage).Should(Equal(expectedResponse.HasPreviousPage))

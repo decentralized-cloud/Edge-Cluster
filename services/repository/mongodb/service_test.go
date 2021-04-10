@@ -245,10 +245,10 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			}
 		})
 
-		When("user searches for edge clusters with selected edge cluster Ids and first 10 projects without providing project Id", func() {
+		When("user ListEdgeClusterses for edge clusters with selected edge cluster Ids and first 10 projects without providing project Id", func() {
 			It("should return first 10 edge clusters", func() {
 				first := 10
-				searchRequest := repository.SearchRequest{
+				ListEdgeClustersRequest := repository.ListEdgeClustersRequest{
 					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     []string{},
@@ -259,7 +259,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					SortingOptions: []common.SortingOptionPair{},
 				}
 
-				response, err := sut.Search(ctx, &searchRequest)
+				response, err := sut.ListEdgeClusters(ctx, &ListEdgeClustersRequest)
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusters).ShouldNot(BeNil())
 				Ω(len(response.EdgeClusters)).Should(Equal(10))
@@ -273,10 +273,10 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			})
 		})
 
-		When("user searches for edge clusters with selected edge cluster Ids and first 10 projects", func() {
+		When("user ListEdgeClusterses for edge clusters with selected edge cluster Ids and first 10 projects", func() {
 			It("should return first 10 edge clusters", func() {
 				first := 10
-				searchRequest := repository.SearchRequest{
+				ListEdgeClustersRequest := repository.ListEdgeClustersRequest{
 					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
@@ -287,7 +287,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					SortingOptions: []common.SortingOptionPair{},
 				}
 
-				response, err := sut.Search(ctx, &searchRequest)
+				response, err := sut.ListEdgeClusters(ctx, &ListEdgeClustersRequest)
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusters).ShouldNot(BeNil())
 				Ω(len(response.EdgeClusters)).Should(Equal(10))
@@ -301,10 +301,10 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			})
 		})
 
-		When("user searches for edge clusters with selected edge cluster Ids and first 5 projects", func() {
+		When("user ListEdgeClusterses for edge clusters with selected edge cluster Ids and first 5 projects", func() {
 			It("should return first 5 edge clusters", func() {
 				first := 5
-				searchRequest := repository.SearchRequest{
+				ListEdgeClustersRequest := repository.ListEdgeClustersRequest{
 					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
@@ -315,7 +315,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					SortingOptions: []common.SortingOptionPair{},
 				}
 
-				response, err := sut.Search(ctx, &searchRequest)
+				response, err := sut.ListEdgeClusters(ctx, &ListEdgeClustersRequest)
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusters).ShouldNot(BeNil())
 				Ω(len(response.EdgeClusters)).Should(Equal(5))
@@ -329,10 +329,10 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			})
 		})
 
-		When("user searches for edge clusters with selected edge clusters Ids with After parameter provided.", func() {
+		When("user ListEdgeClusterses for edge clusters with selected edge clusters Ids with After parameter provided.", func() {
 			It("should return first 9 edge clusters after provided edge clusters id", func() {
 				first := 9
-				searchRequest := repository.SearchRequest{
+				ListEdgeClustersRequest := repository.ListEdgeClustersRequest{
 					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
@@ -343,7 +343,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					SortingOptions: []common.SortingOptionPair{},
 				}
 
-				response, err := sut.Search(ctx, &searchRequest)
+				response, err := sut.ListEdgeClusters(ctx, &ListEdgeClustersRequest)
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusters).ShouldNot(BeNil())
 				Ω(len(response.EdgeClusters)).Should(Equal(9))
@@ -357,10 +357,10 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			})
 		})
 
-		When("user searches for edge clusters with selected edge clusters Ids and last 10 edge clusters.", func() {
+		When("user ListEdgeClusterses for edge clusters with selected edge clusters Ids and last 10 edge clusters.", func() {
 			It("should return last 10 edge clusters.", func() {
 				last := 10
-				searchRequest := repository.SearchRequest{
+				ListEdgeClustersRequest := repository.ListEdgeClustersRequest{
 					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
@@ -371,7 +371,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					SortingOptions: []common.SortingOptionPair{},
 				}
 
-				response, err := sut.Search(ctx, &searchRequest)
+				response, err := sut.ListEdgeClusters(ctx, &ListEdgeClustersRequest)
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusters).ShouldNot(BeNil())
 				Ω(len(response.EdgeClusters)).Should(Equal(10))
@@ -385,10 +385,10 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			})
 		})
 
-		When("user searches for edge clusters with selected edge clusters Ids with Before parameter provided.", func() {
+		When("user ListEdgeClusterses for edge clusters with selected edge clusters Ids with Before parameter provided.", func() {
 			It("should return first 9 edge clusters before provided edge cluster id", func() {
 				last := 9
-				searchRequest := repository.SearchRequest{
+				ListEdgeClustersRequest := repository.ListEdgeClustersRequest{
 					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
@@ -399,7 +399,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					SortingOptions: []common.SortingOptionPair{},
 				}
 
-				response, err := sut.Search(ctx, &searchRequest)
+				response, err := sut.ListEdgeClusters(ctx, &ListEdgeClustersRequest)
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusters).ShouldNot(BeNil())
 				Ω(len(response.EdgeClusters)).Should(Equal(9))
@@ -413,10 +413,10 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			})
 		})
 
-		When("user searches for edge clusters with selected edge cluster Ids and first 10 edge clusters with ascending order on name property", func() {
+		When("user ListEdgeClusterses for edge clusters with selected edge cluster Ids and first 10 edge clusters with ascending order on name property", func() {
 			It("should return first 10 edge clusters in adcending order on name field", func() {
 				first := 10
-				searchRequest := repository.SearchRequest{
+				ListEdgeClustersRequest := repository.ListEdgeClustersRequest{
 					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
@@ -429,7 +429,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					},
 				}
 
-				response, err := sut.Search(ctx, &searchRequest)
+				response, err := sut.ListEdgeClusters(ctx, &ListEdgeClustersRequest)
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusters).ShouldNot(BeNil())
 				Ω(len(response.EdgeClusters)).Should(Equal(10))
@@ -443,10 +443,10 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 			})
 		})
 
-		When("user searches for edge clusters with selected edge cluster Ids and first 10 edge clusters with descending order on name property", func() {
+		When("user ListEdgeClusterses for edge clusters with selected edge cluster Ids and first 10 edge clusters with descending order on name property", func() {
 			It("should return first 10 edge clusters in descending order on name field", func() {
 				first := 10
-				searchRequest := repository.SearchRequest{
+				ListEdgeClustersRequest := repository.ListEdgeClustersRequest{
 					UserEmail:      createRequest.UserEmail,
 					EdgeClusterIDs: edgeClusterIDs,
 					ProjectIDs:     projectIDs,
@@ -459,7 +459,7 @@ var _ = Describe("Mongodb Repository Service Tests", func() {
 					},
 				}
 
-				response, err := sut.Search(ctx, &searchRequest)
+				response, err := sut.ListEdgeClusters(ctx, &ListEdgeClustersRequest)
 				Ω(err).Should(BeNil())
 				Ω(response.EdgeClusters).ShouldNot(BeNil())
 				Ω(len(response.EdgeClusters)).Should(Equal(10))

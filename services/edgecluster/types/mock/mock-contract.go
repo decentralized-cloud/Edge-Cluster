@@ -149,6 +149,21 @@ func (mr *MockEdgeClusterProvisionerContractMockRecorder) ListPods(ctx, request 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListPods", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).ListPods), ctx, request)
 }
 
+// ListServices mocks base method.
+func (m *MockEdgeClusterProvisionerContract) ListServices(ctx context.Context, request *types.ListServicesRequest) (*types.ListServicesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListServices", ctx, request)
+	ret0, _ := ret[0].(*types.ListServicesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListServices indicates an expected call of ListServices.
+func (mr *MockEdgeClusterProvisionerContractMockRecorder) ListServices(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListServices", reflect.TypeOf((*MockEdgeClusterProvisionerContract)(nil).ListServices), ctx, request)
+}
+
 // UpdateProvisionWithRetry mocks base method.
 func (m *MockEdgeClusterProvisionerContract) UpdateProvisionWithRetry(ctx context.Context, request *types.UpdateProvisionRequest) (*types.UpdateProvisionResponse, error) {
 	m.ctrl.T.Helper()

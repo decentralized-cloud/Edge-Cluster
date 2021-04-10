@@ -18,18 +18,19 @@ import (
 )
 
 type transportService struct {
-	logger                      *zap.Logger
-	configurationService        configuration.ConfigurationContract
-	endpointCreatorService      endpoint.EndpointCreatorContract
-	middlewareProviderService   middleware.MiddlewareProviderContract
-	jwksURL                     string
-	createEdgeClusterHandler    gokitgrpc.Handler
-	readEdgeClusterHandler      gokitgrpc.Handler
-	updateEdgeClusterHandler    gokitgrpc.Handler
-	deleteEdgeClusterHandler    gokitgrpc.Handler
-	searchHandler               gokitgrpc.Handler
-	listEdgeClusterNodesHandler gokitgrpc.Handler
-	listEdgeClusterPodsHandler  gokitgrpc.Handler
+	logger                         *zap.Logger
+	configurationService           configuration.ConfigurationContract
+	endpointCreatorService         endpoint.EndpointCreatorContract
+	middlewareProviderService      middleware.MiddlewareProviderContract
+	jwksURL                        string
+	createEdgeClusterHandler       gokitgrpc.Handler
+	readEdgeClusterHandler         gokitgrpc.Handler
+	updateEdgeClusterHandler       gokitgrpc.Handler
+	deleteEdgeClusterHandler       gokitgrpc.Handler
+	ListEdgeClustersHandler        gokitgrpc.Handler
+	listEdgeClusterNodesHandler    gokitgrpc.Handler
+	listEdgeClusterPodsHandler     gokitgrpc.Handler
+	listEdgeClusterServicesHandler gokitgrpc.Handler
 }
 
 var Live bool
@@ -103,7 +104,7 @@ func (service *transportService) Start() error {
 	}
 
 	gRPCServer := grpc.NewServer()
-	edgeClusterGRPCContract.RegisterEdgeClusterServiceServer(gRPCServer, service)
+	edgeClusterGRPCContract.RegisterServiceServer(gRPCServer, service)
 	service.logger.Info("gRPC service started", zap.String("address", address))
 
 	Live = true
@@ -160,13 +161,13 @@ func (service *transportService) setupHandlers() {
 		encodeDeleteEdgeClusterResponse,
 	)
 
-	endpoint = service.endpointCreatorService.SearchEndpoint()
-	endpoint = service.middlewareProviderService.CreateLoggingMiddleware("Search")(endpoint)
+	endpoint = service.endpointCreatorService.ListEdgeClustersEndpoint()
+	endpoint = service.middlewareProviderService.CreateLoggingMiddleware("ListEdgeClusters")(endpoint)
 	endpoint = service.createAuthMiddleware()(endpoint)
-	service.searchHandler = gokitgrpc.NewServer(
+	service.ListEdgeClustersHandler = gokitgrpc.NewServer(
 		endpoint,
-		decodeSearchRequest,
-		encodeSearchResponse,
+		decodeListEdgeClustersRequest,
+		encodeListEdgeClustersResponse,
 	)
 
 	endpoint = service.endpointCreatorService.ListEdgeClusterNodesEndpoint()
@@ -186,6 +187,16 @@ func (service *transportService) setupHandlers() {
 		decodeListEdgeClusterPodsRequest,
 		encodeListEdgeClusterPodsResponse,
 	)
+
+	endpoint = service.endpointCreatorService.ListEdgeClusterServicesEndpoint()
+	endpoint = service.middlewareProviderService.CreateLoggingMiddleware("ListEdgeClusterServices")(endpoint)
+	endpoint = service.createAuthMiddleware()(endpoint)
+	service.listEdgeClusterServicesHandler = gokitgrpc.NewServer(
+		endpoint,
+		decodeListEdgeClusterServicesRequest,
+		encodeListEdgeClusterServicesResponse,
+	)
+
 }
 
 // CreateEdgeCluster creates a new edgeCluster
@@ -251,22 +262,22 @@ func (service *transportService) DeleteEdgeCluster(
 
 }
 
-// Search returns the list  of edge clusters that matched the provided criteria
+// ListEdgeClusters returns the list  of edge clusters that matched the provided criteria
 // context: Mandatory. The reference to the context
 // request: Mandatory. The request contains the filter criteria to look for existing edge clusters
 // Returns the list of edge clusters that matched the provided criteria
-func (service *transportService) Search(
+func (service *transportService) ListEdgeClusters(
 	ctx context.Context,
-	request *edgeClusterGRPCContract.SearchRequest) (*edgeClusterGRPCContract.SearchResponse, error) {
-	_, response, err := service.searchHandler.ServeGRPC(ctx, request)
+	request *edgeClusterGRPCContract.ListEdgeClustersRequest) (*edgeClusterGRPCContract.ListEdgeClustersResponse, error) {
+	_, response, err := service.ListEdgeClustersHandler.ServeGRPC(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.(*edgeClusterGRPCContract.SearchResponse), nil
+	return response.(*edgeClusterGRPCContract.ListEdgeClustersResponse), nil
 }
 
-// Search returns the list  of edge clusters that matched the provided criteria
+// ListEdgeClusterNodes returns the list  of edge clusters that matched the provided criteria
 // context: Mandatory. The reference to the context
 // request: Mandatory. The request contains the filter criteria to look for existing edge clusters
 // Returns the list of edge clusters that matched the provided criteria
@@ -281,7 +292,7 @@ func (service *transportService) ListEdgeClusterNodes(
 	return response.(*edgeClusterGRPCContract.ListEdgeClusterNodesResponse), nil
 }
 
-// Search returns the list  of edge clusters that matched the provided criteria
+// ListEdgeClusterPods returns the list  of edge clusters that matched the provided criteria
 // context: Mandatory. The reference to the context
 // request: Mandatory. The request contains the filter criteria to look for existing edge clusters
 // Returns the list of edge clusters that matched the provided criteria
@@ -294,4 +305,19 @@ func (service *transportService) ListEdgeClusterPods(
 	}
 
 	return response.(*edgeClusterGRPCContract.ListEdgeClusterPodsResponse), nil
+}
+
+// ListEdgeClusterServices returns the list  of edge clusters that matched the provided criteria
+// context: Mandatory. The reference to the context
+// request: Mandatory. The request contains the filter criteria to look for existing edge clusters
+// Returns the list of edge clusters that matched the provided criteria
+func (service *transportService) ListEdgeClusterServices(
+	ctx context.Context,
+	request *edgeClusterGRPCContract.ListEdgeClusterServicesRequest) (*edgeClusterGRPCContract.ListEdgeClusterServicesResponse, error) {
+	_, response, err := service.listEdgeClusterServicesHandler.ServeGRPC(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.(*edgeClusterGRPCContract.ListEdgeClusterServicesResponse), nil
 }

@@ -9,7 +9,7 @@ import "google/protobuf/timestamp.proto";
 /**
  * The valid conditions of node
  */
- enum EdgeClusterNodeConditionType {
+ enum NodeConditionType {
   // NodeReady means kubelet is healthy and ready to accept pods.
   Ready = 0;
 
@@ -27,14 +27,14 @@ import "google/protobuf/timestamp.proto";
 }
 
 /**
- * EdgeClusterNodeCondition contains condition information for a node.
+ * NodeCondition contains condition information for a node.
  */
- message EdgeClusterNodeCondition {
+ message NodeCondition {
   // Type of node condition.
-  EdgeClusterNodeConditionType type = 1;
+  NodeConditionType type = 1;
 
   // Status of the condition, one of True, False, Unknown.
-  EdgeClusterConditionStatus status = 2;
+  ConditionStatus status = 2;
 
   // Last time we got an update on a given condition.
   google.protobuf.Timestamp LastHeartbeatTime = 3;
@@ -52,7 +52,7 @@ import "google/protobuf/timestamp.proto";
 /**
  * The valid address type of edge cluster node
  */
- enum EdgeClusterNodeAddressType {
+ enum NodeAddressType {
   Hostname = 0;
   ExternalIP = 1;
   InternalIP = 2;
@@ -65,16 +65,16 @@ import "google/protobuf/timestamp.proto";
  */
  message EdgeClusterNodeAddress {
   // Edge cluster node address type, one of Hostname, ExternalIP or InternalIP.
-  EdgeClusterNodeAddressType nodeAddressType = 1;
+  NodeAddressType nodeAddressType = 1;
 
   // The node address.
   string address = 2;
 }
 
 /**
- * EdgeClusterNodeSystemInfo contains a set of ids/uuids to uniquely identify the node.
+ * NodeSystemInfo contains a set of ids/uuids to uniquely identify the node.
  */
- message EdgeClusterNodeSystemInfo {
+ message NodeSystemInfo {
   // MachineID reported by the node. For unique machine identification
   // in the cluster this field is preferred.
   string machineID = 1;
@@ -109,17 +109,17 @@ import "google/protobuf/timestamp.proto";
 }
 
 /**
- * EdgeClusterNodeStatus is information about the current status of a node.
+ * NodeStatus is information about the current status of a node.
  */
- message EdgeClusterNodeStatus {
+ message NodeStatus {
   // Conditions is an array of current observed node conditions.
-  repeated EdgeClusterNodeCondition conditions = 1;
+  repeated NodeCondition conditions = 1;
 
   // Addresses is the list of addresses reachable to the node.
   repeated EdgeClusterNodeAddress addresses = 2;
 
   // NodeInfo is the set of ids/uuids to uniquely identify the node.
-  EdgeClusterNodeSystemInfo nodeInfo = 3;
+  NodeSystemInfo nodeInfo = 3;
 }
 
 /**
@@ -127,10 +127,10 @@ import "google/protobuf/timestamp.proto";
  */
  message EdgeClusterNode {
   // The node metadata
-  EdgeClusterObjectMetadata metadata = 1;
+  ObjectMeta metadata = 1;
 
   // The most recently observed status of the node
-  EdgeClusterNodeStatus status = 2;
+  NodeStatus status = 2;
 }
 
 /** 

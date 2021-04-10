@@ -29,57 +29,16 @@ message EdgeCluster {
 }
 
 /**
- * Ingress represents the status of a load-balancer ingress point
- * traffic intended for the service should be sent to an ingress point.
- */
- message Ingress {
-  // IP is set for load-balancer ingress points that are IP based
-  // (typically GCE or OpenStack load-balancers)
-  string ip = 1;
-
-  // Hostname is set for load-balancer ingress points that are DNS based
-  // (typically AWS load-balancers)
-  string hostname = 2;
-}
-
-/**
- *  Protocol defines network protocols.
- */
- enum Protocol {
-  // TCP protocol
-  TCP = 0;
-
-  // UDP protocol
-  UDP = 1;
-
-  // SCTP protocol
-  SCTP = 2;
-}
-
-/**
- * Port contains information on service's port.
- */
- message Port {
-  // The port number of the edge-cluster master port
-  int32 port = 1;
-
-  // The protocol of the edge-cluster master port
-  Protocol protcol = 2;
-}
-
-/**
  * The edge cluster provision details contains details such as current status of the edge cluster
  * as well as ingress address of the edge cluster to connect to
  */
 message EdgeClusterProvisionDetail {
-  // The ingress details of the edge cluster master node
-  repeated Ingress ingress = 1;
-
-  // The ingress details of the edge cluster master node
-  repeated Port ports = 2;
+	// LoadBalancer contains the current status of the load-balancer,
+	// if one is present.
+  LoadBalancerStatus loadBalancer  = 1;
 
   // The provisioned edge cluster kubeconfig content
-  string kubeConfigContent = 3;
+  string kubeConfigContent = 2;
 }
 
 /**
@@ -192,7 +151,7 @@ message DeleteEdgeClusterResponse {
 /**
  * Request to search for edge clusters
  */
-message SearchRequest {
+message ListEdgeClustersRequest {
   // The pagination information
   Pagination pagination = 1;
 
@@ -228,7 +187,7 @@ message EdgeClusterWithCursor {
 /**
  * Response contains the result of searching for edge clusters
  */
-message SearchResponse {
+message ListEdgeClustersResponse {
   // Indicate whether the operation has any error
   Error error = 1;
 

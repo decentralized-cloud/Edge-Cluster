@@ -5,11 +5,12 @@ package edgecluster;
 import "edge-cluster-messages.proto";
 import "edge-cluster-node-messages.proto";
 import "edge-cluster-pod-messages.proto";
+import "edge-cluster-service-messages.proto";
 
 /**
- * The edge cluster servcie that can create new edge cluster, read, update and delete existing edge cluster
+ * The edge cluster servcie
  */
-service EdgeClusterService {
+service Service {
   // CreateEdgeCluster creates a new edge cluster
   // request: The request to create a new edge cluster
   // Returns the result of creating new edge cluster
@@ -30,10 +31,10 @@ service EdgeClusterService {
   // Returns the result of deleting an existing edge cluster
   rpc DeleteEdgeCluster(DeleteEdgeClusterRequest) returns (DeleteEdgeClusterResponse);
 
-  // Search returns the list of edge clusters that matched the criteria
+  // ListEdgeClusters returns the list of edge clusters that matched the criteria
   // request: The request contains the search criteria
   // Returns the list of edge clusters that matched the criteria
-  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc ListEdgeClusters(ListEdgeClustersRequest) returns (ListEdgeClustersResponse);
 
   // ListEdgeClusterNodes lists an existing edge cluster nodes details
   // request: The request to list an existing edge cluster nodes details
@@ -44,4 +45,9 @@ service EdgeClusterService {
   // request: The request to list an existing edge cluster pods details
   // Returns an existing edge cluster pods details
   rpc ListEdgeClusterPods(ListEdgeClusterPodsRequest) returns (ListEdgeClusterPodsResponse);
+
+  // ListEdgeClusterServices lists an existing edge cluster services details
+  // request: The request to list an existing edge cluster services details
+  // Returns an existing edge cluster services details
+  rpc ListEdgeClusterServices(ListEdgeClusterServicesRequest) returns (ListEdgeClusterServicesResponse);
 }

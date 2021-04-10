@@ -95,6 +95,36 @@ func (mr *MockBusinessContractMockRecorder) ListEdgeClusterPods(ctx, request int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEdgeClusterPods", reflect.TypeOf((*MockBusinessContract)(nil).ListEdgeClusterPods), ctx, request)
 }
 
+// ListEdgeClusterServices mocks base method.
+func (m *MockBusinessContract) ListEdgeClusterServices(ctx context.Context, request *business.ListEdgeClusterServicesRequest) (*business.ListEdgeClusterServicesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListEdgeClusterServices", ctx, request)
+	ret0, _ := ret[0].(*business.ListEdgeClusterServicesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListEdgeClusterServices indicates an expected call of ListEdgeClusterServices.
+func (mr *MockBusinessContractMockRecorder) ListEdgeClusterServices(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEdgeClusterServices", reflect.TypeOf((*MockBusinessContract)(nil).ListEdgeClusterServices), ctx, request)
+}
+
+// ListEdgeClusters mocks base method.
+func (m *MockBusinessContract) ListEdgeClusters(ctx context.Context, request *business.ListEdgeClustersRequest) (*business.ListEdgeClustersResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListEdgeClusters", ctx, request)
+	ret0, _ := ret[0].(*business.ListEdgeClustersResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListEdgeClusters indicates an expected call of ListEdgeClusters.
+func (mr *MockBusinessContractMockRecorder) ListEdgeClusters(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEdgeClusters", reflect.TypeOf((*MockBusinessContract)(nil).ListEdgeClusters), ctx, request)
+}
+
 // ReadEdgeCluster mocks base method.
 func (m *MockBusinessContract) ReadEdgeCluster(ctx context.Context, request *business.ReadEdgeClusterRequest) (*business.ReadEdgeClusterResponse, error) {
 	m.ctrl.T.Helper()
@@ -108,21 +138,6 @@ func (m *MockBusinessContract) ReadEdgeCluster(ctx context.Context, request *bus
 func (mr *MockBusinessContractMockRecorder) ReadEdgeCluster(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadEdgeCluster", reflect.TypeOf((*MockBusinessContract)(nil).ReadEdgeCluster), ctx, request)
-}
-
-// Search mocks base method.
-func (m *MockBusinessContract) Search(ctx context.Context, request *business.SearchRequest) (*business.SearchResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Search", ctx, request)
-	ret0, _ := ret[0].(*business.SearchResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Search indicates an expected call of Search.
-func (mr *MockBusinessContractMockRecorder) Search(ctx, request interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockBusinessContract)(nil).Search), ctx, request)
 }
 
 // UpdateEdgeCluster mocks base method.

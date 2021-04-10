@@ -65,6 +65,21 @@ func (mr *MockRepositoryContractMockRecorder) DeleteEdgeCluster(ctx, request int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteEdgeCluster", reflect.TypeOf((*MockRepositoryContract)(nil).DeleteEdgeCluster), ctx, request)
 }
 
+// ListEdgeClusters mocks base method.
+func (m *MockRepositoryContract) ListEdgeClusters(ctx context.Context, request *repository.ListEdgeClustersRequest) (*repository.ListEdgeClustersResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListEdgeClusters", ctx, request)
+	ret0, _ := ret[0].(*repository.ListEdgeClustersResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListEdgeClusters indicates an expected call of ListEdgeClusters.
+func (mr *MockRepositoryContractMockRecorder) ListEdgeClusters(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEdgeClusters", reflect.TypeOf((*MockRepositoryContract)(nil).ListEdgeClusters), ctx, request)
+}
+
 // ReadEdgeCluster mocks base method.
 func (m *MockRepositoryContract) ReadEdgeCluster(ctx context.Context, request *repository.ReadEdgeClusterRequest) (*repository.ReadEdgeClusterResponse, error) {
 	m.ctrl.T.Helper()
@@ -78,21 +93,6 @@ func (m *MockRepositoryContract) ReadEdgeCluster(ctx context.Context, request *r
 func (mr *MockRepositoryContractMockRecorder) ReadEdgeCluster(ctx, request interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadEdgeCluster", reflect.TypeOf((*MockRepositoryContract)(nil).ReadEdgeCluster), ctx, request)
-}
-
-// Search mocks base method.
-func (m *MockRepositoryContract) Search(ctx context.Context, request *repository.SearchRequest) (*repository.SearchResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Search", ctx, request)
-	ret0, _ := ret[0].(*repository.SearchResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Search indicates an expected call of Search.
-func (mr *MockRepositoryContractMockRecorder) Search(ctx, request interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockRepositoryContract)(nil).Search), ctx, request)
 }
 
 // UpdateEdgeCluster mocks base method.
