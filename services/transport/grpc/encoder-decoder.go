@@ -55,7 +55,7 @@ func encodeCreateEdgeClusterResponse(
 			EdgeClusterID: castedResponse.EdgeClusterID,
 			EdgeCluster:   edgeCluster,
 			Cursor:        castedResponse.Cursor,
-			ProvisionDetail: &edgeClusterGRPCContract.EdgeClusterProvisionDetail{
+			ProvisionDetail: &edgeClusterGRPCContract.ProvisionDetail{
 				LoadBalancer:      mapFromLoadBalancerStatus(castedResponse.ProvisionDetails.Service.Status.LoadBalancer),
 				KubeConfigContent: castedResponse.ProvisionDetails.KubeconfigContent,
 			},
@@ -100,7 +100,7 @@ func encodeReadEdgeClusterResponse(
 		return &edgeClusterGRPCContract.ReadEdgeClusterResponse{
 			Error:       edgeClusterGRPCContract.Error_NO_ERROR,
 			EdgeCluster: edgeCluster,
-			ProvisionDetail: &edgeClusterGRPCContract.EdgeClusterProvisionDetail{
+			ProvisionDetail: &edgeClusterGRPCContract.ProvisionDetail{
 				LoadBalancer:      mapFromLoadBalancerStatus(castedResponse.ProvisionDetails.Service.Status.LoadBalancer),
 				KubeConfigContent: castedResponse.ProvisionDetails.KubeconfigContent,
 			},
@@ -152,7 +152,7 @@ func encodeUpdateEdgeClusterResponse(
 			Error:       edgeClusterGRPCContract.Error_NO_ERROR,
 			EdgeCluster: edgeCluster,
 			Cursor:      castedResponse.Cursor,
-			ProvisionDetail: &edgeClusterGRPCContract.EdgeClusterProvisionDetail{
+			ProvisionDetail: &edgeClusterGRPCContract.ProvisionDetail{
 				LoadBalancer:      mapFromLoadBalancerStatus(castedResponse.ProvisionDetails.Service.Status.LoadBalancer),
 				KubeConfigContent: castedResponse.ProvisionDetails.KubeconfigContent,
 			},
@@ -275,7 +275,7 @@ func encodeListEdgeClustersResponse(
 					EdgeClusterID: edgeCluster.EdgeClusterID,
 					EdgeCluster:   mappedEdgeCluster,
 					Cursor:        edgeCluster.Cursor,
-					ProvisionDetail: &edgeClusterGRPCContract.EdgeClusterProvisionDetail{
+					ProvisionDetail: &edgeClusterGRPCContract.ProvisionDetail{
 						LoadBalancer:      mapFromLoadBalancerStatus(edgeCluster.ProvisionDetails.Service.Status.LoadBalancer),
 						KubeConfigContent: edgeCluster.ProvisionDetails.KubeconfigContent,
 					},

@@ -125,7 +125,7 @@ message LoadBalancerIngress {
 	// Hostname is set for load-balancer ingress points that are DNS based
   string hostname = 2;
 
-	// Ports is a list of records of service ports
+	// PortStatus is a list of records of service ports
 	// If used, every port defined in the service should have an entry in it
   repeated PortStatus portStatus = 3; 
 }

@@ -30,22 +30,22 @@ import "google/protobuf/timestamp.proto";
  * NodeCondition contains condition information for a node.
  */
  message NodeCondition {
-  // Type of node condition.
+  // Type is the type of the condition
   NodeConditionType type = 1;
 
-  // Status of the condition, one of True, False, Unknown.
+  // Status is the status of the condition
   ConditionStatus status = 2;
 
   // Last time we got an update on a given condition.
   google.protobuf.Timestamp LastHeartbeatTime = 3;
 
-  // Last time the condition transit from one status to another.
+  // Last time the condition transitioned from one status to another.
   google.protobuf.Timestamp LastTransitionTime = 4;
 
-  // (brief) reason for the condition's last transition.
+  // Unique, one-word, CamelCase reason for the condition last transition.
   string Reason = 5;
 
-  // Human readable message indicating details about last transition.
+  // Human-readable message indicating details about last transition.
   string Message = 6;
 }
 
