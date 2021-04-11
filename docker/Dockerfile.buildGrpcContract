@@ -5,11 +5,11 @@ ADD ./contract/grpc /src
 WORKDIR /src/proto
 RUN mkdir -p ../go
 RUN protoc \
-    --go_opt=Mcommons.proto=./ \
+    --go_opt=Medge-cluster-commons.proto=./ \
     --go_opt=Medge-cluster-messages.proto=./ \
     --go_opt=Medge-cluster-node-messages.proto=./ \
     --go_opt=Medge-cluster-pod-messages.proto=./ \
     --go_opt=Medge-cluster-service-messages.proto=./ \
-    --go_opt=Moperations.proto=./ \
+    --go_opt=Medge-cluster-operations.proto=./ \
     *.proto \
     --go_out=plugins=grpc:../go
