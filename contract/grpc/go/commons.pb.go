@@ -552,7 +552,7 @@ type LoadBalancerIngress struct {
 	Ip string `protobuf:"bytes,1,opt,name=ip,proto3" json:"ip,omitempty"`
 	// Hostname is set for load-balancer ingress points that are DNS based
 	Hostname string `protobuf:"bytes,2,opt,name=hostname,proto3" json:"hostname,omitempty"`
-	// Ports is a list of records of service ports
+	// PortStatus is a list of records of service ports
 	// If used, every port defined in the service should have an entry in it
 	PortStatus []*PortStatus `protobuf:"bytes,3,rep,name=portStatus,proto3" json:"portStatus,omitempty"`
 }

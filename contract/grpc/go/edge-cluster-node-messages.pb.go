@@ -147,17 +147,17 @@ type NodeCondition struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// Type of node condition.
+	// Type is the type of the condition
 	Type NodeConditionType `protobuf:"varint,1,opt,name=type,proto3,enum=edgecluster.NodeConditionType" json:"type,omitempty"`
-	// Status of the condition, one of True, False, Unknown.
+	// Status is the status of the condition
 	Status ConditionStatus `protobuf:"varint,2,opt,name=status,proto3,enum=edgecluster.ConditionStatus" json:"status,omitempty"`
 	// Last time we got an update on a given condition.
 	LastHeartbeatTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=LastHeartbeatTime,proto3" json:"LastHeartbeatTime,omitempty"`
-	// Last time the condition transit from one status to another.
+	// Last time the condition transitioned from one status to another.
 	LastTransitionTime *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=LastTransitionTime,proto3" json:"LastTransitionTime,omitempty"`
-	// (brief) reason for the condition's last transition.
+	// Unique, one-word, CamelCase reason for the condition last transition.
 	Reason string `protobuf:"bytes,5,opt,name=Reason,proto3" json:"Reason,omitempty"`
-	// Human readable message indicating details about last transition.
+	// Human-readable message indicating details about last transition.
 	Message string `protobuf:"bytes,6,opt,name=Message,proto3" json:"Message,omitempty"`
 }
 

@@ -32,7 +32,7 @@ message EdgeCluster {
  * The edge cluster provision details contains details such as current status of the edge cluster
  * as well as ingress address of the edge cluster to connect to
  */
-message EdgeClusterProvisionDetail {
+message ProvisionDetail {
 	// LoadBalancer contains the current status of the load-balancer,
 	// if one is present.
   LoadBalancerStatus loadBalancer  = 1;
@@ -70,7 +70,7 @@ message CreateEdgeClusterResponse {
   string cursor = 5;
 
   // The edge cluster provision details
-  EdgeClusterProvisionDetail provisionDetail = 6;
+  ProvisionDetail provisionDetail = 6;
 }
 
 /** Request to read an existing edge cluster
@@ -94,7 +94,7 @@ message ReadEdgeClusterResponse {
   EdgeCluster edgeCluster = 3;
 
   // The edge cluster provision details
-  EdgeClusterProvisionDetail provisionDetail = 6;
+  ProvisionDetail provisionDetail = 6;
 }
 
 /**
@@ -126,7 +126,7 @@ message UpdateEdgeClusterResponse {
   string cursor = 4;
 
   // The edge cluster provision details
-  EdgeClusterProvisionDetail provisionDetail = 6;
+  ProvisionDetail provisionDetail = 6;
 }
 
 /**
@@ -181,7 +181,7 @@ message EdgeClusterWithCursor {
   EdgeCluster edgeCluster = 3;
 
   // The edge cluster provision details
-  EdgeClusterProvisionDetail provisionDetail = 4;
+  ProvisionDetail provisionDetail = 4;
 }
 
 /**
