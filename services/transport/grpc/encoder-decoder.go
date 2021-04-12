@@ -51,14 +51,11 @@ func encodeCreateEdgeClusterResponse(
 		}
 
 		return &edgeClusterGRPCContract.CreateEdgeClusterResponse{
-			Error:         edgeClusterGRPCContract.Error_NO_ERROR,
-			EdgeClusterID: castedResponse.EdgeClusterID,
-			EdgeCluster:   edgeCluster,
-			Cursor:        castedResponse.Cursor,
-			ProvisionDetail: &edgeClusterGRPCContract.ProvisionDetail{
-				LoadBalancer:      mapFromLoadBalancerStatus(castedResponse.ProvisionDetails.Service.Status.LoadBalancer),
-				KubeConfigContent: castedResponse.ProvisionDetails.KubeconfigContent,
-			},
+			Error:           edgeClusterGRPCContract.Error_NO_ERROR,
+			EdgeClusterID:   castedResponse.EdgeClusterID,
+			EdgeCluster:     edgeCluster,
+			Cursor:          castedResponse.Cursor,
+			ProvisionDetail: mapFromProvisionDetails(castedResponse.ProvisionDetails),
 		}, nil
 	}
 
@@ -98,12 +95,9 @@ func encodeReadEdgeClusterResponse(
 		}
 
 		return &edgeClusterGRPCContract.ReadEdgeClusterResponse{
-			Error:       edgeClusterGRPCContract.Error_NO_ERROR,
-			EdgeCluster: edgeCluster,
-			ProvisionDetail: &edgeClusterGRPCContract.ProvisionDetail{
-				LoadBalancer:      mapFromLoadBalancerStatus(castedResponse.ProvisionDetails.Service.Status.LoadBalancer),
-				KubeConfigContent: castedResponse.ProvisionDetails.KubeconfigContent,
-			},
+			Error:           edgeClusterGRPCContract.Error_NO_ERROR,
+			EdgeCluster:     edgeCluster,
+			ProvisionDetail: mapFromProvisionDetails(castedResponse.ProvisionDetails),
 		}, nil
 	}
 
@@ -149,13 +143,10 @@ func encodeUpdateEdgeClusterResponse(
 		}
 
 		return &edgeClusterGRPCContract.UpdateEdgeClusterResponse{
-			Error:       edgeClusterGRPCContract.Error_NO_ERROR,
-			EdgeCluster: edgeCluster,
-			Cursor:      castedResponse.Cursor,
-			ProvisionDetail: &edgeClusterGRPCContract.ProvisionDetail{
-				LoadBalancer:      mapFromLoadBalancerStatus(castedResponse.ProvisionDetails.Service.Status.LoadBalancer),
-				KubeConfigContent: castedResponse.ProvisionDetails.KubeconfigContent,
-			},
+			Error:           edgeClusterGRPCContract.Error_NO_ERROR,
+			EdgeCluster:     edgeCluster,
+			Cursor:          castedResponse.Cursor,
+			ProvisionDetail: mapFromProvisionDetails(castedResponse.ProvisionDetails),
 		}, nil
 	}
 
@@ -272,13 +263,10 @@ func encodeListEdgeClustersResponse(
 				mappedEdgeCluster, _ := mapFromEdgeCluster(edgeCluster.EdgeCluster)
 
 				return &edgeClusterGRPCContract.EdgeClusterWithCursor{
-					EdgeClusterID: edgeCluster.EdgeClusterID,
-					EdgeCluster:   mappedEdgeCluster,
-					Cursor:        edgeCluster.Cursor,
-					ProvisionDetail: &edgeClusterGRPCContract.ProvisionDetail{
-						LoadBalancer:      mapFromLoadBalancerStatus(edgeCluster.ProvisionDetails.Service.Status.LoadBalancer),
-						KubeConfigContent: edgeCluster.ProvisionDetails.KubeconfigContent,
-					},
+					EdgeClusterID:   edgeCluster.EdgeClusterID,
+					EdgeCluster:     mappedEdgeCluster,
+					Cursor:          edgeCluster.Cursor,
+					ProvisionDetail: mapFromProvisionDetails(edgeCluster.ProvisionDetails),
 				}
 			}).([]*edgeClusterGRPCContract.EdgeClusterWithCursor),
 		}, nil
@@ -607,11 +595,11 @@ func mapFromObjectMeta(objectMeta metav1.ObjectMeta) *edgeClusterGRPCContract.Ob
 }
 
 func mapFromLoadBalancerStatus(loadBalancerStatus v1.LoadBalancerStatus) (mappedValues *edgeClusterGRPCContract.LoadBalancerStatus) {
-	mappedValue := edgeClusterGRPCContract.LoadBalancerStatus{}
-	mappedValue.Ingress = []*edgeClusterGRPCContract.LoadBalancerIngress{}
+	mappedValues = &edgeClusterGRPCContract.LoadBalancerStatus{}
+	mappedValues.Ingress = []*edgeClusterGRPCContract.LoadBalancerIngress{}
 
 	for _, ingress := range loadBalancerStatus.Ingress {
-		mappedValue.Ingress = append(mappedValue.Ingress, &edgeClusterGRPCContract.LoadBalancerIngress{
+		mappedValues.Ingress = append(mappedValues.Ingress, &edgeClusterGRPCContract.LoadBalancerIngress{
 			Ip:         ingress.IP,
 			Hostname:   ingress.Hostname,
 			PortStatus: mapFromPortStatus(ingress.Ports),
@@ -638,4 +626,17 @@ func mapFromPortStatus(ports []v1.PortStatus) (portStatus []*edgeClusterGRPCCont
 	}
 
 	return
+}
+
+func mapFromProvisionDetails(from models.ProvisionDetails) (mappedValues *edgeClusterGRPCContract.ProvisionDetail) {
+	provisionDetails := edgeClusterGRPCContract.ProvisionDetail{
+		LoadBalancer:      nil,
+		KubeConfigContent: from.KubeconfigContent,
+	}
+
+	if from.Service != nil {
+		provisionDetails.LoadBalancer = mapFromLoadBalancerStatus(from.Service.Status.LoadBalancer)
+	}
+
+	return &provisionDetails
 }
