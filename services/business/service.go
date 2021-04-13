@@ -7,9 +7,11 @@ import (
 	edgeClusterTypes "github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	"github.com/decentralized-cloud/edge-cluster/services/repository"
 	commonErrors "github.com/micro-business/go-core/system/errors"
+	"go.uber.org/zap"
 )
 
 type businessService struct {
+	logger                    *zap.Logger
 	repositoryService         repository.RepositoryContract
 	edgeClusterFactoryService edgeClusterTypes.EdgeClusterFactoryContract
 }
@@ -18,10 +20,16 @@ type businessService struct {
 // repositoryService: Mandatory. Reference to the repository service that can persist the edge cluster related data
 // edgeClusterFactoryService: Mandatory. Reference to the factory service that can that can create different type of supported
 // edge cluster provisioner
+// logger: Mandatory. Reference to the logger service
 // Returns the new service or error if something goes wrong
 func NewBusinessService(
+	logger *zap.Logger,
 	repositoryService repository.RepositoryContract,
 	edgeClusterFactoryService edgeClusterTypes.EdgeClusterFactoryContract) (BusinessContract, error) {
+	if logger == nil {
+		return nil, commonErrors.NewArgumentNilError("logger", "logger is required")
+	}
+
 	if repositoryService == nil {
 		return nil, commonErrors.NewArgumentNilError("repositoryService", "repositoryService is required")
 	}
@@ -31,6 +39,7 @@ func NewBusinessService(
 	}
 
 	return &businessService{
+		logger:                    logger,
 		repositoryService:         repositoryService,
 		edgeClusterFactoryService: edgeClusterFactoryService,
 	}, nil
@@ -60,29 +69,25 @@ func (service *businessService) CreateEdgeCluster(
 		return nil, commonErrors.NewUnknownErrorWithError("failed to create egde cluster provisioner", err)
 	}
 
-	if _, err = edgeClusterProvisioner.CreateProvision(
-		ctx,
-		&edgeClusterTypes.CreateProvisionRequest{
-			EdgeClusterID: repositoryResponse.EdgeClusterID,
-			ClusterSecret: request.EdgeCluster.ClusterSecret,
-		}); err != nil {
+	go func() {
+		if _, err = edgeClusterProvisioner.CreateProvision(
+			ctx,
+			&edgeClusterTypes.CreateProvisionRequest{
+				EdgeClusterID: repositoryResponse.EdgeClusterID,
+				ClusterSecret: request.EdgeCluster.ClusterSecret,
+			}); err != nil {
 
-		return nil, commonErrors.NewUnknownErrorWithError("failed to provision egde cluster", err)
-	}
+			service.logger.Error("failed to provision egde cluster", zap.Error(err))
 
-	response := &CreateEdgeClusterResponse{
+			return
+		}
+	}()
+
+	return &CreateEdgeClusterResponse{
 		EdgeClusterID: repositoryResponse.EdgeClusterID,
 		EdgeCluster:   repositoryResponse.EdgeCluster,
 		Cursor:        repositoryResponse.Cursor,
-	}
-
-	if provisionDetailsReponse, err := edgeClusterProvisioner.GetProvisionDetails(
-		ctx,
-		&edgeClusterTypes.GetProvisionDetailsRequest{EdgeClusterID: repositoryResponse.EdgeClusterID}); err == nil {
-		response.ProvisionDetails = provisionDetailsReponse.ProvisionDetails
-	}
-
-	return response, nil
+	}, nil
 }
 
 // ReadEdgeCluster read an existing edge cluster
@@ -146,29 +151,24 @@ func (service *businessService) UpdateEdgeCluster(
 		return nil, commonErrors.NewUnknownErrorWithError("failed to create egde cluster provisioner", err)
 	}
 
-	_, err = edgeClusterProvisioner.UpdateProvisionWithRetry(
-		ctx,
-		&edgeClusterTypes.UpdateProvisionRequest{
-			EdgeClusterID: request.EdgeClusterID,
-			ClusterSecret: request.EdgeCluster.ClusterSecret,
-		})
+	go func() {
+		if _, err = edgeClusterProvisioner.UpdateProvisionWithRetry(
+			ctx,
+			&edgeClusterTypes.UpdateProvisionRequest{
+				EdgeClusterID: request.EdgeClusterID,
+				ClusterSecret: request.EdgeCluster.ClusterSecret,
+			}); err != nil {
+			service.logger.Error("failed to update the existing edge cluster provision", zap.Error(err))
 
-	if err != nil {
-		return nil, commonErrors.NewUnknownErrorWithError("failed to update the existing edge cluster provision", err)
-	}
+			return
+		}
 
-	response := &UpdateEdgeClusterResponse{
+	}()
+
+	return &UpdateEdgeClusterResponse{
 		EdgeCluster: repositoryResponse.EdgeCluster,
 		Cursor:      repositoryResponse.Cursor,
-	}
-
-	if provisionDetailsReponse, err := edgeClusterProvisioner.GetProvisionDetails(
-		ctx,
-		&edgeClusterTypes.GetProvisionDetailsRequest{EdgeClusterID: request.EdgeClusterID}); err == nil {
-		response.ProvisionDetails = provisionDetailsReponse.ProvisionDetails
-	}
-
-	return response, nil
+	}, nil
 }
 
 // DeleteEdgeCluster delete an existing edge cluster
