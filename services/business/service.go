@@ -71,7 +71,7 @@ func (service *businessService) CreateEdgeCluster(
 
 	go func() {
 		if _, err = edgeClusterProvisioner.CreateProvision(
-			ctx,
+			context.Background(),
 			&edgeClusterTypes.CreateProvisionRequest{
 				EdgeClusterID: repositoryResponse.EdgeClusterID,
 				ClusterSecret: request.EdgeCluster.ClusterSecret,
@@ -153,7 +153,7 @@ func (service *businessService) UpdateEdgeCluster(
 
 	go func() {
 		if _, err = edgeClusterProvisioner.UpdateProvisionWithRetry(
-			ctx,
+			context.Background(),
 			&edgeClusterTypes.UpdateProvisionRequest{
 				EdgeClusterID: request.EdgeClusterID,
 				ClusterSecret: request.EdgeCluster.ClusterSecret,
