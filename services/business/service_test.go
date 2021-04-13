@@ -18,6 +18,7 @@ import (
 	"github.com/lucsky/cuid"
 	"github.com/micro-business/go-core/common"
 	commonErrors "github.com/micro-business/go-core/system/errors"
+	"go.uber.org/zap"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -38,6 +39,7 @@ var _ = Describe("Business Service Tests", func() {
 		mockEdgeClusterProvisionerService *edgeClusterFactoryMock.MockEdgeClusterProvisionerContract
 		mockEdgeClusterFactoryService     *edgeClusterFactoryMock.MockEdgeClusterFactoryContract
 		ctx                               context.Context
+		logger                            *zap.Logger
 	)
 
 	BeforeEach(func() {
@@ -75,7 +77,12 @@ var _ = Describe("Business Service Tests", func() {
 			Return(mockEdgeClusterProvisionerService, nil).
 			AnyTimes()
 
+		var err error
+		logger, err = zap.NewProduction()
+		Ω(err).Should(BeNil())
+
 		sut, _ = business.NewBusinessService(
+			logger,
 			mockRepositoryService,
 			mockEdgeClusterFactoryService,
 		)
@@ -90,6 +97,7 @@ var _ = Describe("Business Service Tests", func() {
 		When("edge cluster repository service is not provided and NewBusinessService is called", func() {
 			It("should return ArgumentNilError", func() {
 				service, err := business.NewBusinessService(
+					logger,
 					nil,
 					mockEdgeClusterFactoryService)
 				Ω(service).Should(BeNil())
@@ -100,6 +108,7 @@ var _ = Describe("Business Service Tests", func() {
 		When("edge cluster factory service is not provided and NewBusinessService is called", func() {
 			It("should return ArgumentNilError", func() {
 				service, err := business.NewBusinessService(
+					logger,
 					mockRepositoryService,
 					nil)
 				Ω(service).Should(BeNil())
@@ -110,6 +119,7 @@ var _ = Describe("Business Service Tests", func() {
 		When("all dependencies are resolved and NewBusinessService is called", func() {
 			It("should instantiate the new BusinessService", func() {
 				service, err := business.NewBusinessService(
+					logger,
 					mockRepositoryService,
 					mockEdgeClusterFactoryService)
 				Ω(err).Should(BeNil())
