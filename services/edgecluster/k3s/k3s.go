@@ -321,7 +321,7 @@ func (service *k3sProvisioner) createProvisionNameSpace(ctx context.Context, nam
 
 		if _, err = service.clientset.CoreV1().Namespaces().Create(ctx, namespaceConfig, metav1.CreateOptions{}); err != nil {
 			service.logger.Error(
-				"Failed to create namespace",
+				"failed to create namespace",
 				zap.Error(err),
 				zap.String("namespace", namespace))
 
