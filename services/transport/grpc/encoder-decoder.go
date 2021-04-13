@@ -51,11 +51,10 @@ func encodeCreateEdgeClusterResponse(
 		}
 
 		return &edgeClusterGRPCContract.CreateEdgeClusterResponse{
-			Error:           edgeClusterGRPCContract.Error_NO_ERROR,
-			EdgeClusterID:   castedResponse.EdgeClusterID,
-			EdgeCluster:     edgeCluster,
-			Cursor:          castedResponse.Cursor,
-			ProvisionDetail: mapFromProvisionDetails(castedResponse.ProvisionDetails),
+			Error:         edgeClusterGRPCContract.Error_NO_ERROR,
+			EdgeClusterID: castedResponse.EdgeClusterID,
+			EdgeCluster:   edgeCluster,
+			Cursor:        castedResponse.Cursor,
 		}, nil
 	}
 
@@ -143,10 +142,9 @@ func encodeUpdateEdgeClusterResponse(
 		}
 
 		return &edgeClusterGRPCContract.UpdateEdgeClusterResponse{
-			Error:           edgeClusterGRPCContract.Error_NO_ERROR,
-			EdgeCluster:     edgeCluster,
-			Cursor:          castedResponse.Cursor,
-			ProvisionDetail: mapFromProvisionDetails(castedResponse.ProvisionDetails),
+			Error:       edgeClusterGRPCContract.Error_NO_ERROR,
+			EdgeCluster: edgeCluster,
+			Cursor:      castedResponse.Cursor,
 		}, nil
 	}
 
@@ -451,31 +449,25 @@ func mapFromEdgeCluster(edgeCluster models.EdgeCluster) (grpcEdgeCluster *edgeCl
 	return
 }
 
-func mapFromNodeStatus(nodes []models.EdgeClusterNode) (mappedValues []*edgeClusterGRPCContract.EdgeClusterNode) {
-	mappedValues = []*edgeClusterGRPCContract.EdgeClusterNode{}
-
-	for _, node := range nodes {
-		conditions := []*edgeClusterGRPCContract.NodeCondition{}
-
-		for _, condition := range node.Node.Status.Conditions {
-			conditions = append(conditions, &edgeClusterGRPCContract.NodeCondition{
+func mapFromNodeStatus(nodes []models.EdgeClusterNode) []*edgeClusterGRPCContract.EdgeClusterNode {
+	return funk.Map(nodes, func(node models.EdgeClusterNode) *edgeClusterGRPCContract.EdgeClusterNode {
+		conditions := funk.Map(node.Node.Status.Conditions, func(condition v1.NodeCondition) *edgeClusterGRPCContract.NodeCondition {
+			return &edgeClusterGRPCContract.NodeCondition{
 				Type:               edgeClusterGRPCContract.NodeConditionType(edgeClusterGRPCContract.NodeConditionType_value[string(condition.Type)]),
 				Status:             edgeClusterGRPCContract.ConditionStatus(edgeClusterGRPCContract.ConditionStatus_value[string(condition.Status)]),
 				LastHeartbeatTime:  &timestamppb.Timestamp{Seconds: condition.LastHeartbeatTime.Time.Unix()},
 				LastTransitionTime: &timestamppb.Timestamp{Seconds: condition.LastTransitionTime.Time.Unix()},
 				Reason:             condition.Reason,
 				Message:            condition.Message,
-			})
-		}
+			}
+		}).([]*edgeClusterGRPCContract.NodeCondition)
 
-		addresses := []*edgeClusterGRPCContract.EdgeClusterNodeAddress{}
-
-		for _, address := range node.Node.Status.Addresses {
-			addresses = append(addresses, &edgeClusterGRPCContract.EdgeClusterNodeAddress{
+		addresses := funk.Map(node.Node.Status.Addresses, func(address v1.NodeAddress) *edgeClusterGRPCContract.EdgeClusterNodeAddress {
+			return &edgeClusterGRPCContract.EdgeClusterNodeAddress{
 				NodeAddressType: edgeClusterGRPCContract.NodeAddressType(edgeClusterGRPCContract.NodeAddressType_value[string(address.Type)]),
 				Address:         address.Address,
-			})
-		}
+			}
+		}).([]*edgeClusterGRPCContract.EdgeClusterNodeAddress)
 
 		nodeInfo := edgeClusterGRPCContract.NodeSystemInfo{
 			MachineID:               node.Node.Status.NodeInfo.MachineID,
@@ -490,7 +482,7 @@ func mapFromNodeStatus(nodes []models.EdgeClusterNode) (mappedValues []*edgeClus
 			Architecture:            node.Node.Status.NodeInfo.Architecture,
 		}
 
-		mappedValues = append(mappedValues, &edgeClusterGRPCContract.EdgeClusterNode{
+		return &edgeClusterGRPCContract.EdgeClusterNode{
 			Metadata: &edgeClusterGRPCContract.ObjectMeta{
 				Id:        string(node.Node.UID),
 				Name:      node.Node.Name,
@@ -501,30 +493,24 @@ func mapFromNodeStatus(nodes []models.EdgeClusterNode) (mappedValues []*edgeClus
 				Addresses:  addresses,
 				NodeInfo:   &nodeInfo,
 			},
-		})
-	}
-
-	return
+		}
+	}).([]*edgeClusterGRPCContract.EdgeClusterNode)
 }
 
-func mapFromPods(pods []models.EdgeClusterPod) (mappedValues []*edgeClusterGRPCContract.EdgeClusterPod) {
-	mappedValues = []*edgeClusterGRPCContract.EdgeClusterPod{}
-
-	for _, pod := range pods {
-		conditions := []*edgeClusterGRPCContract.PodCondition{}
-
-		for _, condition := range pod.Pod.Status.Conditions {
-			conditions = append(conditions, &edgeClusterGRPCContract.PodCondition{
+func mapFromPods(pods []models.EdgeClusterPod) []*edgeClusterGRPCContract.EdgeClusterPod {
+	return funk.Map(pods, func(pod models.EdgeClusterPod) *edgeClusterGRPCContract.EdgeClusterPod {
+		conditions := funk.Map(pod.Pod.Status.Conditions, func(condition v1.PodCondition) *edgeClusterGRPCContract.PodCondition {
+			return &edgeClusterGRPCContract.PodCondition{
 				Type:               edgeClusterGRPCContract.PodConditionType(edgeClusterGRPCContract.PodConditionType_value[string(condition.Type)]),
 				Status:             edgeClusterGRPCContract.ConditionStatus(edgeClusterGRPCContract.ConditionStatus_value[string(condition.Status)]),
 				LastProbeTime:      &timestamppb.Timestamp{Seconds: condition.LastProbeTime.Time.Unix()},
 				LastTransitionTime: &timestamppb.Timestamp{Seconds: condition.LastTransitionTime.Time.Unix()},
 				Reason:             condition.Reason,
 				Message:            condition.Message,
-			})
-		}
+			}
+		}).([]*edgeClusterGRPCContract.PodCondition)
 
-		mappedValues = append(mappedValues, &edgeClusterGRPCContract.EdgeClusterPod{
+		return &edgeClusterGRPCContract.EdgeClusterPod{
 			Metadata: mapFromObjectMeta(pod.Pod.ObjectMeta),
 			Spec: &edgeClusterGRPCContract.PodSpec{
 				NodeName: pod.Pod.Spec.NodeName,
@@ -534,40 +520,33 @@ func mapFromPods(pods []models.EdgeClusterPod) (mappedValues []*edgeClusterGRPCC
 				PodIP:      pod.Pod.Status.PodIP,
 				Conditions: conditions,
 			},
-		})
-	}
-
-	return
+		}
+	}).([]*edgeClusterGRPCContract.EdgeClusterPod)
 }
 
-func mapFromServices(services []models.EdgeClusterService) (mappedValues []*edgeClusterGRPCContract.EdgeClusterService) {
-	mappedValues = []*edgeClusterGRPCContract.EdgeClusterService{}
-
-	for _, service := range services {
-		conditions := []*edgeClusterGRPCContract.ServiceCondition{}
-
-		for _, condition := range service.Service.Status.Conditions {
-			conditions = append(conditions, &edgeClusterGRPCContract.ServiceCondition{
+func mapFromServices(services []models.EdgeClusterService) []*edgeClusterGRPCContract.EdgeClusterService {
+	return funk.Map(services, func(service models.EdgeClusterService) *edgeClusterGRPCContract.EdgeClusterService {
+		conditions := funk.Map(service.Service.Status.Conditions, func(condition metav1.Condition) *edgeClusterGRPCContract.ServiceCondition {
+			return &edgeClusterGRPCContract.ServiceCondition{
 				Type:               condition.Type,
 				Status:             edgeClusterGRPCContract.ConditionStatus(edgeClusterGRPCContract.ConditionStatus_value[string(condition.Status)]),
 				LastTransitionTime: &timestamppb.Timestamp{Seconds: condition.LastTransitionTime.Time.Unix()},
 				Reason:             condition.Reason,
 				Message:            condition.Message,
-			})
-		}
+			}
+		}).([]*edgeClusterGRPCContract.ServiceCondition)
 
-		ports := []*edgeClusterGRPCContract.ServicePort{}
-		for _, port := range service.Service.Spec.Ports {
-			ports = append(ports, &edgeClusterGRPCContract.ServicePort{
+		ports := funk.Map(service.Service.Spec.Ports, func(port v1.ServicePort) *edgeClusterGRPCContract.ServicePort {
+			return &edgeClusterGRPCContract.ServicePort{
 				Name:       port.Name,
 				Protcol:    edgeClusterGRPCContract.Protocol(edgeClusterGRPCContract.Protocol_value[string(port.Protocol)]),
 				Port:       port.Port,
 				TargetPort: port.TargetPort.String(),
 				NodePort:   port.NodePort,
-			})
-		}
+			}
+		}).([]*edgeClusterGRPCContract.ServicePort)
 
-		mappedValues = append(mappedValues, &edgeClusterGRPCContract.EdgeClusterService{
+		return &edgeClusterGRPCContract.EdgeClusterService{
 			Metadata: mapFromObjectMeta(service.Service.ObjectMeta),
 			Spec: &edgeClusterGRPCContract.ServiceSpec{
 				Ports:        ports,
@@ -580,10 +559,8 @@ func mapFromServices(services []models.EdgeClusterService) (mappedValues []*edge
 				LoadBalancer: mapFromLoadBalancerStatus(service.Service.Status.LoadBalancer),
 				Conditions:   conditions,
 			},
-		})
-	}
-
-	return
+		}
+	}).([]*edgeClusterGRPCContract.EdgeClusterService)
 }
 
 func mapFromObjectMeta(objectMeta metav1.ObjectMeta) *edgeClusterGRPCContract.ObjectMeta {
@@ -595,47 +572,44 @@ func mapFromObjectMeta(objectMeta metav1.ObjectMeta) *edgeClusterGRPCContract.Ob
 }
 
 func mapFromLoadBalancerStatus(loadBalancerStatus v1.LoadBalancerStatus) (mappedValues *edgeClusterGRPCContract.LoadBalancerStatus) {
-	mappedValues = &edgeClusterGRPCContract.LoadBalancerStatus{}
-	mappedValues.Ingress = []*edgeClusterGRPCContract.LoadBalancerIngress{}
-
-	for _, ingress := range loadBalancerStatus.Ingress {
-		mappedValues.Ingress = append(mappedValues.Ingress, &edgeClusterGRPCContract.LoadBalancerIngress{
-			Ip:         ingress.IP,
-			Hostname:   ingress.Hostname,
-			PortStatus: mapFromPortStatus(ingress.Ports),
-		})
+	mappedValues = &edgeClusterGRPCContract.LoadBalancerStatus{
+		Ingress: funk.Map(loadBalancerStatus.Ingress, func(ingress v1.LoadBalancerIngress) *edgeClusterGRPCContract.LoadBalancerIngress {
+			return &edgeClusterGRPCContract.LoadBalancerIngress{
+				Ip:         ingress.IP,
+				Hostname:   ingress.Hostname,
+				PortStatus: mapFromPortStatus(ingress.Ports),
+			}
+		}).([]*edgeClusterGRPCContract.LoadBalancerIngress),
 	}
 
 	return
 }
 
-func mapFromPortStatus(ports []v1.PortStatus) (portStatus []*edgeClusterGRPCContract.PortStatus) {
-	portStatus = []*edgeClusterGRPCContract.PortStatus{}
-
-	for _, port := range ports {
+func mapFromPortStatus(ports []v1.PortStatus) []*edgeClusterGRPCContract.PortStatus {
+	return funk.Map(ports, func(port v1.PortStatus) *edgeClusterGRPCContract.PortStatus {
 		error := ""
 		if port.Error != nil {
 			error = *port.Error
 		}
 
-		portStatus = append(portStatus, &edgeClusterGRPCContract.PortStatus{
+		return &edgeClusterGRPCContract.PortStatus{
 			Port:     port.Port,
 			Protocol: edgeClusterGRPCContract.Protocol(edgeClusterGRPCContract.Protocol_value[string(port.Protocol)]),
 			Error:    error,
-		})
-	}
-
-	return
+		}
+	}).([]*edgeClusterGRPCContract.PortStatus)
 }
 
 func mapFromProvisionDetails(from models.ProvisionDetails) (mappedValues *edgeClusterGRPCContract.ProvisionDetail) {
 	provisionDetails := edgeClusterGRPCContract.ProvisionDetail{
-		LoadBalancer:      nil,
 		KubeConfigContent: from.KubeconfigContent,
 	}
 
 	if from.Service != nil {
 		provisionDetails.LoadBalancer = mapFromLoadBalancerStatus(from.Service.Status.LoadBalancer)
+		provisionDetails.Ports = funk.Map(from.Service.Spec.Ports, func(port v1.ServicePort) int32 {
+			return port.Port
+		}).([]int32)
 	}
 
 	return &provisionDetails

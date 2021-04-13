@@ -41,6 +41,9 @@ message ProvisionDetail {
 
   // The provisioned edge cluster kubeconfig content
   string kubeConfigContent = 2;
+
+  // The ports that will be exposed by the edge cluster.
+  repeated int32 ports = 3;
 }
 
 /**
@@ -70,9 +73,6 @@ message CreateEdgeClusterResponse {
   // The cursor defines the position of the edge cluster in the repository that can be later
   // referred to using pagination information
   string cursor = 5;
-
-  // The edge cluster provision details
-  ProvisionDetail provisionDetail = 6;
 }
 
 /** Request to read an existing edge cluster
@@ -126,9 +126,6 @@ message UpdateEdgeClusterResponse {
   // The cursor defines the position of the edge cluster in the repository that can be later
   // referred to using pagination information
   string cursor = 4;
-
-  // The edge cluster provision details
-  ProvisionDetail provisionDetail = 6;
 }
 
 /**

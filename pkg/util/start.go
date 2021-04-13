@@ -106,7 +106,7 @@ func setupDependencies(logger *zap.Logger) (err error) {
 		return
 	}
 
-	businessService, err := business.NewBusinessService(repositoryService, edgeClusterFactoryService)
+	businessService, err := business.NewBusinessService(logger, repositoryService, edgeClusterFactoryService)
 	if err != nil {
 		return err
 	}
