@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/configuration"
@@ -120,7 +121,7 @@ func (service *k3sProvisioner) CreateProvision(
 
 	response = &types.CreateProvisionResponse{}
 
-	isReady, err := service.isK3SPodReady(ctx, namespace)
+	isReady, err := service.isK3SPodReady(ctx, request.EdgeClusterID)
 	if err != nil {
 		service.logger.Error("K3S pod status is not ready", zap.Error(err))
 
@@ -149,7 +150,6 @@ func (service *k3sProvisioner) CreateProvision(
 func (service *k3sProvisioner) UpdateProvisionWithRetry(
 	ctx context.Context,
 	request *types.UpdateProvisionRequest) (response *types.UpdateProvisionResponse, err error) {
-
 	namespace := getNamespace(request.EdgeClusterID)
 
 	err = retry.RetryOnConflict(
@@ -180,7 +180,7 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 
 	response = &types.UpdateProvisionResponse{}
 
-	isReady, internalErr := service.isK3SPodReady(ctx, namespace)
+	isReady, internalErr := service.isK3SPodReady(ctx, request.EdgeClusterID)
 	if internalErr != nil {
 		service.logger.Error("K3S pod status is not ready", zap.Error(internalErr))
 
@@ -622,7 +622,8 @@ func (service *k3sProvisioner) createClientsetForEdgeCluster(
 
 func (service *k3sProvisioner) isK3SPodReady(
 	ctx context.Context,
-	namespace string) (bool, error) {
+	edgeClusterID string) (bool, error) {
+	namespace := getNamespace(edgeClusterID)
 	watch, err := service.clientset.CoreV1().Pods(namespace).Watch(ctx, metav1.ListOptions{
 		Watch:          true,
 		TimeoutSeconds: &waitForDeploymentToBeReadyTimeout,
@@ -634,12 +635,20 @@ func (service *k3sProvisioner) isK3SPodReady(
 	}
 
 	for event := range watch.ResultChan() {
-		if service, ok := event.Object.(*v1.Pod); ok {
-			for _, item := range service.Status.Conditions {
-				if item.Type != v1.ContainersReady {
+		if pod, ok := event.Object.(*v1.Pod); ok {
+			for _, item := range pod.Status.Conditions {
+				if item.Type == v1.ContainersReady {
 					watch.Stop()
 
-					return true, nil
+					for i := 0; i < 60; i++ {
+						if _, err := service.GetProvisionDetails(ctx, &types.GetProvisionDetailsRequest{EdgeClusterID: edgeClusterID}); err == nil {
+							return true, nil
+						}
+
+						time.Sleep(1 * time.Second)
+					}
+
+					return false, nil
 				}
 			}
 		}
