@@ -8,7 +8,9 @@ import (
 
 	"github.com/decentralized-cloud/edge-cluster/services/business"
 	"github.com/decentralized-cloud/edge-cluster/services/configuration"
+	"github.com/decentralized-cloud/edge-cluster/services/cron/cronhelm"
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster"
+	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/helm"
 	edgeClusterTypes "github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	"github.com/decentralized-cloud/edge-cluster/services/endpoint"
 	"github.com/decentralized-cloud/edge-cluster/services/repository/mongodb"
@@ -18,6 +20,7 @@ import (
 	"go.uber.org/zap"
 )
 
+var helmService helm.HelmHelperContract
 var configurationService configuration.ConfigurationContract
 var endpointCreatorService endpoint.EndpointCreatorContract
 var middlewareProviderService middleware.MiddlewareProviderContract
@@ -36,6 +39,13 @@ func StartService() {
 
 	if err = setupDependencies(logger); err != nil {
 		logger.Fatal("failed to setup dependecies", zap.Error(err))
+	}
+
+	cronHelmService, err := cronhelm.NewhelmCronService(
+		logger,
+		helmService)
+	if err != nil {
+		logger.Fatal("failed to create cron helm serviuce", zap.Error(err))
 	}
 
 	grpcTransportService, err := grpc.NewTransportService(
@@ -57,6 +67,12 @@ func StartService() {
 	signalChan := make(chan os.Signal, 1)
 	cleanupDone := make(chan struct{})
 	signal.Notify(signalChan, os.Interrupt)
+
+	go func() {
+		if serviceErr := cronHelmService.Start(); serviceErr != nil {
+			logger.Fatal("failed to start cron helm service", zap.Error(serviceErr))
+		}
+	}()
 
 	go func() {
 		if serviceErr := grpcTransportService.Start(); serviceErr != nil {
@@ -82,6 +98,10 @@ func StartService() {
 			logger.Error("failed to stop HTTP transport service", zap.Error(err))
 		}
 
+		if err := cronHelmService.Stop(); err != nil {
+			logger.Error("failed to stop cron helm service", zap.Error(err))
+		}
+
 		close(cleanupDone)
 	}()
 	<-cleanupDone
@@ -96,8 +116,12 @@ func setupDependencies(logger *zap.Logger) (err error) {
 		return
 	}
 
+	if helmService, err = helm.NewHelmHelperService(logger); err != nil {
+		return
+	}
+
 	var edgeClusterFactoryService edgeClusterTypes.EdgeClusterFactoryContract
-	if edgeClusterFactoryService, err = edgecluster.NewEdgeClusterFactoryService(logger, configurationService); err != nil {
+	if edgeClusterFactoryService, err = edgecluster.NewEdgeClusterFactoryService(logger, configurationService, helmService); err != nil {
 		return
 	}
 
