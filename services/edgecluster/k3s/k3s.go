@@ -8,14 +8,15 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/configuration"
+	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/helm"
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	commonErrors "github.com/micro-business/go-core/system/errors"
 	"go.uber.org/zap"
 	appsv1 "k8s.io/api/apps/v1"
-	apiv1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -35,13 +36,14 @@ const (
 )
 
 var deploymentReplica int32 = 1
-var waitForDeploymentToBeReadyTimeout int64 = 60
+var waitForDeploymentToBeReadyTimeout int64 = 120
 
 type k3sProvisioner struct {
 	logger         *zap.Logger
 	clientset      *kubernetes.Clientset
 	k8sRestConfig  *rest.Config
 	k3sDockerImage string
+	helmService    helm.HelmHelperContract
 }
 
 // NewK3SProvisioner creates new instance of the k3sProvisioner, setting up all dependencies and returns the instance
@@ -51,7 +53,8 @@ type k3sProvisioner struct {
 func NewK3SProvisioner(
 	logger *zap.Logger,
 	k8sRestConfig *rest.Config,
-	configurationService configuration.ConfigurationContract) (types.EdgeClusterProvisionerContract, error) {
+	configurationService configuration.ConfigurationContract,
+	helmService helm.HelmHelperContract) (types.EdgeClusterProvisionerContract, error) {
 	if logger == nil {
 		return nil, commonErrors.NewArgumentNilError("logger", "logger is required")
 	}
@@ -62,6 +65,10 @@ func NewK3SProvisioner(
 
 	if configurationService == nil {
 		return nil, commonErrors.NewArgumentNilError("configurationService", "configurationService is required")
+	}
+
+	if helmService == nil {
+		return nil, commonErrors.NewArgumentNilError("helmService", "helmService is required")
 	}
 
 	k3sDockerImage, err := configurationService.GetK3SDockerImage()
@@ -79,6 +86,7 @@ func NewK3SProvisioner(
 		clientset:      clientset,
 		k8sRestConfig:  k8sRestConfig,
 		k3sDockerImage: k3sDockerImage,
+		helmService:    helmService,
 	}, nil
 }
 
@@ -111,6 +119,25 @@ func (service *k3sProvisioner) CreateProvision(
 	}
 
 	response = &types.CreateProvisionResponse{}
+
+	isReady, err := service.isK3SPodReady(ctx, namespace)
+	if err != nil {
+		service.logger.Error("K3S pod status is not ready", zap.Error(err))
+
+		return
+	}
+
+	if !isReady {
+		service.logger.Error("K3S pod status is not ready")
+
+		return
+	}
+
+	if err = service.deployHelmChart(ctx, request.EdgeClusterID); err != nil {
+		service.logger.Error("failed to install the helm charts", zap.Error(err))
+
+		return
+	}
 
 	return
 }
@@ -152,6 +179,25 @@ func (service *k3sProvisioner) UpdateProvisionWithRetry(
 		})
 
 	response = &types.UpdateProvisionResponse{}
+
+	isReady, internalErr := service.isK3SPodReady(ctx, namespace)
+	if internalErr != nil {
+		service.logger.Error("K3S pod status is not ready", zap.Error(internalErr))
+
+		return
+	}
+
+	if !isReady {
+		service.logger.Error("K3S pod status is not ready")
+
+		return
+	}
+
+	if internalErr = service.deployHelmChart(ctx, request.EdgeClusterID); internalErr != nil {
+		service.logger.Error("failed to install the helm charts", zap.Error(internalErr))
+
+		return
+	}
 
 	return
 }
@@ -365,7 +411,7 @@ func (service *k3sProvisioner) createDeployment(
 					internalName: internalName,
 				},
 			},
-			Template: apiv1.PodTemplateSpec{
+			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						internalName: internalName,
@@ -389,7 +435,7 @@ func (service *k3sProvisioner) createService(ctx context.Context, namespace stri
 	servicePorts := []v1.ServicePort{
 		{
 			Name:       internalName,
-			Protocol:   apiv1.ProtocolTCP,
+			Protocol:   v1.ProtocolTCP,
 			Port:       k3sPort,
 			TargetPort: intstr.FromInt(k3sPort),
 		},
@@ -399,7 +445,7 @@ func (service *k3sProvisioner) createService(ctx context.Context, namespace stri
 		internalName: internalName,
 	}
 
-	serviceConfig := &apiv1.Service{
+	serviceConfig := &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      internalName,
 			Namespace: namespace,
@@ -407,10 +453,10 @@ func (service *k3sProvisioner) createService(ctx context.Context, namespace stri
 				"k8s-app": internalName,
 			},
 		},
-		Spec: apiv1.ServiceSpec{
+		Spec: v1.ServiceSpec{
 			Ports:    servicePorts,
 			Selector: serviceSelector,
-			Type:     apiv1.ServiceTypeLoadBalancer,
+			Type:     v1.ServiceTypeLoadBalancer,
 		},
 	}
 
@@ -427,14 +473,14 @@ func getNamespace(edgeClusterID string) string {
 	return fmt.Sprintf("%x", sha256.Sum224([]byte(edgeClusterID)))
 }
 
-func (service *k3sProvisioner) getDeploymentSpec(ctx context.Context, namespace string, k3SClusterSecret string) (apiv1.PodSpec, error) {
+func (service *k3sProvisioner) getDeploymentSpec(ctx context.Context, namespace string, k3SClusterSecret string) (v1.PodSpec, error) {
 	advertiseAddress, err := service.getAdvertiseAddress(ctx, namespace)
 	if err != nil {
-		return apiv1.PodSpec{}, err
+		return v1.PodSpec{}, err
 	}
 
-	return apiv1.PodSpec{
-		Containers: []apiv1.Container{
+	return v1.PodSpec{
+		Containers: []v1.Container{
 			{
 				Name:  containerName,
 				Image: service.k3sDockerImage,
@@ -442,10 +488,10 @@ func (service *k3sProvisioner) getDeploymentSpec(ctx context.Context, namespace 
 					"server",
 					fmt.Sprintf("--advertise-address=%s", advertiseAddress),
 				},
-				Env: []apiv1.EnvVar{
+				Env: []v1.EnvVar{
 					{Name: "K3S_CLUSTER_SECRET", Value: k3SClusterSecret},
 				},
-				Ports: []apiv1.ContainerPort{
+				Ports: []v1.ContainerPort{
 					{
 						Name:          internalName,
 						ContainerPort: k3sPort,
@@ -516,12 +562,10 @@ func (service *k3sProvisioner) getProvisionDetailsKubeConfigContent(
 func (service *k3sProvisioner) getAdvertiseAddress(
 	ctx context.Context,
 	namespace string) (string, error) {
-
 	watch, err := service.clientset.CoreV1().Services(namespace).Watch(ctx, metav1.ListOptions{
 		Watch:          true,
 		TimeoutSeconds: &waitForDeploymentToBeReadyTimeout,
 	})
-
 	if err != nil {
 		service.logger.Error("failed to retrieve advertise address", zap.Error(err))
 
@@ -550,7 +594,6 @@ func (service *k3sProvisioner) getAdvertiseAddress(
 func (service *k3sProvisioner) createClientsetForEdgeCluster(
 	ctx context.Context,
 	edgeClusterID string) (clientset *kubernetes.Clientset, err error) {
-
 	getProvisionDetailsResponse, err := service.GetProvisionDetails(
 		ctx,
 		&types.GetProvisionDetailsRequest{
@@ -575,4 +618,94 @@ func (service *k3sProvisioner) createClientsetForEdgeCluster(
 	}
 
 	return
+}
+
+func (service *k3sProvisioner) isK3SPodReady(
+	ctx context.Context,
+	namespace string) (bool, error) {
+	watch, err := service.clientset.CoreV1().Pods(namespace).Watch(ctx, metav1.ListOptions{
+		Watch:          true,
+		TimeoutSeconds: &waitForDeploymentToBeReadyTimeout,
+	})
+	if err != nil {
+		service.logger.Error("failed to retrieve K3S pod status", zap.Error(err))
+
+		return false, err
+	}
+
+	for event := range watch.ResultChan() {
+		if service, ok := event.Object.(*v1.Pod); ok {
+			for _, item := range service.Status.Conditions {
+				if item.Type != v1.ContainersReady {
+					watch.Stop()
+
+					return true, nil
+				}
+			}
+		}
+	}
+
+	return false, types.NewUnknownError("failed to retrieve K3S pod status")
+}
+
+func (service *k3sProvisioner) deployHelmChart(ctx context.Context, edgeClusterID string) error {
+	provisionDetails, err := service.GetProvisionDetails(ctx, &types.GetProvisionDetailsRequest{EdgeClusterID: edgeClusterID})
+	if err != nil {
+		return err
+	}
+
+	errorsChan := make(chan error)
+	waitGroupDoneChan := make(chan bool)
+
+	var waitGroup sync.WaitGroup
+	waitGroup.Add(2)
+
+	go func() {
+		defer waitGroup.Done()
+
+		if err := service.helmService.InstallChart(
+			provisionDetails.ProvisionDetails.KubeconfigContent,
+			"portainer",
+			"portainer",
+			"portainer",
+			"portainer",
+			map[string]string{
+				"set": "service.type=LoadBalancer",
+			}); err != nil {
+			errorsChan <- err
+		}
+	}()
+
+	go func() {
+		defer waitGroup.Done()
+
+		if err := service.helmService.InstallChart(
+			provisionDetails.ProvisionDetails.KubeconfigContent,
+			"edgecluster",
+			"edge-core",
+			"decentralized-cloud",
+			"edge-core",
+			map[string]string{
+				"set": "pod.edgeClusterType=K3S",
+			}); err != nil {
+			errorsChan <- err
+		}
+	}()
+
+	go func() {
+		waitGroup.Wait()
+		close(waitGroupDoneChan)
+	}()
+
+	select {
+	case <-waitGroupDoneChan:
+		close(errorsChan)
+
+		return nil
+
+	case err := <-errorsChan:
+		close(errorsChan)
+
+		return err
+	}
 }

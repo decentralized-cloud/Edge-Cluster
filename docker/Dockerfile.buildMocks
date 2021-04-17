@@ -9,4 +9,5 @@ RUN mockgen -source=services/business/contract.go -destination=services/business
 RUN mockgen -source=services/configuration/contract.go -destination=services/configuration/mock/mock-contract.go
 RUN mockgen -source=services/endpoint/contract.go -destination=services/endpoint/mock/mock-contract.go
 RUN mockgen -source=services/edgecluster/types/contract.go -destination=services/edgecluster/types/mock/mock-contract.go
-
+RUN mockgen -source=services/edgecluster/helm/contract.go -destination=services/edgecluster/helm/mock/mock-contract.go
+RUN mockgen -source=services/cron/contract.go -destination=services/cron/mock/mock-contract.go

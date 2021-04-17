@@ -8,6 +8,7 @@ import (
 
 	"github.com/decentralized-cloud/edge-cluster/models"
 	"github.com/decentralized-cloud/edge-cluster/services/configuration"
+	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/helm"
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/k3s"
 	"github.com/decentralized-cloud/edge-cluster/services/edgecluster/types"
 	commonErrors "github.com/micro-business/go-core/system/errors"
@@ -21,6 +22,7 @@ type edgeClusterFactoryService struct {
 	logger               *zap.Logger
 	k8sRestConfig        *rest.Config
 	configurationService configuration.ConfigurationContract
+	helmService          helm.HelmHelperContract
 }
 
 // NewEdgeClusterFactoryService creates new instance of the edgeClusterFactoryService, setting up all dependencies and returns the instance
@@ -28,7 +30,8 @@ type edgeClusterFactoryService struct {
 // Returns the new service or error if something goes wrong
 func NewEdgeClusterFactoryService(
 	logger *zap.Logger,
-	configurationService configuration.ConfigurationContract) (types.EdgeClusterFactoryContract, error) {
+	configurationService configuration.ConfigurationContract,
+	helmService helm.HelmHelperContract) (types.EdgeClusterFactoryContract, error) {
 	if logger == nil {
 		return nil, commonErrors.NewArgumentNilError("logger", "logger is required")
 	}
@@ -37,9 +40,14 @@ func NewEdgeClusterFactoryService(
 		return nil, commonErrors.NewArgumentNilError("configurationService", "configurationService is required")
 	}
 
+	if helmService == nil {
+		return nil, commonErrors.NewArgumentNilError("helmService", "helmService is required")
+	}
+
 	service := edgeClusterFactoryService{
 		logger:               logger,
 		configurationService: configurationService,
+		helmService:          helmService,
 	}
 
 	k8sRestConfig, err := service.getRestConfig()
@@ -64,7 +72,8 @@ func (service *edgeClusterFactoryService) Create(
 		return k3s.NewK3SProvisioner(
 			service.logger,
 			service.k8sRestConfig,
-			service.configurationService)
+			service.configurationService,
+			service.helmService)
 	}
 
 	return nil, types.NewEdgeClusterTypeNotSupportedError(clusterType)

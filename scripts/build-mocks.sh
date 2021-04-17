@@ -25,3 +25,5 @@ docker cp extract-mock-builder:/src/services/business/mock/mock-contract.go ./se
 docker cp extract-mock-builder:/src/services/configuration/mock/mock-contract.go ./services/configuration/mock/mock-contract.go
 docker cp extract-mock-builder:/src/services/endpoint/mock/mock-contract.go ./services/endpoint/mock/mock-contract.go
 docker cp extract-mock-builder:/src/services/edgecluster/types/mock/mock-contract.go ./services/edgecluster/types/mock/mock-contract.go
+docker cp extract-mock-builder:/src/services/edgecluster/helm/mock/mock-contract.go ./services/edgecluster/helm/mock/mock-contract.go
+docker cp extract-mock-builder:/src/services/cron/mock/mock-contract.go ./services/cron/mock/mock-contract.go
